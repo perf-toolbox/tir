@@ -4,7 +4,10 @@ use darling::ast::NestedMeta;
 use darling::{Error, FromField, FromMeta};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
+use syn::parse::{Parse, ParseStream};
 use syn::parse_macro_input;
+use syn::punctuated::Punctuated;
+use syn::Token;
 
 #[derive(FromMeta)]
 struct OperationAttrs {
@@ -163,5 +166,54 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
                 Ok(Self { operation: operation.get_impl() })
             }
         }
+    })
+}
+
+#[derive(Debug)]
+struct Types(Vec<syn::Ident>);
+
+impl Parse for Types {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let result = Punctuated::<syn::Ident, Token![,]>::parse_terminated(input)?;
+
+        Ok(Types(result.into_iter().collect()))
+    }
+}
+
+#[proc_macro]
+pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as Types);
+
+    let dialect = input.0.first().unwrap();
+
+    let mut quotes = vec![];
+
+    for ty in input.0.iter().skip(1) {
+        let tokens = quote! {
+            #dialect.add_operation(#ty::get_operation_name());
+        };
+        quotes.push(tokens);
+    }
+    TokenStream::from(quote! {
+        #(#quotes)*
+    })
+}
+
+#[proc_macro]
+pub fn populate_dialect_types(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as Types);
+
+    let dialect = input.0.first().unwrap();
+
+    let mut quotes = vec![];
+
+    for ty in input.0.iter().skip(1) {
+        let tokens = quote! {
+            #dialect.add_type(#ty::get_type_name());
+        };
+        quotes.push(tokens);
+    }
+    TokenStream::from(quote! {
+        #(#quotes)*
     })
 }
