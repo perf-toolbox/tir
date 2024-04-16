@@ -1,11 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::{Attr, Context, Op, Operation, Type};
 use crate::builtin::DIALECT_NAME;
+use crate::{Attr, Context, Op, Operation, OperationImpl, Region, Type};
+use tir_macros::operation;
 
+#[operation(name = "func")]
 pub struct FuncOp {
-    operation: Rc<RefCell<Operation>>,
+    #[cfg(region = true)]
+    body: Type,
 }
 
 impl FuncOp {
@@ -16,65 +19,31 @@ impl FuncOp {
         return_type: Type,
     ) -> Self {
         let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
-        let operation = Operation::new(context.clone(), dialect, FuncOp::get_operation_name());
+        let mut operation = Operation::new(context.clone(), dialect, FuncOp::get_operation_name());
 
-        let region = operation.borrow_mut().emplace_region();
+        let region = operation.emplace_region();
 
         region.borrow_mut().emplace_block(Rc::downgrade(&region));
 
-        operation
-            .borrow_mut()
-            .add_attr("sym_name".to_string(), Attr::String(name));
+        operation.add_attr("sym_name".to_string(), Attr::String(name));
 
-        Self { operation }
+        Self {
+            operation: operation.get_impl(),
+        }
     }
 
     pub fn sym_name(&self) -> String {
-        match self.operation.borrow().get_attrs().get("sym_name").unwrap() {
+        match self.operation.borrow().attrs.get("sym_name").unwrap() {
             Attr::String(name) => name.clone(),
             _ => panic!("sym_name is not a string"),
         }
     }
 }
 
-impl Op for FuncOp {
-    fn get_operation_name() -> &'static str {
-        "func"
-    }
-}
-
-impl Into<Rc<RefCell<Operation>>> for FuncOp {
-    fn into(self) -> Rc<RefCell<Operation>> {
-        self.operation.clone()
-    }
-}
-
-impl TryFrom<Rc<RefCell<Operation>>> for FuncOp {
-    type Error = ();
-
-    fn try_from(operation: Rc<RefCell<Operation>>) -> Result<Self, Self::Error> {
-        if operation.borrow().get_operation_name() != FuncOp::get_operation_name()
-            || operation.borrow().get_dialect_id()
-                != operation
-                    .borrow()
-                    .get_context()
-                    .borrow()
-                    .get_dialect_by_name(DIALECT_NAME)
-                    .unwrap()
-                    .borrow()
-                    .get_id()
-        {
-            return Err(());
-        }
-
-        Ok(Self { operation })
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use crate::{Context, Op};
     use crate::builtin::*;
+    use crate::{Context, Op};
 
     use super::*;
 

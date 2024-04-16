@@ -1,12 +1,12 @@
 mod attrs;
+pub mod builtin;
 mod context;
 mod dialect;
-mod r#type;
 mod operation;
-pub mod builtin;
+mod r#type;
 
 pub use attrs::*;
-pub use dialect::*;
 pub use context::*;
-pub use r#type::*;
+pub use dialect::*;
 pub use operation::*;
+pub use r#type::*;

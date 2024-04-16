@@ -1,7 +1,7 @@
 use crate::{Attr, Context, Dialect};
 use std::collections::HashMap;
 use std::{
-    cell::RefCell,
+    cell::{Ref, RefCell},
     rc::{Rc, Weak},
 };
 
@@ -22,7 +22,7 @@ pub struct Value {
 #[derive(Debug)]
 pub struct Block {
     parent: Weak<RefCell<Region>>,
-    pub operations: Vec<Rc<RefCell<Operation>>>,
+    pub operations: Vec<Operation>,
 }
 
 impl Block {
@@ -33,11 +33,11 @@ impl Block {
         }))
     }
 
-    pub fn add_operation(&mut self, operation: Rc<RefCell<Operation>>) {
+    pub fn add_operation(&mut self, operation: Operation) {
         self.operations.push(operation);
     }
 
-    pub fn get_operations(&self) -> &[Rc<RefCell<Operation>>] {
+    pub fn get_operations(&self) -> &[Operation] {
         &self.operations
     }
 
@@ -76,14 +76,25 @@ impl Region {
 }
 
 #[derive(Debug)]
+pub struct OperationImpl {
+    pub context: Rc<RefCell<Context>>,
+    pub dialect_id: u32,
+    pub operation_id: u32,
+    pub operation_name: &'static str,
+    pub operands: Vec<Operand>,
+    pub attrs: HashMap<String, Attr>,
+    pub regions: Vec<Rc<RefCell<Region>>>,
+}
+
+impl OperationImpl {
+    pub fn get_regions(&self) -> &[Rc<RefCell<Region>>] {
+        &self.regions
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Operation {
-    context: Rc<RefCell<Context>>,
-    dialect_id: u32,
-    operation_id: u32,
-    operation_name: &'static str,
-    operands: Vec<Operand>,
-    attrs: HashMap<String, Attr>,
-    regions: Vec<Rc<RefCell<Region>>>,
+    r#impl: Rc<RefCell<OperationImpl>>,
 }
 
 impl Operation {
@@ -91,10 +102,10 @@ impl Operation {
         context: Rc<RefCell<Context>>,
         dialect: Rc<RefCell<Dialect>>,
         operation_name: &'static str,
-    ) -> Rc<RefCell<Operation>> {
+    ) -> Operation {
         let dialect_id = dialect.borrow().get_id();
         let operation_id = dialect.borrow().get_operation_id(operation_name);
-        Rc::new(RefCell::new(Operation {
+        let r#impl = Rc::new(RefCell::new(OperationImpl {
             context,
             dialect_id,
             operation_id,
@@ -102,43 +113,53 @@ impl Operation {
             operands: vec![],
             attrs: HashMap::new(),
             regions: vec![],
-        }))
+        }));
+        Operation { r#impl }
     }
+
+    pub fn from(r#impl: Rc<RefCell<OperationImpl>>) -> Self {
+        Operation { r#impl }
+    }
+
     pub fn get_context(&self) -> Rc<RefCell<Context>> {
-        self.context.clone()
+        self.r#impl.borrow().context.clone()
     }
 
     pub fn get_dialect_id(&self) -> u32 {
-        self.dialect_id
+        self.r#impl.borrow().dialect_id
     }
 
     pub fn get_operation_id(&self) -> u32 {
-        self.operation_id
+        self.r#impl.borrow().operation_id
     }
 
     pub fn get_operation_name(&self) -> &'static str {
-        self.operation_name
+        self.r#impl.borrow().operation_name
     }
 
     pub fn emplace_region(&mut self) -> Rc<RefCell<Region>> {
         let region = Region::new(self.get_context());
-        self.regions.push(region.clone());
+        self.r#impl.borrow_mut().regions.push(region.clone());
         region
     }
 
-    pub fn get_regions(&self) -> &[Rc<RefCell<Region>>] {
-        &self.regions
+    pub fn get_regions(&self) -> Ref<'_, [Rc<RefCell<Region>>]> {
+        Ref::map(self.r#impl.borrow(), |r#impl| r#impl.get_regions())
     }
 
     pub fn add_attr(&mut self, name: String, attr: Attr) {
-        self.attrs.insert(name, attr);
+        self.r#impl.borrow_mut().attrs.insert(name, attr);
     }
 
-    pub fn get_attrs(&self) -> &HashMap<String, Attr> {
-        &self.attrs
+    pub fn get_attrs(&self) -> Ref<'_, HashMap<String, Attr>> {
+        Ref::map(self.r#impl.borrow(), |r#impl| &r#impl.attrs)
+    }
+
+    pub fn get_impl(&self) -> Rc<RefCell<OperationImpl>> {
+        self.r#impl.clone()
     }
 }
 
-pub trait Op: Into<Rc<RefCell<Operation>>> + Sized {
+pub trait Op: Into<Operation> + Sized {
     fn get_operation_name() -> &'static str;
 }
