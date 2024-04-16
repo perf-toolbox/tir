@@ -1,0 +1,11 @@
+[package]
+name = "tir_backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+goblin = { version = "0.8.0", features = ["elf64"] }
+scroll = "0.12.0"
+tir-core = { path = "../../core/" }
