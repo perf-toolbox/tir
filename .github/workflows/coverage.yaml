@@ -28,7 +28,6 @@ jobs:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
         RUSTDOCFLAGS: '-C instrument-coverage'
-    - uses: actions-rs/grcov@v0.1
     - name: Install grcov
       run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
     - name: Run grcov
