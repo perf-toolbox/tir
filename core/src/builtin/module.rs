@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::builtin::DIALECT_NAME;
+use crate::utils::{trait_id, TraitId};
 use crate::{Block, Context, Op, Operation, OperationImpl, Region};
 use tir_macros::operation;
 

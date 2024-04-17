@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 use crate::Dialect;
 
@@ -8,16 +8,22 @@ use crate::Dialect;
 /// ```
 /// use tir_core::{Dialect, Context};
 ///
-/// fn foo() {
+/// fn foo(dialect_obj: Dialect) {
 ///     // Create a new context
 ///     let mut context = Context::new();
 ///     // Register dialects
-///     let dialect = context.borrow_mut().add_dialect(Dialect::new("test"));
+///     let dialect = context.borrow_mut().add_dialect(dialect_obj);
 /// }
 /// ```
-#[derive(Debug)]
 pub struct Context {
     dialects: Vec<Rc<RefCell<Dialect>>>,
+}
+
+impl Debug for Context {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Context")?;
+        Ok(())
+    }
 }
 
 impl Context {
