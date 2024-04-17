@@ -127,7 +127,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
         let set_func = format_ident!("set_{}", operand);
         let funcs = quote! {
             pub fn #get_func(&self) -> Ref<'_, Operand> {
-                Ref::map(self.operation.borrow(), |ops| &ops[#id])
+                Ref::map(self.operation.borrow(), |ops| &ops.operands[#id])
             }
             pub fn #set_func(&mut self) {
                 todo!()

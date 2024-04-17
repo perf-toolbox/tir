@@ -10,7 +10,8 @@ pub enum Operand {
     Value(Value),
     BlockArgument,
     Block(Block),
-    Register(i32),
+    Register(u32),
+    RegisterClass(u32),
 }
 
 #[derive(Debug)]
