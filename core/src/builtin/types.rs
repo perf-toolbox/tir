@@ -32,7 +32,7 @@ impl FuncType {
 
         attrs.insert(
             FuncType::get_inputs_attr_name().to_string(),
-            Attr::TypeArray(input_types.into_iter().cloned().collect()),
+            Attr::TypeArray(input_types.to_vec()),
         );
         attrs.insert(
             FuncType::get_return_attr_name().to_string(),
@@ -94,8 +94,8 @@ impl VoidType {
     }
 }
 
-impl Into<Type> for VoidType {
-    fn into(self) -> Type {
-        self.r#type
+impl From<VoidType> for Type {
+    fn from(val: VoidType) -> Self {
+        val.r#type
     }
 }

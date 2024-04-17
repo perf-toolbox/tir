@@ -11,9 +11,9 @@ pub fn trait_id<T: ?Sized + 'static>() -> TraitId {
 mod tests {
     use crate::utils::*;
     fn has_trait<T: ?Sized + 'static>() -> bool {
-        let vector = vec![trait_id::<dyn Send>(), trait_id::<dyn Sync>()];
+        let vector = [trait_id::<dyn Send>(), trait_id::<dyn Sync>()];
 
-        vector.iter().find(|&x| x == &trait_id::<T>()).is_some()
+        vector.iter().any(|x| x == &trait_id::<T>())
     }
 
     #[test]
