@@ -56,7 +56,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
         if field.attrs.len() != 1 {
             panic!("Expected all fields to have one attribute");
         }
-        let op_field = match OperationField::from_field(&field) {
+        let op_field = match OperationField::from_field(field) {
             Ok(v) => v,
             Err(e) => {
                 return TokenStream::from(e.write_errors());

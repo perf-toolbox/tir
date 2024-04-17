@@ -15,8 +15,8 @@ pub enum Operand {
 
 #[derive(Debug)]
 pub struct Value {
-    operation: Rc<RefCell<Operation>>,
-    result_id: u32,
+    _operation: Rc<RefCell<Operation>>,
+    _result_id: u32,
 }
 
 #[derive(Debug)]

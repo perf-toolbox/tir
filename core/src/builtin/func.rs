@@ -16,8 +16,8 @@ impl FuncOp {
     pub fn new(
         context: Rc<RefCell<Context>>,
         name: String,
-        input_types: &[Type],
-        return_type: Type,
+        _input_types: &[Type],
+        _return_type: Type,
     ) -> Self {
         let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
         let mut operation = Operation::new(context.clone(), dialect, FuncOp::get_operation_name());

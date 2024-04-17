@@ -34,7 +34,7 @@ impl Context {
     pub fn new() -> Rc<RefCell<Context>> {
         let mut ctx = Context { dialects: vec![] };
         ctx.add_dialect(crate::builtin::create_dialect());
-        return Rc::new(RefCell::new(ctx));
+        Rc::new(RefCell::new(ctx))
     }
 
     /// Register a new dialect with a context
@@ -45,7 +45,7 @@ impl Context {
             .borrow_mut()
             .set_id((self.dialects.len() - 1).try_into().unwrap());
 
-        return dialect_ref.clone();
+        dialect_ref.clone()
     }
 
     pub fn get_dialect_by_name(&self, name: &str) -> Option<Rc<RefCell<Dialect>>> {
@@ -54,7 +54,7 @@ impl Context {
                 return Some(dialect.clone());
             }
         }
-        return None;
+        None
     }
 }
 

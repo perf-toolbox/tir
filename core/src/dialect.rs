@@ -1,6 +1,6 @@
 use crate::{Op, Operation};
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::rc::Rc;
 
 pub type DispatchFn = Box<dyn Fn(Operation) -> Option<Box<dyn Op>>>;
 
@@ -9,7 +9,7 @@ pub struct Dialect {
     id: u32,
     operation_ids: HashMap<&'static str, u32>,
     type_ids: HashMap<&'static str, u32>,
-    dispatch_fn: Arc<DispatchFn>,
+    _dispatch_fn: Rc<DispatchFn>,
 }
 
 impl Dialect {
@@ -19,7 +19,7 @@ impl Dialect {
             id: 0,
             operation_ids: HashMap::new(),
             type_ids: HashMap::new(),
-            dispatch_fn: Arc::new(dispatch_fn),
+            _dispatch_fn: Rc::new(dispatch_fn),
         }
     }
 
