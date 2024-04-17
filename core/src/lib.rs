@@ -5,6 +5,7 @@ mod dialect;
 mod error;
 mod operation;
 mod r#type;
+pub mod utils;
 
 pub use attrs::*;
 pub use context::*;

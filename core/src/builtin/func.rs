@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::builtin::DIALECT_NAME;
+use crate::utils::{trait_id, TraitId};
 use crate::{Attr, Context, Op, Operation, OperationImpl, Region, Type};
 use tir_macros::operation;
 

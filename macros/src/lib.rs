@@ -12,12 +12,17 @@ use syn::Token;
 #[derive(FromMeta)]
 struct OperationAttrs {
     pub name: String,
+    #[darling(default)]
+    pub traits: darling::util::PathList,
 }
 
 #[derive(FromField, Debug)]
 #[darling(attributes(cfg))]
 struct OperationField {
     pub ident: Option<syn::Ident>,
+    pub ty: syn::Type,
+    #[darling(default)]
+    pub attribute: bool,
     #[darling(default)]
     pub operand: bool,
     #[darling(default)]
@@ -43,6 +48,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
 
     let input = parse_macro_input!(input as syn::ItemStruct);
 
+    let mut attrs = vec![];
     let mut operands = vec![];
     let mut regions = vec![];
 
@@ -57,7 +63,9 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
             }
         };
 
-        if op_field.operand {
+        if op_field.attribute {
+            attrs.push((op_field.ident.unwrap(), op_field.ty));
+        } else if op_field.operand {
             operands.push(op_field.ident.unwrap());
         } else if op_field.region {
             regions.push((op_field.ident.unwrap(), op_field.single_block));
@@ -65,6 +73,23 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut impls = vec![];
+
+    for (attr, ty) in attrs {
+        let attr_name = attr.to_string();
+        let get_name = format_ident!("get_{}_attr", attr);
+        let set_name = format_ident!("set_{}_attr", attr);
+
+        let funcs = quote! {
+            pub fn #get_name(&self) -> Attr {
+                self.operation.borrow().attrs.get(#attr_name).unwrap().clone()
+            }
+            pub fn #set_name<T>(&mut self, value: T) where T: Into<#ty> {
+                let tmp: #ty = value.into();
+                self.operation.borrow_mut().attrs.insert(#attr_name.to_string(), Attr::from(tmp));
+            }
+        };
+        impls.push(funcs);
+    }
 
     for (id, (region, single_block)) in regions.iter().enumerate() {
         let get_func = format_ident!("get_{}_region", region);
@@ -121,8 +146,8 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let op_name_str = op_attrs.name;
-
     let op_name = input.ident;
+    let traits = op_attrs.traits;
 
     TokenStream::from(quote! {
         #[derive(Debug)]
@@ -137,6 +162,13 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
         impl Op for #op_name {
             fn get_operation_name() -> &'static str {
                 #op_name_str
+            }
+
+            fn has_trait<T: ?Sized + 'static>() -> bool {
+                let ids: Vec<TraitId> = vec![
+                    #(trait_id::<dyn #traits>()),*
+                ];
+                ids.iter().find(|&x| x == &trait_id::<T>()).is_some()
             }
         }
 
@@ -181,21 +213,38 @@ impl Parse for Types {
 }
 
 #[proc_macro]
+pub fn dialect(input: TokenStream) -> TokenStream {
+    let name_ident = parse_macro_input!(input as syn::Ident);
+    let dialect_name = name_ident.to_string();
+
+    TokenStream::from(quote! {
+        pub(crate) const DIALECT_NAME: &str = #dialect_name;
+
+        fn op_dispatcher(operation: Operation) -> Option<Box<dyn Op>> {
+            None
+        }
+
+        pub fn create_dialect() -> Dialect {
+            let mut dialect = Dialect::new(DIALECT_NAME, Box::new(op_dispatcher));
+
+            populate_dialect_ops(&mut dialect);
+            populate_dialect_types(&mut dialect);
+
+            dialect
+        }
+    })
+}
+
+#[proc_macro]
 pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Types);
 
-    let dialect = input.0.first().unwrap();
+    let ty = input.0;
 
-    let mut quotes = vec![];
-
-    for ty in input.0.iter().skip(1) {
-        let tokens = quote! {
-            #dialect.add_operation(#ty::get_operation_name());
-        };
-        quotes.push(tokens);
-    }
     TokenStream::from(quote! {
-        #(#quotes)*
+        fn populate_dialect_ops(dialect: &mut Dialect) {
+            #(dialect.add_operation(#ty::get_operation_name());)*
+        }
     })
 }
 
@@ -203,17 +252,11 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 pub fn populate_dialect_types(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Types);
 
-    let dialect = input.0.first().unwrap();
+    let ty = input.0;
 
-    let mut quotes = vec![];
-
-    for ty in input.0.iter().skip(1) {
-        let tokens = quote! {
-            #dialect.add_type(#ty::get_type_name());
-        };
-        quotes.push(tokens);
-    }
     TokenStream::from(quote! {
-        #(#quotes)*
+        fn populate_dialect_types(dialect: &mut Dialect) {
+            #(dialect.add_type(#ty::get_type_name());)*
+        }
     })
 }

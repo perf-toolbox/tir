@@ -160,6 +160,12 @@ impl Operation {
     }
 }
 
-pub trait Op: Into<Operation> + Sized {
-    fn get_operation_name() -> &'static str;
+pub trait Op {
+    fn get_operation_name() -> &'static str
+    where
+        Self: Sized;
+
+    fn has_trait<T: ?Sized + 'static>() -> bool
+    where
+        Self: Sized;
 }

@@ -29,12 +29,17 @@ Additional methods can be defined manually by implementing `impl SuperOp {...}`.
 
 ## Field configurations
 
+### `#[cfg(attribute = true)]`
+
+Defines an attribute of a specific type. Any type used in attributes must be convertible
+to `tir_core::Attribute` enum. Also implements basic attribute getters and setters.
+
 ### `#[cfg(operand = true)]`
 
 Defines an operand of a specific type. Also implements basic setters and getters
 for the operand.
 
-### `3#[cfg(region = true, single_block = true)]`
+### `#[cfg(region = true, single_block = true)]`
 
 Defines a region. Also defines a basic getter `get_<field_name>_region`. If
 `single_block` argument is passed, also defines a `get_<field_name>` single block

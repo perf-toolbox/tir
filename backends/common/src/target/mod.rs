@@ -1,16 +1,10 @@
-use tir_core::{Dialect, Op};
+use tir_core::{Dialect, Op, Operation};
 
 mod ops;
 
 pub use ops::*;
-use tir_macros::populate_dialect_ops;
+use tir_macros::{dialect, populate_dialect_ops, populate_dialect_types};
 
-pub(crate) const DIALECT_NAME: &str = "target";
-
-pub fn create_dialect() -> Dialect {
-    let mut dialect = Dialect::new(DIALECT_NAME);
-
-    populate_dialect_ops!(dialect, SectionOp);
-
-    dialect
-}
+dialect!(target);
+populate_dialect_ops!(SectionOp, ConstDataOp, FuncOp);
+populate_dialect_types!();
