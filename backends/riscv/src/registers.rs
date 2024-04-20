@@ -1,3 +1,5 @@
+#![allow(clippy::all)]
+
 use seq_macro::seq;
 use tir_core::Operand;
 

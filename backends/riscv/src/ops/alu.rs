@@ -9,6 +9,8 @@ use tir_macros::operation;
 
 use crate::DIALECT_NAME;
 
+const ALU_OPCODE: u8 = 0b110011;
+
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
         #[operation(name = $op_name, traits(BinaryEmittable))]
@@ -58,7 +60,7 @@ macro_rules! alu_ops {
                 stream: &mut Box<dyn tir_backend::BinaryStream>,
             ) -> tir_core::Result<()> {
                 let instr = RTypeInstr::builder()
-                    .opcode(0b010011)
+                    .opcode(ALU_OPCODE)
                     .rd(encode_gpr(&self.get_rd())?)
                     .funct3($funct3)
                     .rs1(encode_gpr(&self.get_rs1())?)
@@ -77,7 +79,7 @@ macro_rules! alu_ops {
             }
 
             let instr = RTypeInstr::from_bytes(&stream[0..4].try_into().unwrap());
-            if instr.opcode() != 0b011011 {
+            if instr.opcode() != ALU_OPCODE {
                 return None;
             }
 
@@ -110,4 +112,79 @@ alu_ops! {
     SraOp => { name = "sra", funct7 = 0b0100000, funct3 = 0b101 }
     OrOp => { name = "or", funct7 = 0b0000000, funct3 = 0b110 }
     AndOp => { name = "and", funct7 = 0b0000000, funct3 = 0b111 }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::disassemble_alu_instr;
+    use tir_core::Context;
+
+    #[test]
+    fn test_disassembler() {
+        // add x28, x6, x7
+        // sub x28, x6, x7
+        // sll x28, x6, x7
+        // slt x28, x6, x7
+        // sltu x28, x6, x7
+        // srl x28, x6, x7
+        // sra x28, x6, x7
+        // or x28, x6, x7
+        // and x28, x6, x7
+        let instructions = vec![
+            0x00730e33 as u32,
+            0x40730e33,
+            0x00731e33,
+            0x00732e33,
+            0x00733e33,
+            0x00735e33,
+            0x40735e33,
+            0x00736e33,
+            0x00737e33,
+        ];
+
+        let context = Context::new();
+        context.borrow_mut().add_dialect(crate::create_dialect());
+
+        let mut ops = vec![];
+
+        for instr in instructions {
+            if let Some(op) = disassemble_alu_instr(&context, &instr.to_le_bytes()) {
+                ops.push(op);
+            }
+        }
+
+        assert_eq!(ops.len(), 9);
+        assert!(AddOp::try_from(ops[0].clone()).is_ok());
+        assert!(SubOp::try_from(ops[1].clone()).is_ok());
+        assert!(SllOp::try_from(ops[2].clone()).is_ok());
+        assert!(SltOp::try_from(ops[3].clone()).is_ok());
+        assert!(SltuOp::try_from(ops[4].clone()).is_ok());
+        assert!(SrlOp::try_from(ops[5].clone()).is_ok());
+        assert!(SraOp::try_from(ops[6].clone()).is_ok());
+        assert!(OrOp::try_from(ops[7].clone()).is_ok());
+        assert!(AndOp::try_from(ops[8].clone()).is_ok());
+    }
+
+    #[test]
+    fn test_disassembler_negative() {
+        // _boot:
+        //   addi x28, x6, 1000
+        //   jal _boot
+        // some bogus instr
+        let instructions = vec![0x3e830e13 as u32, 0xffdff0ef, 0x7fffff3];
+
+        let context = Context::new();
+        context.borrow_mut().add_dialect(crate::create_dialect());
+
+        let mut ops = vec![];
+
+        for instr in instructions {
+            if let Some(op) = disassemble_alu_instr(&context, &instr.to_le_bytes()) {
+                ops.push(op);
+            }
+        }
+
+        assert_eq!(ops.len(), 0);
+    }
 }
