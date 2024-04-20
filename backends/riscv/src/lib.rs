@@ -22,9 +22,18 @@ pub fn disassemble(
     context: &Rc<RefCell<Context>>,
     stream: &[u8],
 ) -> Result<ModuleOp, DisassemblerError> {
+    if stream.len() % 4 != 0 {
+        return Err(DisassemblerError::UnexpectedEndOfStream(4, stream.len() % 4));
+    }
+    
     for i in 0..(stream.len() / 4) {
         let offset = i * 4;
-        disassemble_alu_instr(context, &stream[offset..]);
+        if let Some(_op) = disassemble_alu_instr(context, &stream[offset..]) {
+            // TODO attach operation
+        } else {
+            // FIXME add an appropriate error
+            return Err(DisassemblerError::Unknown);
+        }
     }
     Err(DisassemblerError::Unknown)
 }
