@@ -23,9 +23,12 @@ pub fn disassemble(
     stream: &[u8],
 ) -> Result<ModuleOp, DisassemblerError> {
     if stream.len() % 4 != 0 {
-        return Err(DisassemblerError::UnexpectedEndOfStream(4, stream.len() % 4));
+        return Err(DisassemblerError::UnexpectedEndOfStream(
+            4,
+            stream.len() % 4,
+        ));
     }
-    
+
     for i in 0..(stream.len() / 4) {
         let offset = i * 4;
         if let Some(_op) = disassemble_alu_instr(context, &stream[offset..]) {
