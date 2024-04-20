@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 tir-core = { path = "../../core/" }
 tir-macros = { path = "../../macros" }
+thiserror = "1.0.58"

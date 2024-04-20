@@ -6,4 +6,5 @@ members = [
     "macros",
     "backends/common",
     "backends/riscv",
+    "backends/riscv/fuzz",
 ]

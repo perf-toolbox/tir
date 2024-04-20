@@ -22,18 +22,10 @@ impl BinaryEmittable for AddOp {
     ) -> tir_core::Result<()> {
         unimplemented!()
     }
-
-    fn try_decode(_data: &[u8]) -> tir_core::Result<Operation> {
-        unimplemented!()
-    }
 }
 
 impl AsmPrintable for AddOp {
     fn print(&self, _target_opts: &tir_backend::TargetOptions) {
-        unimplemented!()
-    }
-
-    fn try_parse(_instruction: &str) -> tir_core::Result<Operation> {
         unimplemented!()
     }
 }
