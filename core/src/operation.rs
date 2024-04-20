@@ -10,7 +10,8 @@ pub enum Operand {
     Value(Value),
     BlockArgument,
     Block(Block),
-    Register(i32),
+    Register(u32),
+    RegisterClass(u32),
 }
 
 #[derive(Debug)]
@@ -157,6 +158,10 @@ impl Operation {
 
     pub fn get_impl(&self) -> Rc<RefCell<OperationImpl>> {
         self.r#impl.clone()
+    }
+
+    pub fn add_operand(&mut self, operand: Operand) {
+        self.r#impl.borrow_mut().operands.push(operand);
     }
 }
 

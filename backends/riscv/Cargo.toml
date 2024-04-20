@@ -1,11 +1,12 @@
 [package]
-name = "tir-backend"
+name = "tir-riscv"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tir-core = { path = "../../core/" }
+tir-core = { path = "../../core" }
 tir-macros = { path = "../../macros" }
-thiserror = "1.0.58"
+tir-backend = { path = "../common" }
+seq-macro = "0.3.5"
