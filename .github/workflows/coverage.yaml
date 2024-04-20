@@ -19,6 +19,7 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
       with:
         components: llvm-tools-preview
+    - uses: Swatinem/rust-cache@v2
     - name: Build
       run: cargo build --verbose
       env:
@@ -34,11 +35,6 @@ jobs:
     - name: Install grcov
       run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
     - name: Run grcov
-      run: grcov . --binary-path target/debug/ -s . -t lcov --branch --ignore-not-existing -o lcov.info
-    - name: Codecov
-      uses: codecov/codecov-action@v4
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        verbose: true
-        fail_ci_if_error: true
+      run: grcov . --binary-path target/debug/ -s . -t coveralls+ --branch --llvm --ignore '../*' --ignore "/*" --ignore 'macros/*' --ignore 'fuzz/*' --ignore '**/tests/**' --token ${{ secrets.COVERALLS_REPO_TOKEN }} > coveralls.json
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2

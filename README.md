@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/github/perf-toolbox/tir/badge.svg?branch=main)](https://coveralls.io/github/perf-toolbox/tir?branch=main)
+
 # Target Intermediate Representation
 
 TIR  is a collection of modular tools designed for efficient and flexible
