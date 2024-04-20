@@ -1,0 +1,25 @@
+name: Fuzz
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: llvm-tools-preview
+    - name: Install cargo-fuzz
+      run: cargo install cargo-fuzz
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose
+    - name: Fuzz
+      run: cargo +nightly fuzz run fuzz_riscv_disassembler -- -max_total_time=5 -max_len=16384
