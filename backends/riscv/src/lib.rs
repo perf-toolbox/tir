@@ -1,8 +1,11 @@
+use std::cell::RefCell;
+use std::rc::Rc;
 use tir_backend::DisassemblerError;
-use tir_core::{builtin::ModuleOp, Dialect, Op, Operation};
+use tir_core::{builtin::ModuleOp, Context, Dialect, Op, Operation};
 
 mod ops;
 mod registers;
+pub mod utils;
 pub use ops::*;
 pub use registers::*;
 
@@ -15,6 +18,13 @@ populate_dialect_ops!(
 );
 populate_dialect_types!();
 
-pub fn disassemble(_stream: &[u8]) -> Result<ModuleOp, DisassemblerError> {
+pub fn disassemble(
+    context: &Rc<RefCell<Context>>,
+    stream: &[u8],
+) -> Result<ModuleOp, DisassemblerError> {
+    for i in 0..(stream.len() / 4) {
+        let offset = i * 4;
+        disassemble_alu_instr(context, &stream[offset..]);
+    }
     Err(DisassemblerError::Unknown)
 }

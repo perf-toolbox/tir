@@ -22,6 +22,8 @@ pub trait AsmPrintable {
 
 #[derive(Error, Debug)]
 pub enum DisassemblerError {
+    #[error("unexpected end of stream, need `{0}` more bytes, only `{1}` bytes left")]
+    UnexpectedEndOfStream(usize, usize),
     #[error("unknown disassembler error")]
     Unknown,
 }

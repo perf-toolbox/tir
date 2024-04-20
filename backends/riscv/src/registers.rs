@@ -28,3 +28,29 @@ impl Into<Operand> for Reg {
         result
     }
 }
+
+pub fn disassemble_gpr(value: u8) -> Option<Operand> {
+    seq!(N in 0..=31 {
+        let result = match value {
+        #(
+            N => Some(Reg::X~N.into()),
+        )*
+            _ => None,
+        };
+    });
+
+    result
+}
+
+pub fn encode_gpr(operand: &Operand) -> tir_core::Result<u8> {
+    match operand {
+        Operand::Register(reg) => {
+            if *reg >= 32 {
+                Err(tir_core::Error::Unknown)
+            } else {
+                Ok(*reg as u8)
+            }
+        }
+        _ => Err(tir_core::Error::Unknown),
+    }
+}

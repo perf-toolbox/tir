@@ -1,5 +1,5 @@
 [package]
-name = "tir-riscv-fuzz"
+name = "tir-fuzz"
 version = "0.0.0"
 publish = false
 edition = "2021"
@@ -11,11 +11,14 @@ cargo-fuzz = true
 libfuzzer-sys = "0.4"
 
 [dependencies.tir-riscv]
-path = ".."
+path = "../backends/riscv/"
+
+[dependencies.tir-core]
+path = "../core/"
 
 [[bin]]
 name = "fuzz_riscv_disassembler"
-path = "fuzz_targets/fuzz_riscv_disassembler.rs"
+path = "fuzz_targets/riscv/disassembler.rs"
 test = false
 doc = false
 bench = false
