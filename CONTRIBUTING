@@ -25,6 +25,13 @@ This allow us to review and pull in new features or improvements individually.
 
 All pull requests SHOULD adhere to the [Conventional Commits specification](https://conventionalcommits.org/)
 
+## A Plea for Lean Software
+
+We value concise and readable code. Please, avoid large pull requests, unnecessary dependencies and 
+complicated abstractions. Some good examples of lean software are [tinygrad](https://github.com/tinygrad/tinygrad)
+or [llm.c](https://github.com/karpathy/llm.c) from which we take a lot of inspiration. You can also refer
+to this blog post to learn more: https://berthub.eu/articles/posts/a-2024-plea-for-lean-software/.
+
 ## License
 
 You must agree that your patch will be licensed under the Conventional Commit License, and when we change the license we will assume that you agreed with the change unless you object to the changes in time.

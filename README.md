@@ -30,3 +30,9 @@ various binary analysis tasks.
 - **One-Size-Fits-All Solution:** TIR does not aim to be a one-size-fits-all
   tool for all binary analysis needs, but rather a modular framework that can
   be extended and customized as needed.
+
+## Building from source
+
+TIR is a Rust project, and can be built with `cargo`, just like any other Rust
+project. If you want to contribute to this repository, refer to our
+[Developer guide](docs/dev_guide.md) and [Contribution guide](./CONTRIBUTING).
