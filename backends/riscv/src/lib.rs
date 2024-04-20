@@ -2,7 +2,9 @@ use tir_backend::DisassemblerError;
 use tir_core::{builtin::ModuleOp, Dialect, Op, Operation};
 
 mod ops;
+mod registers;
 pub use ops::*;
+pub use registers::*;
 
 use tir_macros::{dialect, populate_dialect_ops, populate_dialect_types};
 

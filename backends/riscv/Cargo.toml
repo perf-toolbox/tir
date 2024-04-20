@@ -9,3 +9,4 @@ edition = "2021"
 tir-core = { path = "../../core" }
 tir-macros = { path = "../../macros" }
 tir-backend = { path = "../common" }
+seq-macro = "0.3.5"
