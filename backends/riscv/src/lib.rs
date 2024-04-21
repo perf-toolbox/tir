@@ -45,9 +45,11 @@ pub fn disassemble(
 
 #[cfg(test)]
 mod tests {
+    use std::any::TypeId;
+
+    use super::*;
     use tir_core::builtin::ModuleOp;
     use tir_core::{Context, OpBuilder};
-    use super::*;
 
     #[test]
     fn test_disassembler() {
@@ -61,7 +63,7 @@ mod tests {
         // or x28, x6, x7
         // and x28, x6, x7
         let instructions = vec![
-            0x00730e33 as u32,
+            0x00730e33_u32,
             0x40730e33,
             0x00731e33,
             0x00732e33,
@@ -81,31 +83,29 @@ mod tests {
         let context = Context::new();
         context.borrow_mut().add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::new(context.clone());
+        let module = ModuleOp::builder(context.clone()).build();
 
-        let builder = OpBuilder::new(context.clone(), module.get_body());
+        let builder = OpBuilder::new(context.clone(), module.borrow_mut().get_body());
 
         assert!(disassemble(&context, builder, &data).is_ok());
 
-        let ops = module.get_body().borrow().operations.to_vec();
+        let ops = module.borrow_mut().get_body().borrow().operations.to_vec();
 
         assert_eq!(ops.len(), 9);
-        assert!(AddOp::try_from(ops[0].clone()).is_ok());
-        assert!(SubOp::try_from(ops[1].clone()).is_ok());
-        assert!(SllOp::try_from(ops[2].clone()).is_ok());
-        assert!(SltOp::try_from(ops[3].clone()).is_ok());
-        assert!(SltuOp::try_from(ops[4].clone()).is_ok());
-        assert!(SrlOp::try_from(ops[5].clone()).is_ok());
-        assert!(SraOp::try_from(ops[6].clone()).is_ok());
-        assert!(OrOp::try_from(ops[7].clone()).is_ok());
-        assert!(AndOp::try_from(ops[8].clone()).is_ok());
+        assert_eq!(ops[0].borrow().type_id(), TypeId::of::<AddOp>());
+        assert_eq!(ops[1].borrow().type_id(), TypeId::of::<SubOp>());
+        assert_eq!(ops[2].borrow().type_id(), TypeId::of::<SllOp>());
+        assert_eq!(ops[3].borrow().type_id(), TypeId::of::<SltOp>());
+        assert_eq!(ops[4].borrow().type_id(), TypeId::of::<SltuOp>());
+        assert_eq!(ops[5].borrow().type_id(), TypeId::of::<SrlOp>());
+        assert_eq!(ops[6].borrow().type_id(), TypeId::of::<SraOp>());
+        assert_eq!(ops[7].borrow().type_id(), TypeId::of::<OrOp>());
+        assert_eq!(ops[8].borrow().type_id(), TypeId::of::<AndOp>());
     }
 
     #[test]
     fn test_disassembler_negative() {
-        let instructions = vec![
-            0x7fffff3 as u32,
-        ];
+        let instructions = vec![0x7fffff3_u32];
 
         let mut data = vec![];
 
@@ -116,9 +116,9 @@ mod tests {
         let context = Context::new();
         context.borrow_mut().add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::new(context.clone());
+        let module = ModuleOp::builder(context.clone()).build();
 
-        let builder = OpBuilder::new(context.clone(), module.get_body());
+        let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
         assert!(disassemble(&context, builder, &data).is_err());
     }

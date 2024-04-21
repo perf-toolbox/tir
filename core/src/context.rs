@@ -2,6 +2,8 @@ use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 use crate::Dialect;
 
+pub type ContextRef = Rc<RefCell<Context>>;
+
 /// Context holds all the resources required for building an IR
 ///
 /// Examples:

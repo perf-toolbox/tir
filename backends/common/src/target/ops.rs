@@ -1,10 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use tir_core::utils::{trait_id, TraitId};
+use tir_core::*;
+use tir_macros::operation;
 
 use crate::target::DIALECT_NAME;
-use tir_core::utils::{trait_id, TraitId};
-use tir_core::{Attr, Op, Operation, OperationImpl, Region};
-use tir_macros::operation;
 
 #[operation(name = "section")]
 pub struct SectionOp {

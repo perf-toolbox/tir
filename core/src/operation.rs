@@ -1,13 +1,16 @@
-use crate::{Attr, Context, Dialect};
+use crate::{Attr, ContextRef};
 use std::collections::HashMap;
+
 use std::{
-    cell::{Ref, RefCell},
+    any::Any,
+    cell::RefCell,
     rc::{Rc, Weak},
 };
 
 pub type BlockRef = Rc<RefCell<Block>>;
+pub type RegionRef = Rc<RefCell<Region>>;
+pub type RegionWeakRef = Weak<RefCell<Region>>;
 
-#[derive(Debug)]
 pub enum Operand {
     Value(Value),
     BlockArgument,
@@ -16,20 +19,18 @@ pub enum Operand {
     RegisterClass(u32),
 }
 
-#[derive(Debug)]
 pub struct Value {
-    _operation: Rc<RefCell<Operation>>,
+    _operation: Operation,
     _result_id: u32,
 }
 
-#[derive(Debug)]
 pub struct Block {
-    parent: Weak<RefCell<Region>>,
+    parent: RegionWeakRef,
     pub operations: Vec<Operation>,
 }
 
 impl Block {
-    pub fn new(parent: Weak<RefCell<Region>>) -> Rc<RefCell<Block>> {
+    pub fn new(parent: RegionWeakRef) -> Rc<RefCell<Block>> {
         Rc::new(RefCell::new(Block {
             parent,
             operations: vec![],
@@ -44,130 +45,57 @@ impl Block {
         &self.operations
     }
 
-    pub fn get_parent(&self) -> Weak<RefCell<Region>> {
+    pub fn get_parent(&self) -> RegionWeakRef {
         self.parent.clone()
     }
 }
 
-#[derive(Debug)]
 pub struct Region {
-    context: Rc<RefCell<Context>>,
-    pub blocks: Vec<Rc<RefCell<Block>>>,
+    context: ContextRef,
+    pub blocks: Vec<BlockRef>,
 }
 
 impl Region {
-    pub fn new(context: Rc<RefCell<Context>>) -> Rc<RefCell<Region>> {
+    pub fn new(context: ContextRef) -> RegionRef {
         Rc::new(RefCell::new(Region {
             context: context.clone(),
             blocks: vec![],
         }))
     }
 
-    pub fn get_context(&self) -> Rc<RefCell<Context>> {
+    pub fn get_context(&self) -> ContextRef {
         self.context.clone()
     }
 
-    pub fn emplace_block(&mut self, parent: Weak<RefCell<Region>>) -> Rc<RefCell<Block>> {
+    pub fn emplace_block(&mut self, parent: RegionWeakRef) -> BlockRef {
         let block = Block::new(parent);
         self.blocks.push(block.clone());
         block
     }
 
-    pub fn get_blocks(&self) -> &[Rc<RefCell<Block>>] {
+    pub fn get_blocks(&self) -> &[BlockRef] {
         &self.blocks
     }
 }
 
-#[derive(Debug)]
 pub struct OperationImpl {
-    pub context: Rc<RefCell<Context>>,
+    pub context: ContextRef,
     pub dialect_id: u32,
     pub operation_id: u32,
-    pub operation_name: &'static str,
     pub operands: Vec<Operand>,
     pub attrs: HashMap<String, Attr>,
     pub regions: Vec<Rc<RefCell<Region>>>,
 }
 
 impl OperationImpl {
-    pub fn get_regions(&self) -> &[Rc<RefCell<Region>>] {
+    pub fn get_regions(&self) -> &[RegionRef] {
         &self.regions
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Operation {
-    r#impl: Rc<RefCell<OperationImpl>>,
-}
+pub type Operation = Rc<RefCell<dyn Op>>;
 
-impl Operation {
-    pub fn new(
-        context: Rc<RefCell<Context>>,
-        dialect: Rc<RefCell<Dialect>>,
-        operation_name: &'static str,
-    ) -> Operation {
-        let dialect_id = dialect.borrow().get_id();
-        let operation_id = dialect.borrow().get_operation_id(operation_name);
-        let r#impl = Rc::new(RefCell::new(OperationImpl {
-            context,
-            dialect_id,
-            operation_id,
-            operation_name,
-            operands: vec![],
-            attrs: HashMap::new(),
-            regions: vec![],
-        }));
-        Operation { r#impl }
-    }
-
-    pub fn from(r#impl: Rc<RefCell<OperationImpl>>) -> Self {
-        Operation { r#impl }
-    }
-
-    pub fn get_context(&self) -> Rc<RefCell<Context>> {
-        self.r#impl.borrow().context.clone()
-    }
-
-    pub fn get_dialect_id(&self) -> u32 {
-        self.r#impl.borrow().dialect_id
-    }
-
-    pub fn get_operation_id(&self) -> u32 {
-        self.r#impl.borrow().operation_id
-    }
-
-    pub fn get_operation_name(&self) -> &'static str {
-        self.r#impl.borrow().operation_name
-    }
-
-    pub fn emplace_region(&mut self) -> Rc<RefCell<Region>> {
-        let region = Region::new(self.get_context());
-        self.r#impl.borrow_mut().regions.push(region.clone());
-        region
-    }
-
-    pub fn get_regions(&self) -> Ref<'_, [Rc<RefCell<Region>>]> {
-        Ref::map(self.r#impl.borrow(), |r#impl| r#impl.get_regions())
-    }
-
-    pub fn add_attr(&mut self, name: String, attr: Attr) {
-        self.r#impl.borrow_mut().attrs.insert(name, attr);
-    }
-
-    pub fn get_attrs(&self) -> Ref<'_, HashMap<String, Attr>> {
-        Ref::map(self.r#impl.borrow(), |r#impl| &r#impl.attrs)
-    }
-
-    pub fn get_impl(&self) -> Rc<RefCell<OperationImpl>> {
-        self.r#impl.clone()
-    }
-
-    pub fn add_operand(&mut self, operand: Operand) {
-        self.r#impl.borrow_mut().operands.push(operand);
-    }
-}
-
-pub trait Op {
+pub trait Op: Any {
     fn get_operation_name() -> &'static str
     where
         Self: Sized;
@@ -175,4 +103,12 @@ pub trait Op {
     fn has_trait<T: ?Sized + 'static>() -> bool
     where
         Self: Sized;
+
+    fn get_context(&self) -> ContextRef;
+    fn get_dialect_id(&self) -> u32;
+    fn emplace_region(&mut self) -> RegionRef;
+    fn get_regions(&self) -> &[RegionRef];
+    fn add_attr(&mut self, name: String, attr: Attr);
+    fn get_attrs(&self) -> &HashMap<String, Attr>;
+    fn add_operand(&mut self, operand: Operand);
 }
