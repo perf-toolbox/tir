@@ -36,5 +36,9 @@ jobs:
       run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
     - name: Run grcov
       run: grcov . --binary-path target/debug/ -s . -t coveralls+ --branch --llvm --ignore '../*' --ignore "/*" --ignore 'macros/*' --ignore 'fuzz/*' --ignore '**/tests/**' --token ${{ secrets.COVERALLS_REPO_TOKEN }} > coveralls.json
+    - id: sha
+      run: echo "SHA=$(git rev-parse HEAD)" > $GITHUB_OUTPUT
     - name: Coveralls
       uses: coverallsapp/github-action@v2
+      with:
+        git-commit: ${{ steps.sha.outputs.SHA }}
