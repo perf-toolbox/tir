@@ -1,10 +1,10 @@
 use crate::utils::RTypeInstr;
 use crate::{disassemble_gpr, encode_gpr};
-use std::cell::{Ref, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 use tir_backend::BinaryEmittable;
 use tir_core::utils::{trait_id, TraitId};
-use tir_core::{Context, Op, Operand, Operation, OperationImpl};
+use tir_core::*;
 use tir_macros::operation;
 
 use crate::DIALECT_NAME;
@@ -21,26 +21,6 @@ macro_rules! alu_op_base {
             rs2: Register,
             #[cfg(operand = true)]
             rd: Register,
-        }
-
-        impl $struct_name {
-            pub fn new(
-                context: Rc<RefCell<Context>>,
-                rs1: Operand,
-                rs2: Operand,
-                rd: Operand,
-            ) -> Self {
-                let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
-                let mut operation =
-                    Operation::new(context.clone(), dialect, $struct_name::get_operation_name());
-                operation.add_operand(rs1);
-                operation.add_operand(rs2);
-                operation.add_operand(rd);
-
-                Self {
-                    operation: operation.get_impl(),
-                }
-            }
         }
     };
 }
@@ -90,8 +70,8 @@ macro_rules! alu_ops {
             match (instr.funct3(), instr.funct7()) {
                 $(
                 ($funct3, $funct7) => {
-                    let op = $struct_name::new(context.clone(), rs1, rs2, rd);
-                    Some(op.into())
+                    let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
+                    Some(op)
                 },
                 )*
                 _ => None,
@@ -118,10 +98,11 @@ alu_ops! {
 mod tests {
     use super::*;
     use crate::disassemble_alu_instr;
+    use std::any::TypeId;
     use tir_core::Context;
 
     #[test]
-    fn test_disassembler() {
+    fn test_alu_disassembler() {
         // add x28, x6, x7
         // sub x28, x6, x7
         // sll x28, x6, x7
@@ -132,7 +113,7 @@ mod tests {
         // or x28, x6, x7
         // and x28, x6, x7
         let instructions = vec![
-            0x00730e33 as u32,
+            0x00730e33_u32,
             0x40730e33,
             0x00731e33,
             0x00732e33,
@@ -155,24 +136,24 @@ mod tests {
         }
 
         assert_eq!(ops.len(), 9);
-        assert!(AddOp::try_from(ops[0].clone()).is_ok());
-        assert!(SubOp::try_from(ops[1].clone()).is_ok());
-        assert!(SllOp::try_from(ops[2].clone()).is_ok());
-        assert!(SltOp::try_from(ops[3].clone()).is_ok());
-        assert!(SltuOp::try_from(ops[4].clone()).is_ok());
-        assert!(SrlOp::try_from(ops[5].clone()).is_ok());
-        assert!(SraOp::try_from(ops[6].clone()).is_ok());
-        assert!(OrOp::try_from(ops[7].clone()).is_ok());
-        assert!(AndOp::try_from(ops[8].clone()).is_ok());
+        assert_eq!(ops[0].borrow().type_id(), TypeId::of::<AddOp>());
+        assert_eq!(ops[1].borrow().type_id(), TypeId::of::<SubOp>());
+        assert_eq!(ops[2].borrow().type_id(), TypeId::of::<SllOp>());
+        assert_eq!(ops[3].borrow().type_id(), TypeId::of::<SltOp>());
+        assert_eq!(ops[4].borrow().type_id(), TypeId::of::<SltuOp>());
+        assert_eq!(ops[5].borrow().type_id(), TypeId::of::<SrlOp>());
+        assert_eq!(ops[6].borrow().type_id(), TypeId::of::<SraOp>());
+        assert_eq!(ops[7].borrow().type_id(), TypeId::of::<OrOp>());
+        assert_eq!(ops[8].borrow().type_id(), TypeId::of::<AndOp>());
     }
 
     #[test]
-    fn test_disassembler_negative() {
+    fn test_alu_disassembler_negative() {
         // _boot:
         //   addi x28, x6, 1000
         //   jal _boot
         // some bogus instr
-        let instructions = vec![0x3e830e13 as u32, 0xffdff0ef, 0x7fffff3];
+        let instructions = vec![0x3e830e13_u32, 0xffdff0ef, 0x7fffff3];
 
         let context = Context::new();
         context.borrow_mut().add_dialect(crate::create_dialect());

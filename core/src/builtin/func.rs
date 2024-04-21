@@ -3,46 +3,22 @@ use std::rc::Rc;
 
 use crate::builtin::DIALECT_NAME;
 use crate::utils::{trait_id, TraitId};
-use crate::{Attr, Context, Op, Operation, OperationImpl, Region, Type};
+use crate::*;
 use tir_macros::operation;
 
 #[operation(name = "func")]
 pub struct FuncOp {
     #[cfg(region = true)]
     body: Type,
-}
-
-impl FuncOp {
-    pub fn new(
-        context: Rc<RefCell<Context>>,
-        name: String,
-        _input_types: &[Type],
-        _return_type: Type,
-    ) -> Self {
-        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
-        let mut operation = Operation::new(context.clone(), dialect, FuncOp::get_operation_name());
-
-        let region = operation.emplace_region();
-
-        region.borrow_mut().emplace_block(Rc::downgrade(&region));
-
-        operation.add_attr("sym_name".to_string(), Attr::String(name));
-
-        Self {
-            operation: operation.get_impl(),
-        }
-    }
-
-    pub fn sym_name(&self) -> String {
-        match self.operation.borrow().attrs.get("sym_name").unwrap() {
-            Attr::String(name) => name.clone(),
-            _ => panic!("sym_name is not a string"),
-        }
-    }
+    #[cfg(attribute = true)]
+    sym_name: String,
+    // TODO: add function type
 }
 
 #[cfg(test)]
 mod test {
+    use std::any::TypeId;
+
     use crate::{builtin::*, OpBuilder};
     use crate::{Context, Op};
 
@@ -53,28 +29,23 @@ mod test {
         assert!(FuncOp::get_operation_name() == "func");
 
         let context = Context::new();
-        let module = ModuleOp::new(context.clone());
-        let builder = OpBuilder::new(context.clone(), module.get_body());
+        let module = ModuleOp::builder(context.clone()).build();
+        let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
-        let inputs = vec![];
-        let result = VoidType::build(context.clone());
+        // TODO add support for function type
+        // let inputs = vec![];
+        // let result = VoidType::build(context.clone());
 
-        let func = func::FuncOp::new(context, "test".to_string(), &inputs, result.into());
-        builder.borrow_mut().insert(func.into());
-
-        match FuncOp::try_from(
-            module
-                .get_body()
-                .borrow()
-                .get_operations()
-                .first()
-                .unwrap()
-                .clone(),
-        ) {
-            Ok(func) => {
-                assert!(func.sym_name() == "test");
-            }
-            Err(_) => panic!("convert to func failed"),
-        }
+        let func = func::FuncOp::builder(context)
+            .sym_name("test".to_string().into())
+            .build();
+        builder.borrow_mut().insert(func.clone());
+        assert_eq!(
+            TryInto::<String>::try_into(func.borrow().get_sym_name_attr()).unwrap(),
+            "test"
+        );
+        let body = module.borrow().get_body().clone();
+        let op = body.borrow().get_operations().first().unwrap().clone();
+        assert_eq!((*op.borrow()).type_id(), TypeId::of::<FuncOp>());
     }
 }

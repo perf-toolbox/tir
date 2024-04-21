@@ -1,7 +1,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use tir_core::{Context, OpBuilder, builtin::ModuleOp};
+use tir_core::{builtin::ModuleOp, Context, OpBuilder};
 use tir_riscv::disassemble;
 
 fuzz_target!(|data: &[u8]| {
@@ -10,9 +10,9 @@ fuzz_target!(|data: &[u8]| {
         .borrow_mut()
         .add_dialect(tir_riscv::create_dialect());
 
-    let module = ModuleOp::new(context.clone());
+    let module = ModuleOp::builder(context.clone()).build();
 
-    let builder = OpBuilder::new(context.clone(), module.get_body());
+    let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
     let _ = disassemble(&context, builder, data);
 });

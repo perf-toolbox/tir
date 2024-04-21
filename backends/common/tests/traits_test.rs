@@ -1,10 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use tir_backend::{AsmPrintable, BinaryEmittable};
-use tir_core::{
-    utils::{trait_id, TraitId},
-    Dialect, Op, Operation, OperationImpl,
-};
+use tir_core::utils::{trait_id, TraitId};
+use tir_core::*;
 use tir_macros::{dialect, operation, populate_dialect_ops, populate_dialect_types};
 
 dialect!(test_backend);
