@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use tir_backend::DisassemblerError;
-use tir_core::{builtin::ModuleOp, Context, Dialect, Op, Operation};
+use tir_core::{builtin::ModuleOp, Context, Dialect, Op, OpBuilderRef, Operation};
 
 mod ops;
 mod registers;
@@ -20,6 +20,7 @@ populate_dialect_types!();
 
 pub fn disassemble(
     context: &Rc<RefCell<Context>>,
+    builder: OpBuilderRef,
     stream: &[u8],
 ) -> Result<ModuleOp, DisassemblerError> {
     if stream.len() % 4 != 0 {
@@ -31,8 +32,8 @@ pub fn disassemble(
 
     for i in 0..(stream.len() / 4) {
         let offset = i * 4;
-        if let Some(_op) = disassemble_alu_instr(context, &stream[offset..]) {
-            // TODO attach operation
+        if let Some(op) = disassemble_alu_instr(context, &stream[offset..]) {
+            builder.borrow_mut().insert(op);
         } else {
             // FIXME add an appropriate error
             return Err(DisassemblerError::Unknown);

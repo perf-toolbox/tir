@@ -5,6 +5,8 @@ use std::{
     rc::{Rc, Weak},
 };
 
+pub type BlockRef = Rc<RefCell<Block>>;
+
 #[derive(Debug)]
 pub enum Operand {
     Value(Value),

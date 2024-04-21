@@ -43,7 +43,7 @@ impl FuncOp {
 
 #[cfg(test)]
 mod test {
-    use crate::builtin::*;
+    use crate::{builtin::*, OpBuilder};
     use crate::{Context, Op};
 
     use super::*;
@@ -54,12 +54,13 @@ mod test {
 
         let context = Context::new();
         let module = ModuleOp::new(context.clone());
+        let builder = OpBuilder::new(context.clone(), module.get_body());
 
         let inputs = vec![];
         let result = VoidType::build(context.clone());
 
         let func = func::FuncOp::new(context, "test".to_string(), &inputs, result.into());
-        module.get_body().borrow_mut().add_operation(func.into());
+        builder.borrow_mut().insert(func.into());
 
         match FuncOp::try_from(
             module
