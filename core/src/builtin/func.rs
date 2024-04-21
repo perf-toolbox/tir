@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::builtin::FuncType;
 use crate::builtin::DIALECT_NAME;
 use crate::utils::{trait_id, TraitId};
 use crate::*;
@@ -12,7 +13,8 @@ pub struct FuncOp {
     body: Type,
     #[cfg(attribute = true)]
     sym_name: String,
-    // TODO: add function type
+    #[cfg(attribute = true)]
+    func_type: FuncType,
 }
 
 #[cfg(test)]
@@ -32,12 +34,14 @@ mod test {
         let module = ModuleOp::builder(context.clone()).build();
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
-        // TODO add support for function type
-        // let inputs = vec![];
-        // let result = VoidType::build(context.clone());
+        let inputs: Vec<Type> = vec![];
+        let result = VoidType::build(context.clone());
+
+        let func_type = FuncType::build(context.clone(), &inputs, result.into());
 
         let func = func::FuncOp::builder(context)
             .sym_name("test".to_string().into())
+            .func_type(func_type.into())
             .build();
         builder.borrow_mut().insert(func.clone());
         assert_eq!(
