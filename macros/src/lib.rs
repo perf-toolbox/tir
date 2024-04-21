@@ -1,5 +1,6 @@
 extern crate proc_macro;
 
+use case_converter::camel_to_snake;
 use darling::ast::NestedMeta;
 use darling::{Error, FromField, FromMeta};
 use proc_macro::TokenStream;
@@ -95,7 +96,7 @@ fn build_attr_accessors(attrs: &[AttrField]) -> proc_macro2::TokenStream {
             }
             pub fn #set_name<T>(&mut self, value: T) where T: Into<#ty> {
                 let tmp: #ty = value.into();
-                self.operation.attrs.insert(#attr_name.to_string(), Attr::from(tmp));
+                self.operation.attrs.insert(#attr_name.to_string(), tmp.into());
             }
         };
 
@@ -420,6 +421,59 @@ pub fn dialect(input: TokenStream) -> TokenStream {
             dialect
         }
     })
+}
+
+#[proc_macro]
+pub fn dialect_type(input: TokenStream) -> TokenStream {
+    let name_ident = parse_macro_input!(input as syn::Ident);
+    let name_string = name_ident.to_string();
+    let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
+    let name_str = camel_to_snake(name_str);
+
+    quote! {
+        pub struct #name_ident {
+            r#type: Type,
+        }
+
+        impl Ty for #name_ident {
+            fn get_type_name() -> &'static str {
+                #name_str
+            }
+        }
+
+        impl Into<Attr> for #name_ident {
+            fn into(self) -> Attr {
+                Attr::Type(self.r#type)
+            }
+        }
+
+        impl Into<Type> for #name_ident {
+            fn into(self) -> Type {
+                self.r#type
+            }
+        }
+
+        impl TryFrom<Attr> for #name_ident {
+            type Error = ();
+
+            fn try_from(attr: Attr) -> Result<Self, Self::Error> {
+                if let Attr::Type(ty) = attr {
+                    let context = ty.get_context();
+                    let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
+                    let type_id = dialect.borrow().get_type_id(#name_ident::get_type_name());
+                    if type_id != ty.get_type_id() {
+                        return Err(());
+                    }
+
+                    return Ok(#name_ident {
+                        r#type: ty,
+                    });
+                }
+                Err(())
+            }
+        }
+    }
+    .into()
 }
 
 #[proc_macro]

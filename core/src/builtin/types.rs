@@ -2,12 +2,12 @@ use crate::{Attr, Context, Ty, Type};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use tir_macros::dialect_type;
 
 use crate::builtin::DIALECT_NAME;
 
-pub struct FuncType {
-    r#type: Type,
-}
+dialect_type!(FuncType);
+dialect_type!(VoidType);
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
@@ -16,11 +16,6 @@ impl FuncType {
 
     fn get_return_attr_name() -> &'static str {
         "return"
-    }
-
-    pub fn new(r#type: Type) -> Self {
-        // TODO check type is correct
-        Self { r#type }
     }
 
     pub fn build(
@@ -47,40 +42,29 @@ impl FuncType {
     }
 
     pub fn get_inputs(&self) -> &[Type] {
-        match self.r#type.get_attrs().get("inputs").as_ref().unwrap() {
+        match self
+            .r#type
+            .get_attrs()
+            .get(Self::get_inputs_attr_name())
+            .as_ref()
+            .unwrap()
+        {
             Attr::TypeArray(array) => array,
             _ => panic!("Expected 'inputs' to be a TypeArray"),
         }
     }
 
     pub fn get_return(&self) -> &Type {
-        match self.r#type.get_attrs().get("return").as_ref().unwrap() {
+        match self
+            .r#type
+            .get_attrs()
+            .get(Self::get_return_attr_name())
+            .as_ref()
+            .unwrap()
+        {
             Attr::Type(type_) => type_,
             _ => panic!("Expected 'return' to be a Type"),
         }
-    }
-}
-
-impl Ty for FuncType {
-    fn get_type_name() -> &'static str {
-        "func"
-    }
-}
-
-pub struct VoidType {
-    r#type: Type,
-}
-
-impl VoidType {
-    pub fn new(r#type: Type) -> Self {
-        // TODO check type is correct
-        Self { r#type }
-    }
-}
-
-impl Ty for VoidType {
-    fn get_type_name() -> &'static str {
-        "void"
     }
 }
 
@@ -91,11 +75,5 @@ impl VoidType {
         let r#type = Type::new(context, dialect.borrow().get_id(), type_id, HashMap::new());
 
         VoidType { r#type }
-    }
-}
-
-impl From<VoidType> for Type {
-    fn from(val: VoidType) -> Self {
-        val.r#type
     }
 }
