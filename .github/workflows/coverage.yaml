@@ -3,7 +3,7 @@ name: Code Coverage
 on:
   push:
     branches: [ "main" ]
-  pull_request_target:
+  pull_request:
     branches: [ "main" ]
 
 env:
@@ -35,10 +35,6 @@ jobs:
     - name: Install grcov
       run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
     - name: Run grcov
-      run: grcov . --binary-path target/debug/ -s . -t coveralls+ --branch --llvm --ignore '../*' --ignore "/*" --ignore 'macros/*' --ignore 'fuzz/*' --ignore '**/tests/**' --token ${{ secrets.COVERALLS_REPO_TOKEN }} > coveralls.json
-    - id: sha
-      run: echo "SHA=$(git rev-parse HEAD)" > $GITHUB_OUTPUT
+      run: grcov . --binary-path target/debug/ -s . -t lcov --branch --llvm --ignore '../*' --ignore "/*" --ignore 'macros/*' --ignore 'fuzz/*' --ignore '**/tests/**' -o lcov.info
     - name: Coveralls
       uses: coverallsapp/github-action@v2
-      with:
-        git-commit: ${{ steps.sha.outputs.SHA }}
