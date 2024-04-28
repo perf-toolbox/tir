@@ -119,3 +119,20 @@ seq!(N in 0..31 {
         }
     }
 });
+
+#[cfg(test)]
+mod tests {
+    use crate::{disassemble_gpr, get_abi_reg_name, get_reg_name, Reg};
+
+    #[test]
+    fn disassemble() {
+        assert!(disassemble_gpr(33).is_none());
+    }
+
+    #[test]
+    fn reg_name() {
+        assert_eq!(get_abi_reg_name(&Reg::X0), "zero");
+        // TODO this should be lower case
+        assert_eq!(get_reg_name(&Reg::X0), "X0");
+    }
+}
