@@ -1,5 +1,5 @@
 use crate::utils::RTypeInstr;
-use crate::{disassemble_gpr, encode_gpr};
+use crate::{assemble_reg, disassemble_gpr};
 use std::cell::RefCell;
 use std::rc::Rc;
 use tir_backend::BinaryEmittable;
@@ -41,10 +41,10 @@ macro_rules! alu_ops {
             ) -> tir_core::Result<()> {
                 let instr = RTypeInstr::builder()
                     .opcode(ALU_OPCODE)
-                    .rd(encode_gpr(&self.get_rd())?)
+                    .rd(assemble_reg(&self.get_rd())?)
                     .funct3($funct3)
-                    .rs1(encode_gpr(&self.get_rs1())?)
-                    .rs2(encode_gpr(&self.get_rs2())?)
+                    .rs1(assemble_reg(&self.get_rs1())?)
+                    .rs2(assemble_reg(&self.get_rs2())?)
                     .funct7($funct7)
                     .build();
                 stream.write(&instr.to_bytes());
