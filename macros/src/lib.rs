@@ -1,8 +1,11 @@
 extern crate proc_macro;
 
+mod ir_printer;
+
 use case_converter::camel_to_snake;
 use darling::ast::NestedMeta;
 use darling::{Error, FromField, FromMeta};
+use ir_printer::*;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
@@ -15,6 +18,8 @@ struct OperationAttrs {
     pub name: String,
     #[darling(default)]
     pub traits: darling::util::PathList,
+    #[darling(default)]
+    pub custom_assembly: bool,
 }
 
 #[derive(FromField, Debug)]
@@ -331,10 +336,18 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let op_name = input.ident;
     let traits = op_attrs.traits;
 
+    let printer = if !op_attrs.custom_assembly {
+        make_generic_ir_printer_parser(op_name.clone())
+    } else {
+        quote! {}
+    };
+
     TokenStream::from(quote! {
         pub struct #op_name {
             operation: OperationImpl,
         }
+
+        #printer
 
         #op_builder
 
@@ -346,6 +359,10 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
 
         impl Op for #op_name {
             fn get_operation_name() -> &'static str {
+                #op_name_str
+            }
+
+            fn get_op_name(&self) -> &'static str {
                 #op_name_str
             }
 
