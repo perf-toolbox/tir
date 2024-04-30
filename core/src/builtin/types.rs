@@ -9,6 +9,8 @@ use crate::builtin::DIALECT_NAME;
 dialect_type!(FuncType);
 dialect_type!(VoidType);
 
+// FIXME: we need scalar types
+
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
         "inputs"
