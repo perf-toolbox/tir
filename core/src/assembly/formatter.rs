@@ -1,12 +1,3 @@
-use crate::{builtin, context, Block, Operation};
-
-pub trait IRText {
-    fn print(&self, fmt: &mut dyn IRFormatter);
-    fn parse(input: &str) -> Operation
-    where
-        Self: Sized;
-}
-
 pub trait IRFormatter {
     fn increase_indent(&mut self);
     fn decrease_indent(&mut self);
@@ -21,12 +12,12 @@ pub trait IRFormatter {
         }
     }
 
-    fn start_block(&mut self) {
+    fn start_region(&mut self) {
         self.write_direct("{\n");
         self.increase_indent();
     }
 
-    fn end_block(&mut self) {
+    fn end_region(&mut self) {
         self.decrease_indent();
         self.write_newline("}");
     }
@@ -34,6 +25,12 @@ pub trait IRFormatter {
 
 pub struct StdoutPrinter {
     indent: u32,
+}
+
+impl Default for StdoutPrinter {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl StdoutPrinter {
@@ -60,18 +57,44 @@ impl IRFormatter for StdoutPrinter {
     }
 }
 
-/// Prints given operation to stdout
-pub fn print_op(op: Operation, fmt: &mut dyn IRFormatter) {
-    let context = op.borrow().get_context();
-    let dialect = op.borrow().get_dialect_id();
-    let dialect = context.borrow().get_dialect(dialect).unwrap();
+pub struct StringPrinter {
+    indent: u32,
+    data: String,
+}
 
-    if dialect.borrow().get_name() != builtin::DIALECT_NAME {
-        fmt.write_direct(&dialect.borrow().get_name());
-        fmt.write_direct(".");
+impl Default for StringPrinter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl StringPrinter {
+    pub fn new() -> Self {
+        StringPrinter {
+            indent: 0,
+            data: String::new(),
+        }
     }
 
-    fmt.write_direct(op.borrow().get_op_name());
-    fmt.write_direct(" ");
-    op.borrow().print(fmt);
+    pub fn get(&self) -> String {
+        self.data.clone()
+    }
+}
+
+impl IRFormatter for StringPrinter {
+    fn increase_indent(&mut self) {
+        self.indent += 1;
+    }
+
+    fn decrease_indent(&mut self) {
+        self.indent -= 1;
+    }
+
+    fn get_indent(&self) -> u32 {
+        self.indent
+    }
+
+    fn write_direct(&mut self, data: &str) {
+        self.data += data;
+    }
 }

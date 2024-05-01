@@ -1,7 +1,8 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use tir_backend::DisassemblerError;
-use tir_core::{Context, Dialect, Op, OpBuilderRef, Operation};
+use tir_core::IRAssembly;
+use tir_core::{Context, Dialect, Op, OpBuilderRef};
 
 mod ops;
 mod registers;

@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 tir-macros = { path = "../macros/" }
+winnow = "0.6.7"

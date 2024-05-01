@@ -11,8 +11,8 @@ pub struct ModuleOp {
     body: Region,
 }
 
-impl IRText for ModuleOp {
-    fn parse(_input: &str) -> Operation
+impl IRAssembly for ModuleOp {
+    fn parse(_: ContextRef, _input: &mut &str) -> std::result::Result<Operation, ()>
     where
         Self: Sized,
     {
@@ -20,12 +20,12 @@ impl IRText for ModuleOp {
     }
 
     fn print(&self, fmt: &mut dyn IRFormatter) {
-        fmt.start_block();
+        fmt.start_region();
         let body = self.get_body();
         for op in &body.borrow().operations {
             op.borrow().print(fmt);
         }
-        fmt.end_block();
+        fmt.end_region();
     }
 }
 

@@ -1,12 +1,13 @@
 use crate::Dialect;
 use crate::Op;
-use crate::Operation;
+
 use crate::Ty;
 
 mod func;
 mod module;
 mod types;
 
+use crate::assembly::IRAssembly;
 pub use func::*;
 pub use module::*;
 use tir_macros::dialect;

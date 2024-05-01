@@ -1,11 +1,11 @@
 extern crate proc_macro;
 
-mod ir_printer;
+mod assembly;
 
+use assembly::*;
 use case_converter::camel_to_snake;
 use darling::ast::NestedMeta;
 use darling::{Error, FromField, FromMeta};
-use ir_printer::*;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
@@ -282,7 +282,7 @@ fn build_op_builder(
                 let context = self.context.clone();
                 let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
                 let dialect_id = dialect.borrow().get_id();
-                let operation_id = dialect.borrow().get_operation_id(#op_name);
+                let operation_id = dialect.borrow().get_operation_id(#op_name).expect("We just registered the operation");
                 let mut attrs = std::collections::HashMap::new();
                 let mut operands = vec![];
                 let mut regions = vec![];
@@ -425,12 +425,8 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     TokenStream::from(quote! {
         pub(crate) const DIALECT_NAME: &str = #dialect_name;
 
-        fn op_dispatcher(operation: Operation) -> Option<Box<dyn Op>> {
-            None
-        }
-
         pub fn create_dialect() -> Dialect {
-            let mut dialect = Dialect::new(DIALECT_NAME, Box::new(op_dispatcher));
+            let mut dialect = Dialect::new(DIALECT_NAME);
 
             populate_dialect_ops(&mut dialect);
             populate_dialect_types(&mut dialect);
@@ -501,7 +497,7 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name());)*
+            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
         }
     })
 }

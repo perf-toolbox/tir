@@ -1,4 +1,4 @@
-use crate::{Attr, ContextRef, IRText};
+use crate::{Attr, ContextRef, IRAssembly};
 use std::collections::HashMap;
 
 use std::{
@@ -95,7 +95,7 @@ impl OperationImpl {
 
 pub type Operation = Rc<RefCell<dyn Op>>;
 
-pub trait Op: Any + IRText {
+pub trait Op: Any + IRAssembly {
     fn get_operation_name() -> &'static str
     where
         Self: Sized;

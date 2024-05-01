@@ -1,4 +1,5 @@
-use tir_core::{Dialect, Op, Operation};
+use tir_core::IRAssembly;
+use tir_core::{Dialect, Op};
 
 mod ops;
 
