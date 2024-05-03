@@ -1,7 +1,7 @@
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
+use winnow::ascii::multispace0;
 use winnow::combinator::alt;
-use winnow::combinator::repeat_till;
 use winnow::combinator::separated_pair;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
@@ -46,7 +46,7 @@ pub fn parse_ir(context: ContextRef, ir: &str) -> Result<Operation, ()> {
     parser(context, &mut input)
 }
 
-pub fn parse_single_operation(context: ContextRef, ir: &mut &str) -> PResult<Operation> {
+pub fn parse_single_operation(context: &ContextRef, ir: &mut &str) -> PResult<Operation> {
     let mut ir = ir;
     let (dialect_name, op_name) = op_tuple.parse_next(&mut ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))?;
 
@@ -60,16 +60,25 @@ pub fn parse_single_operation(context: ContextRef, ir: &mut &str) -> PResult<Ope
         .borrow()
         .get_operation_parser(operation_id)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    parser(context, &mut ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))
+    parser(context.clone(), &mut ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))
 }
 
 pub fn parse_single_block_region(context: ContextRef, ir: &mut &str) -> Result<Vec<Operation>, ()> {
-    let atom = move |ir| -> PResult<Operation> { parse_single_operation(context.clone(), ir) };
-    let res = ("(", repeat_till(0.., atom, "}"))
-        .map(|(_, (a, _))| a)
-        .parse_next(ir);
+    let _ = (multispace0, "{", multispace0).parse_next(ir).map_err(|_: ErrMode<ContextError>| ())?;
 
-    return res.map_err(|_| ());
+    let mut operations = vec![];
+
+    loop {
+        if let Ok(operation) = parse_single_operation(&context, ir) {
+            operations.push(operation);
+        } else {
+            break;
+        }
+    }
+    
+    let _ = (multispace0, "}").parse_next(ir).map_err(|_: ErrMode<ContextError>| ())?;
+
+    Ok(operations)
 }
 
 #[cfg(test)]

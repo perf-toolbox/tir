@@ -12,11 +12,16 @@ pub struct ModuleOp {
 }
 
 impl IRAssembly for ModuleOp {
-    fn parse(_: ContextRef, _input: &mut &str) -> std::result::Result<Operation, ()>
+    fn parse(context: ContextRef, input: &mut &str) -> std::result::Result<Operation, ()>
     where
         Self: Sized,
     {
-        todo!();
+        let ops = parse_single_block_region(context.clone(), input)?;
+        let module = ModuleOp::builder(context).build();
+        for op in ops {
+            module.borrow_mut().get_body().borrow_mut().add_operation(op);
+        }
+        Ok(module)
     }
 
     fn print(&self, fmt: &mut dyn IRFormatter) {
@@ -32,6 +37,7 @@ impl IRAssembly for ModuleOp {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::any::TypeId;
 
     #[test]
     fn test_module() {
@@ -50,9 +56,30 @@ mod test {
         let context = Context::new();
         let module = ModuleOp::builder(context).build();
 
-        let mut printer = StdoutPrinter::new();
-
+        let mut printer = StringPrinter::new();
+        
         print_op(module, &mut printer);
-        // panic!();
+
+        let result = printer.get();
+
+        let golden = "module {\n}\n";
+        assert_eq!(result, golden);
+    }
+    
+    #[test]
+    fn test_module_parse() {
+        let context = Context::new();
+        let input = "module {\n}\n";
+        let op = parse_ir(context, input).expect("parsed ir");
+        assert_eq!(op.borrow().type_id(), TypeId::of::<ModuleOp>());
+        // let module = ModuleOp::builder(context).build();
+
+        // let mut printer = StringPrinter::new();
+        
+        // print_op(module, &mut printer);
+
+        // let result = printer.get();
+
+        // assert_eq!(result, golden);
     }
 }

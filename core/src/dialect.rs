@@ -38,11 +38,11 @@ impl Dialect {
     }
 
     pub fn add_operation(&mut self, name: &'static str, parser: ParseFn) {
-        if let Some(id) = self
+        if self
             .operation_ids
-            .insert(name, self.operation_ids.len().try_into().unwrap())
+            .insert(name, self.operation_ids.len().try_into().unwrap()).is_none()
         {
-            self.parse_fn.insert(id, parser);
+            self.parse_fn.insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
         }
     }
 
