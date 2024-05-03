@@ -179,26 +179,13 @@ fn build_region_accessors(regions: &[RegionField]) -> proc_macro2::TokenStream {
     }
 }
 
-fn build_return_type_accessor(
-    maybe_return_type: &Option<syn::Path>,
-) -> proc_macro2::TokenStream {
-    if maybe_return_type.is_none() {
-        return proc_macro2::TokenStream::new();
-    }
-    quote! {
-        pub fn get_return_type(&self) -> &Type {
-            &self.operation.return_type.unwrap()
-        }
-    }
-}
-
 fn build_op_builder(
     op: &syn::Ident,
     op_name: &str,
     attrs: &[AttrField],
     operands: &[OperandField],
     regions: &[RegionField],
-    return_type: &proc_macro2::TokenStream,
+    return_type: &Option<syn::Path>,
 ) -> proc_macro2::TokenStream {
     let builder_name = format_ident!("{}Builder", op);
 
@@ -271,6 +258,23 @@ fn build_op_builder(
         }
     }
 
+    if return_type.is_some() {
+        builder_fields.push(quote! {
+            return_type: Option<Type>,
+        });
+
+        builder_setters.push(quote! {
+            return_type: None,
+        });
+
+        builder_accessors.push(quote! {
+            pub fn return_type(mut self, ty: Type) -> Self {
+                self.return_type = Some(ty);
+                self
+            }
+        });
+    }
+
     quote! {
         pub struct #builder_name {
             context: ContextRef,
@@ -297,6 +301,7 @@ fn build_op_builder(
                 let mut attrs = std::collections::HashMap::new();
                 let mut operands = vec![];
                 let mut regions = vec![];
+                let mut return_type = None;
 
                 #(#builder_fillers)*
 
@@ -307,8 +312,7 @@ fn build_op_builder(
                     operands,
                     attrs,
                     regions,
-                    // FIXME:
-                    return_type: None,
+                    return_type,
                 }}));
 
                 operation
@@ -342,7 +346,6 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let attr_accessors = build_attr_accessors(&attrs);
     let operand_accessors = build_operand_accessors(&operands);
     let region_accessors = build_region_accessors(&regions);
-    let return_type = build_return_type_accessor(&op_attrs.return_type);
 
     let op_builder = build_op_builder(
         &input.ident,
@@ -350,7 +353,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
         &attrs,
         &operands,
         &regions,
-        &return_type,
+        &op_attrs.return_type,
     );
 
     let op_name_str = op_attrs.name;

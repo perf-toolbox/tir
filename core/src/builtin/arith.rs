@@ -3,10 +3,11 @@ use std::rc::Rc;
 
 use crate::builtin::DIALECT_NAME;
 use crate::utils::{trait_id, TraitId};
+use crate::Type;
 use crate::*;
 use tir_macros::operation;
 
-#[operation(name = "const", return_type = create::builtin::Type)]
+#[operation(name = "const", return_type = Type)]
 pub struct ConstOp {
     #[cfg(attribute = true)]
     value: Attr,
@@ -31,7 +32,11 @@ mod test {
 
         let attr = Attr::I8(16);
 
-        let constant = ConstOp::builder(context.clone()).value(attr.into()).build();
+        let constant = ConstOp::builder(context.clone())
+            .value(attr.into())
+            // TODO: here we need to build I8 type
+            .return_type(None)
+            .build();
 
         builder.borrow_mut().insert(constant.clone());
         assert_eq!(
