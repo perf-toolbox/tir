@@ -1,5 +1,8 @@
 extern crate proc_macro;
 
+mod assembly;
+
+use assembly::*;
 use case_converter::camel_to_snake;
 use darling::ast::NestedMeta;
 use darling::{Error, FromField, FromMeta};
@@ -15,6 +18,8 @@ struct OperationAttrs {
     pub name: String,
     #[darling(default)]
     pub traits: darling::util::PathList,
+    #[darling(default)]
+    pub custom_assembly: bool,
 }
 
 #[derive(FromField, Debug)]
@@ -277,7 +282,7 @@ fn build_op_builder(
                 let context = self.context.clone();
                 let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
                 let dialect_id = dialect.borrow().get_id();
-                let operation_id = dialect.borrow().get_operation_id(#op_name);
+                let operation_id = dialect.borrow().get_operation_id(#op_name).expect("We just registered the operation");
                 let mut attrs = std::collections::HashMap::new();
                 let mut operands = vec![];
                 let mut regions = vec![];
@@ -331,10 +336,18 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let op_name = input.ident;
     let traits = op_attrs.traits;
 
+    let printer = if !op_attrs.custom_assembly {
+        make_generic_ir_printer_parser(op_name.clone())
+    } else {
+        quote! {}
+    };
+
     TokenStream::from(quote! {
         pub struct #op_name {
             operation: OperationImpl,
         }
+
+        #printer
 
         #op_builder
 
@@ -346,6 +359,10 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
 
         impl Op for #op_name {
             fn get_operation_name() -> &'static str {
+                #op_name_str
+            }
+
+            fn get_op_name(&self) -> &'static str {
                 #op_name_str
             }
 
@@ -408,12 +425,8 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     TokenStream::from(quote! {
         pub(crate) const DIALECT_NAME: &str = #dialect_name;
 
-        fn op_dispatcher(operation: Operation) -> Option<Box<dyn Op>> {
-            None
-        }
-
         pub fn create_dialect() -> Dialect {
-            let mut dialect = Dialect::new(DIALECT_NAME, Box::new(op_dispatcher));
+            let mut dialect = Dialect::new(DIALECT_NAME);
 
             populate_dialect_ops(&mut dialect);
             populate_dialect_types(&mut dialect);
@@ -484,7 +497,7 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name());)*
+            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
         }
     })
 }

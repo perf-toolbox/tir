@@ -13,6 +13,7 @@ jobs:
     strategy:
       matrix:
         target:
+          - core_op_parser
           - riscv_disassembler
       max-parallel: 3
     steps:

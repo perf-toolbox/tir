@@ -58,6 +58,10 @@ impl Context {
         }
         None
     }
+
+    pub fn get_dialect(&self, id: u32) -> Option<Rc<RefCell<Dialect>>> {
+        Some(self.dialects[id as usize].clone())
+    }
 }
 
 #[cfg(test)]

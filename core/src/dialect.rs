@@ -1,25 +1,24 @@
-use crate::{Op, Operation};
+use crate::{ContextRef, Operation};
 use std::collections::HashMap;
-use std::rc::Rc;
 
-pub type DispatchFn = Box<dyn Fn(Operation) -> Option<Box<dyn Op>>>;
+pub type ParseFn = fn(ContextRef, &mut &str) -> Result<Operation, ()>;
 
 pub struct Dialect {
     name: &'static str,
     id: u32,
     operation_ids: HashMap<&'static str, u32>,
     type_ids: HashMap<&'static str, u32>,
-    _dispatch_fn: Rc<DispatchFn>,
+    parse_fn: HashMap<u32, ParseFn>,
 }
 
 impl Dialect {
-    pub fn new(name: &'static str, dispatch_fn: DispatchFn) -> Dialect {
+    pub fn new(name: &'static str) -> Dialect {
         Dialect {
             name,
             id: 0,
             operation_ids: HashMap::new(),
             type_ids: HashMap::new(),
-            _dispatch_fn: Rc::new(dispatch_fn),
+            parse_fn: HashMap::new(),
         }
     }
 
@@ -38,13 +37,21 @@ impl Dialect {
         self.name
     }
 
-    pub fn add_operation(&mut self, name: &'static str) {
-        self.operation_ids
-            .insert(name, self.operation_ids.len().try_into().unwrap());
+    pub fn add_operation(&mut self, name: &'static str, parser: ParseFn) {
+        if self
+            .operation_ids
+            .insert(name, self.operation_ids.len().try_into().unwrap()).is_none()
+        {
+            self.parse_fn.insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
+        }
     }
 
-    pub fn get_operation_id(&self, name: &'static str) -> u32 {
-        *self.operation_ids.get(name).unwrap()
+    pub fn get_operation_id(&self, name: &str) -> Option<u32> {
+        self.operation_ids.get(name).cloned()
+    }
+
+    pub fn get_operation_parser(&self, id: u32) -> Option<ParseFn> {
+        self.parse_fn.get(&id).cloned()
     }
 
     pub fn add_type(&mut self, name: &'static str) {

@@ -22,3 +22,10 @@ path = "fuzz_targets/riscv/disassembler.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "fuzz_core_op_parser"
+path = "fuzz_targets/core/op_parser.rs"
+test = false
+doc = false
+bench = false

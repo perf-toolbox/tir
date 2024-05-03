@@ -1,3 +1,4 @@
+mod assembly;
 mod attrs;
 mod builder;
 pub mod builtin;
@@ -8,6 +9,7 @@ mod operation;
 mod r#type;
 pub mod utils;
 
+pub use assembly::*;
 pub use attrs::*;
 pub use builder::*;
 pub use context::*;

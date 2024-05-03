@@ -1,6 +1,6 @@
 use crate::Dialect;
 use crate::Op;
-use crate::Operation;
+
 use crate::Ty;
 
 mod arith;
@@ -8,6 +8,7 @@ mod func;
 mod module;
 mod types;
 
+use crate::assembly::IRAssembly;
 pub use arith::*;
 pub use func::*;
 pub use module::*;
