@@ -1,7 +1,10 @@
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
 use winnow::combinator::alt;
+use winnow::combinator::repeat_till;
 use winnow::combinator::separated_pair;
+use winnow::error::ContextError;
+use winnow::error::ErrMode;
 use winnow::PResult;
 use winnow::Parser;
 
@@ -26,7 +29,7 @@ fn op_tuple<'s>(input: &mut &'s str) -> PResult<(&'s str, &'s str)> {
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
-pub fn parse_op(context: ContextRef, ir: &str) -> Result<Operation, ()> {
+pub fn parse_ir(context: ContextRef, ir: &str) -> Result<Operation, ()> {
     let mut input = ir;
     let (dialect_name, op_name) = op_tuple.parse_next(&mut input).map_err(|_| ())?;
 
@@ -41,6 +44,32 @@ pub fn parse_op(context: ContextRef, ir: &str) -> Result<Operation, ()> {
         .get_operation_parser(operation_id)
         .ok_or(())?;
     parser(context, &mut input)
+}
+
+pub fn parse_single_operation(context: ContextRef, ir: &mut &str) -> PResult<Operation> {
+    let mut ir = ir;
+    let (dialect_name, op_name) = op_tuple.parse_next(&mut ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))?;
+
+    let dialect = context
+        .borrow()
+        .get_dialect_by_name(dialect_name)
+        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
+
+    let operation_id = dialect.borrow().get_operation_id(op_name).ok_or(ErrMode::Backtrack(ContextError::new()))?;
+    let parser = dialect
+        .borrow()
+        .get_operation_parser(operation_id)
+        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
+    parser(context, &mut ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))
+}
+
+pub fn parse_single_block_region(context: ContextRef, ir: &mut &str) -> Result<Vec<Operation>, ()> {
+    let atom = move |ir| -> PResult<Operation> { parse_single_operation(context.clone(), ir) };
+    let res = ("(", repeat_till(0.., atom, "}"))
+        .map(|(_, (a, _))| a)
+        .parse_next(ir);
+
+    return res.map_err(|_| ());
 }
 
 #[cfg(test)]
