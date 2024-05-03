@@ -15,6 +15,8 @@ struct OperationAttrs {
     pub name: String,
     #[darling(default)]
     pub traits: darling::util::PathList,
+    #[darling(default)]
+    pub return_type: Option<syn::Path>,
 }
 
 #[derive(FromField, Debug)]
@@ -177,12 +179,26 @@ fn build_region_accessors(regions: &[RegionField]) -> proc_macro2::TokenStream {
     }
 }
 
+fn build_return_type_accessor(
+    maybe_return_type: &Option<syn::Path>,
+) -> proc_macro2::TokenStream {
+    if maybe_return_type.is_none() {
+        return proc_macro2::TokenStream::new();
+    }
+    quote! {
+        pub fn get_return_type(&self) -> &Type {
+            &self.operation.return_type.unwrap()
+        }
+    }
+}
+
 fn build_op_builder(
     op: &syn::Ident,
     op_name: &str,
     attrs: &[AttrField],
     operands: &[OperandField],
     regions: &[RegionField],
+    return_type: &proc_macro2::TokenStream,
 ) -> proc_macro2::TokenStream {
     let builder_name = format_ident!("{}Builder", op);
 
@@ -291,6 +307,8 @@ fn build_op_builder(
                     operands,
                     attrs,
                     regions,
+                    // FIXME:
+                    return_type: None,
                 }}));
 
                 operation
@@ -324,8 +342,16 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let attr_accessors = build_attr_accessors(&attrs);
     let operand_accessors = build_operand_accessors(&operands);
     let region_accessors = build_region_accessors(&regions);
+    let return_type = build_return_type_accessor(&op_attrs.return_type);
 
-    let op_builder = build_op_builder(&input.ident, &op_attrs.name, &attrs, &operands, &regions);
+    let op_builder = build_op_builder(
+        &input.ident,
+        &op_attrs.name,
+        &attrs,
+        &operands,
+        &regions,
+        &return_type,
+    );
 
     let op_name_str = op_attrs.name;
     let op_name = input.ident;

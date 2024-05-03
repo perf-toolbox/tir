@@ -1,4 +1,4 @@
-use crate::{Attr, ContextRef};
+use crate::{Attr, ContextRef, Type};
 use std::collections::HashMap;
 
 use std::{
@@ -85,6 +85,7 @@ pub struct OperationImpl {
     pub operands: Vec<Operand>,
     pub attrs: HashMap<String, Attr>,
     pub regions: Vec<Rc<RefCell<Region>>>,
+    pub return_type: Option<Type>,
 }
 
 impl OperationImpl {

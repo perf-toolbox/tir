@@ -6,11 +6,10 @@ use crate::utils::{trait_id, TraitId};
 use crate::*;
 use tir_macros::operation;
 
-#[operation(name = "const")]
+#[operation(name = "const", return_type = create::builtin::Type)]
 pub struct ConstOp {
     #[cfg(attribute = true)]
     value: Attr,
-    // FIXME: missing type attribute?
 }
 
 #[cfg(test)]
