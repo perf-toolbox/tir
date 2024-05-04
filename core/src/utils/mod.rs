@@ -1,4 +1,5 @@
 use std::any::TypeId;
+mod iptr;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct TraitId(TypeId);
