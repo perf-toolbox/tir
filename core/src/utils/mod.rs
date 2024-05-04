@@ -1,5 +1,8 @@
 use std::any::TypeId;
 
+mod graph;
+pub use graph::*;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct TraitId(TypeId);
 

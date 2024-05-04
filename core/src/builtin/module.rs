@@ -19,7 +19,11 @@ impl IRAssembly for ModuleOp {
         let ops = parse_single_block_region(context.clone(), input)?;
         let module = ModuleOp::builder(context).build();
         for op in ops {
-            module.borrow_mut().get_body().borrow_mut().add_operation(op);
+            module
+                .borrow_mut()
+                .get_body()
+                .borrow_mut()
+                .add_operation(op);
         }
         Ok(module)
     }
@@ -57,7 +61,7 @@ mod test {
         let module = ModuleOp::builder(context).build();
 
         let mut printer = StringPrinter::new();
-        
+
         print_op(module, &mut printer);
 
         let result = printer.get();
@@ -65,7 +69,7 @@ mod test {
         let golden = "module {\n}\n";
         assert_eq!(result, golden);
     }
-    
+
     #[test]
     fn test_module_parse() {
         let context = Context::new();
