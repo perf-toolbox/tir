@@ -260,7 +260,7 @@ fn build_op_builder(
 
     if return_type.is_some() {
         builder_fields.push(quote! {
-            return_type: Option<Type>,
+            return_type: Option<#return_type>,
         });
 
         builder_setters.push(quote! {
@@ -268,7 +268,7 @@ fn build_op_builder(
         });
 
         builder_accessors.push(quote! {
-            pub fn return_type(mut self, ty: Type) -> Self {
+            pub fn return_type(mut self, ty: #return_type) -> Self {
                 self.return_type = Some(ty);
                 self
             }

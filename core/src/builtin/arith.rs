@@ -30,12 +30,12 @@ mod test {
         let module = ModuleOp::builder(context.clone()).build();
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
-        let attr = Attr::I8(16);
+        let value_attr = Attr::I8(16);
+        let value_type = IntegerType::build(context.clone(), true, 8);
 
         let constant = ConstOp::builder(context.clone())
-            .value(attr.into())
-            // TODO: here we need to build I8 type
-            .return_type(None)
+            .value(value_attr.into())
+            .return_type(value_type.into())
             .build();
 
         builder.borrow_mut().insert(constant.clone());

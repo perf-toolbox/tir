@@ -8,6 +8,7 @@ use crate::builtin::DIALECT_NAME;
 
 dialect_type!(FuncType);
 dialect_type!(VoidType);
+dialect_type!(IntegerType);
 
 // FIXME: we need scalar types
 
@@ -77,5 +78,34 @@ impl VoidType {
         let r#type = Type::new(context, dialect.borrow().get_id(), type_id, HashMap::new());
 
         VoidType { r#type }
+    }
+}
+
+impl IntegerType {
+    fn get_signed_attr_name() -> &'static str {
+        "inputs"
+    }
+
+    fn get_bitwidth_attr_name() -> &'static str {
+        "return"
+    }
+
+    pub fn build(context: Rc<RefCell<Context>>, signed: bool, bitwidth: u32) -> IntegerType {
+        let mut attrs = HashMap::new();
+
+        attrs.insert(
+            IntegerType::get_signed_attr_name().to_string(),
+            Attr::Bool(signed),
+        );
+        attrs.insert(
+            IntegerType::get_bitwidth_attr_name().to_string(),
+            Attr::U32(bitwidth),
+        );
+
+        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
+        let type_id = dialect.borrow().get_type_id(IntegerType::get_type_name());
+        let r#type = Type::new(context, dialect.borrow().get_id(), type_id, attrs);
+
+        IntegerType { r#type }
     }
 }
