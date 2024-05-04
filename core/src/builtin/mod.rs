@@ -17,5 +17,5 @@ use tir_macros::populate_dialect_types;
 pub use types::*;
 
 dialect!(builtin);
-populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);
+populate_dialect_ops!(ModuleOp, FuncOp, IntegerConstOp);
 populate_dialect_types!(FuncType, VoidType, IntegerType);

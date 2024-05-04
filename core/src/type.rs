@@ -48,3 +48,10 @@ impl Type {
 pub trait Ty {
     fn get_type_name() -> &'static str;
 }
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        // FIXME: missing checks, is it even legit?
+        self.type_id == other.type_id && self.dialect_id == other.dialect_id
+    }
+}

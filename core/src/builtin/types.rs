@@ -81,11 +81,11 @@ impl VoidType {
 
 impl IntegerType {
     fn get_signed_attr_name() -> &'static str {
-        "inputs"
+        "signed"
     }
 
     fn get_bitwidth_attr_name() -> &'static str {
-        "return"
+        "bitwidth"
     }
 
     pub fn build(context: Rc<RefCell<Context>>, signed: bool, bitwidth: u32) -> IntegerType {
@@ -105,5 +105,12 @@ impl IntegerType {
         let r#type = Type::new(context, dialect.borrow().get_id(), type_id, attrs);
 
         IntegerType { r#type }
+    }
+}
+
+
+impl PartialEq for IntegerType {
+    fn eq(&self, other: &Self) -> bool {
+        self.r#type == other.r#type
     }
 }
