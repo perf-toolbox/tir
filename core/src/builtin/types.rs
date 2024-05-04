@@ -10,8 +10,6 @@ dialect_type!(FuncType);
 dialect_type!(VoidType);
 dialect_type!(IntegerType);
 
-// FIXME: we need scalar types
-
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
         "inputs"

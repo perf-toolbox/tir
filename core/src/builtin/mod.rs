@@ -18,4 +18,4 @@ pub use types::*;
 
 dialect!(builtin);
 populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);
-populate_dialect_types!(FuncType, VoidType);
+populate_dialect_types!(FuncType, VoidType, IntegerType);
