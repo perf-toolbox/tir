@@ -44,7 +44,7 @@ mod test {
             16
         );
         // FIXME: add test
-        // assert_eq!(constant.borrow().get_return_type.unwrap(), value_type);
+        assert_eq!(constant.borrow().get_return_type(), value_type);
         let body = module.borrow().get_body().clone();
         let op = body.borrow().get_operations().first().unwrap().clone();
         assert_eq!((*op.borrow()).type_id(), TypeId::of::<ConstOp>());

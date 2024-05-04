@@ -179,6 +179,17 @@ fn build_region_accessors(regions: &[RegionField]) -> proc_macro2::TokenStream {
     }
 }
 
+fn build_return_type_accessor(maybe_return_type: &Option<syn::Path>) -> proc_macro2::TokenStream {
+    if maybe_return_type.is_none() {
+        return proc_macro2::TokenStream::new();
+    }
+    quote! {
+        pub fn get_return_type(&self) -> &Type {
+            self.operation.return_type.as_ref().unwrap()
+        }
+    }
+}
+
 fn build_op_builder(
     op: &syn::Ident,
     op_name: &str,
@@ -346,6 +357,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
     let attr_accessors = build_attr_accessors(&attrs);
     let operand_accessors = build_operand_accessors(&operands);
     let region_accessors = build_region_accessors(&regions);
+    let return_type_accessor = build_return_type_accessor(&op_attrs.return_type);
 
     let op_builder = build_op_builder(
         &input.ident,
@@ -371,6 +383,7 @@ pub fn operation(metadata: TokenStream, input: TokenStream) -> TokenStream {
             #attr_accessors
             #operand_accessors
             #region_accessors
+            #return_type_accessor
         }
 
         impl Op for #op_name {
