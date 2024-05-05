@@ -1,6 +1,6 @@
 use tir_backend::DisassemblerError;
-use tir_core::{ContextRef, OpBuilder};
 use tir_core::Dialect;
+use tir_core::{ContextRef, OpBuilder};
 
 mod ops;
 mod registers;
@@ -88,18 +88,18 @@ mod tests {
 
         assert!(disassemble(&context, builder, &data).is_ok());
 
-        // let ops = module.borrow_mut().get_body().borrow().operations.to_vec();
-        //
-        // assert_eq!(ops.len(), 9);
-        // assert_eq!(ops[0].borrow().type_id(), TypeId::of::<AddOp>());
-        // assert_eq!(ops[1].borrow().type_id(), TypeId::of::<SubOp>());
-        // assert_eq!(ops[2].borrow().type_id(), TypeId::of::<SllOp>());
-        // assert_eq!(ops[3].borrow().type_id(), TypeId::of::<SltOp>());
-        // assert_eq!(ops[4].borrow().type_id(), TypeId::of::<SltuOp>());
-        // assert_eq!(ops[5].borrow().type_id(), TypeId::of::<SrlOp>());
-        // assert_eq!(ops[6].borrow().type_id(), TypeId::of::<SraOp>());
-        // assert_eq!(ops[7].borrow().type_id(), TypeId::of::<OrOp>());
-        // assert_eq!(ops[8].borrow().type_id(), TypeId::of::<AndOp>());
+        let ops = module.borrow().get_body().iter().collect::<Vec<_>>();
+
+        assert_eq!(ops.len(), 9);
+        assert_eq!(ops[0].borrow().type_id(), TypeId::of::<AddOp>());
+        assert_eq!(ops[1].borrow().type_id(), TypeId::of::<SubOp>());
+        assert_eq!(ops[2].borrow().type_id(), TypeId::of::<SllOp>());
+        assert_eq!(ops[3].borrow().type_id(), TypeId::of::<SltOp>());
+        assert_eq!(ops[4].borrow().type_id(), TypeId::of::<SltuOp>());
+        assert_eq!(ops[5].borrow().type_id(), TypeId::of::<SrlOp>());
+        assert_eq!(ops[6].borrow().type_id(), TypeId::of::<SraOp>());
+        assert_eq!(ops[7].borrow().type_id(), TypeId::of::<OrOp>());
+        assert_eq!(ops[8].borrow().type_id(), TypeId::of::<AndOp>());
     }
 
     #[test]

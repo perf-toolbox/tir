@@ -1,6 +1,7 @@
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
+    slice::Iter,
     sync::Arc,
 };
 
@@ -48,6 +49,22 @@ impl BlockImpl {
 
 pub struct Block(RefCell<BlockImpl>);
 
+pub struct BlockIter {
+    context: ContextRef,
+    data: Vec<AllocId>,
+    index: usize,
+}
+
+impl Iterator for BlockIter {
+    type Item = OpRef;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let id = self.data.get(self.index);
+        self.index += 1;
+        id.map(|id| self.context.get_op(*id))?
+    }
+}
+
 impl Block {
     pub fn empty(parent: &RegionRef) -> BlockRef {
         Rc::new(Block(RefCell::new(BlockImpl::new(Rc::downgrade(parent)))))
@@ -69,6 +86,18 @@ impl Block {
 
     pub fn first(&self) -> Option<OpRef> {
         self.0.borrow().first()
+    }
+
+    pub fn get_context(&self) -> ContextRef {
+        self.0.borrow().get_context()
+    }
+
+    pub fn iter(&self) -> BlockIter {
+        BlockIter {
+            context: self.get_context(),
+            data: self.0.borrow().operations.clone(),
+            index: 0,
+        }
     }
 }
 
