@@ -91,9 +91,9 @@ impl ContextImpl {
 ///
 /// fn foo(dialect_obj: Dialect) {
 ///     // Create a new context
-///     let mut context = Context::new();
+///     let context = Context::new();
 ///     // Register dialects
-///     let dialect = context.borrow_mut().add_dialect(dialect_obj);
+///     let dialect = context.add_dialect(dialect_obj);
 /// }
 /// ```
 pub struct Context {
