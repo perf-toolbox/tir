@@ -1,4 +1,3 @@
-// use crate::builtin::FuncType;
 use crate::builtin::DIALECT_NAME;
 use crate::*;
 use tir_macros::Assembly;

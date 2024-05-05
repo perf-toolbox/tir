@@ -53,11 +53,9 @@ mod test {
         module.borrow().get_body_region();
         module.borrow().get_body();
         module.borrow().get_context();
-        eprint!("{:?}", context);
-        // module.borrow().get_region();
     }
 
-    // // TODO replace this test with a snapshot test
+    // TODO replace this test with a snapshot test
     #[test]
     fn test_module_print() {
         let context = Context::new();
