@@ -303,7 +303,6 @@ fn build_attr_accessors(attrs: &[Attr]) -> proc_macro2::TokenStream {
     quote! {
         #(#attr_accessors)*
     }
-    .into()
 }
 
 fn build_return_type_accessor(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
@@ -481,7 +480,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 
     let builder = build_op_builder(op_ident.clone(), &name, &fields, &attrs);
 
-    let attr_accessors = if attrs.len() > 0 {
+    let attr_accessors = if !attrs.is_empty() {
         build_attr_accessors(&attrs)
     } else {
         quote! {}

@@ -24,7 +24,7 @@ impl OpBuilderImpl {
     fn insert(&mut self, op: &OpRef) {
         self.insertion_point
             .block
-            .insert(self.insertion_point.index, &op);
+            .insert(self.insertion_point.index, op);
         self.insertion_point.index += 1;
     }
 
@@ -50,7 +50,7 @@ impl OpBuilder {
     }
 
     pub fn insert_generic(&self, op: &OpRef) {
-        self.0.borrow_mut().insert(&op);
+        self.0.borrow_mut().insert(op);
     }
 
     pub fn get_context(&self) -> ContextRef {
