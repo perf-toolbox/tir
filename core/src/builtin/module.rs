@@ -62,17 +62,17 @@ mod test {
     fn test_module_print() {
         let context = Context::new();
         let module = ModuleOp::builder(&context).build();
-    
+
         let mut printer = StringPrinter::new();
-    
+
         print_op(module, &mut printer);
-    
+
         let result = printer.get();
-    
+
         let golden = "module {\n}\n";
         assert_eq!(result, golden);
     }
-    
+
     #[test]
     fn test_module_parse() {
         let context = Context::new();
