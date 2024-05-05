@@ -126,6 +126,7 @@ struct OpAttrs {
     attrs: Vec<Attr>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 struct Attr(syn::Ident, syn::Type);
 
@@ -447,9 +448,6 @@ fn build_op_builder(
                     r#impl,
                 };
                 
-                let ctx = operation.r#impl.context.upgrade().unwrap();
-                eprintln!("CTX ---> {:?}", ctx);
-
                 context.allocate_op(operation)
             }
         }

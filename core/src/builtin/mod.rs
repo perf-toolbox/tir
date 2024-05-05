@@ -17,6 +17,5 @@ pub use types::*;
 use crate::assembly::Assembly;
 
 dialect!(builtin);
-// populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);
-populate_dialect_ops!(ModuleOp, ConstOp);
+populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);
 populate_dialect_types!(FuncType, VoidType);
