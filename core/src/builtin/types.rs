@@ -108,8 +108,3 @@ impl IntegerType {
     }
 }
 
-impl PartialEq for IntegerType {
-    fn eq(&self, other: &Self) -> bool {
-        self.r#type == other.r#type
-    }
-}

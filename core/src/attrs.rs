@@ -21,7 +21,7 @@ macro_rules! impl_from {
     };
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Attr {
     String(String),
     Bool(bool),

@@ -45,13 +45,17 @@ impl Type {
     }
 }
 
-pub trait Ty {
+pub trait Ty: PartialEq {
     fn get_type_name() -> &'static str;
 }
 
 impl PartialEq for Type {
     fn eq(&self, other: &Self) -> bool {
-        // FIXME: missing checks, is it even legit?
-        self.type_id == other.type_id && self.dialect_id == other.dialect_id
+        // We compare contexts as raw pointers, so two structurally identical
+        // datatypes in separate contexts are treated as unequal.
+        self.context.as_ptr() == other.context.as_ptr()
+            && self.attrs == other.attrs
+            && self.type_id == other.type_id
+            && self.dialect_id == other.dialect_id
     }
 }
