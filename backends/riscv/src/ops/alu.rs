@@ -3,7 +3,7 @@ use crate::Register;
 use crate::{assemble_reg, disassemble_gpr};
 use tir_backend::BinaryEmittable;
 use tir_core::*;
-use tir_macros::{Op, Assembly};
+use tir_macros::{Assembly, Op};
 
 use crate::DIALECT_NAME;
 

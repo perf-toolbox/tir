@@ -1,5 +1,7 @@
 use crate::builtin::DIALECT_NAME;
-use crate::{parse_single_block_region, Assembly, ContextRef, IRFormatter, Op, OpImpl, OpRef, RegionRef};
+use crate::{
+    parse_single_block_region, Assembly, ContextRef, IRFormatter, Op, OpImpl, OpRef, RegionRef,
+};
 use tir_macros::Op;
 
 use crate as tir_core;
@@ -34,7 +36,6 @@ impl Assembly for ModuleOp {
         fmt.end_region();
     }
 }
-
 
 #[cfg(test)]
 mod test {

@@ -9,17 +9,17 @@ use crate as tir_core;
 #[derive(Op, Assembly)]
 #[operation(name = "func", known_attrs(sym_name: String, func_type: Type))]
 pub struct FuncOp {
-  #[region]
-  body: RegionRef,
-  r#impl: OpImpl,
+    #[region]
+    body: RegionRef,
+    r#impl: OpImpl,
 }
 
 #[cfg(test)]
 mod test {
     use std::any::TypeId;
 
-    use crate::{builtin::*, OpBuilder};
     use crate::Context;
+    use crate::{builtin::*, OpBuilder};
 
     use super::*;
 

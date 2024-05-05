@@ -33,26 +33,26 @@ pub fn parse_ir(context: ContextRef, ir: &str) -> Result<OpRef, ()> {
     let mut input = ir;
     let (dialect_name, op_name) = op_tuple.parse_next(&mut input).map_err(|_| ())?;
 
-    let dialect = context
-        .get_dialect_by_name(dialect_name)
-        .ok_or(())?;
+    let dialect = context.get_dialect_by_name(dialect_name).ok_or(())?;
 
     let operation_id = dialect.get_operation_id(op_name).ok_or(())?;
-    let parser = dialect
-        .get_operation_parser(operation_id)
-        .ok_or(())?;
+    let parser = dialect.get_operation_parser(operation_id).ok_or(())?;
     parser(context, &mut input)
 }
 
 pub fn parse_single_operation(context: &ContextRef, ir: &mut &str) -> PResult<OpRef> {
     let ir = ir;
-    let (dialect_name, op_name) = op_tuple.parse_next(ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))?;
+    let (dialect_name, op_name) = op_tuple
+        .parse_next(ir)
+        .map_err(|_| ErrMode::Backtrack(ContextError::new()))?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
 
-    let operation_id = dialect.get_operation_id(op_name).ok_or(ErrMode::Backtrack(ContextError::new()))?;
+    let operation_id = dialect
+        .get_operation_id(op_name)
+        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
     let parser = dialect
         .get_operation_parser(operation_id)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
@@ -60,7 +60,9 @@ pub fn parse_single_operation(context: &ContextRef, ir: &mut &str) -> PResult<Op
 }
 
 pub fn parse_single_block_region(context: ContextRef, ir: &mut &str) -> Result<Vec<OpRef>, ()> {
-    let _ = (multispace0, "{", multispace0).parse_next(ir).map_err(|_: ErrMode<ContextError>| ())?;
+    let _ = (multispace0, "{", multispace0)
+        .parse_next(ir)
+        .map_err(|_: ErrMode<ContextError>| ())?;
 
     let mut operations = vec![];
 
@@ -72,7 +74,9 @@ pub fn parse_single_block_region(context: ContextRef, ir: &mut &str) -> Result<V
         }
     }
 
-    let _ = (multispace0, "}").parse_next(ir).map_err(|_: ErrMode<ContextError>| ())?;
+    let _ = (multispace0, "}")
+        .parse_next(ir)
+        .map_err(|_: ErrMode<ContextError>| ())?;
 
     Ok(operations)
 }

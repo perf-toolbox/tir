@@ -447,7 +447,7 @@ fn build_op_builder(
                     #(#field_idents: self.#field_idents.unwrap(),)*
                     r#impl,
                 };
-                
+
                 context.allocate_op(operation)
             }
         }

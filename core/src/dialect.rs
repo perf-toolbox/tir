@@ -43,7 +43,8 @@ impl Dialect {
             .insert(name, self.operation_ids.len().try_into().unwrap())
             .is_none()
         {
-            self.parse_fn.insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
+            self.parse_fn
+                .insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
         }
     }
 

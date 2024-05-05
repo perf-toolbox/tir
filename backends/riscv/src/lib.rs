@@ -1,6 +1,6 @@
 use tir_backend::DisassemblerError;
 use tir_core::Dialect;
-use tir_core::{ContextRef, OpBuilder, Assembly};
+use tir_core::{Assembly, ContextRef, OpBuilder};
 
 mod ops;
 mod registers;
