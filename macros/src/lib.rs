@@ -58,6 +58,10 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
             fn get_type_name() -> &'static str {
                 #name_str
             }
+
+            fn get_dialect_name() -> &'static str {
+                DIALECT_NAME
+            }
         }
 
         impl Into<Attr> for #name_ident {
@@ -89,6 +93,18 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                     });
                 }
                 Err(())
+            }
+        }
+
+        impl TryFrom<Type> for #name_ident {
+            type Error = ();
+
+            fn try_from(ty: Type) -> Result<Self, Self::Error> {
+                if !ty.isa::<#name_ident>() {
+                    return Err(());
+                }
+
+                Ok(Self { r#type: ty })
             }
         }
     }

@@ -77,3 +77,27 @@ impl VoidType {
         VoidType { r#type }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{builtin::FuncType, Context, Type};
+
+    use super::VoidType;
+
+    #[test]
+    fn type_casts() {
+        let context = Context::new();
+
+        let ty = VoidType::build(context.clone());
+        let ty: Type = ty.into();
+        assert!(ty.isa::<VoidType>());
+        assert!(VoidType::try_from(ty.clone()).is_ok());
+        assert!(FuncType::try_from(ty.clone()).is_err());
+
+        let ty = FuncType::build(context.clone(), &[], ty);
+        let ty: Type = ty.into();
+        assert!(ty.isa::<FuncType>());
+        assert!(VoidType::try_from(ty.clone()).is_err());
+        assert!(FuncType::try_from(ty.clone()).is_ok());
+    }
+}

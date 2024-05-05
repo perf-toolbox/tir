@@ -43,8 +43,19 @@ impl Type {
     pub fn get_attrs(&self) -> &HashMap<String, Attr> {
         &self.attrs
     }
+
+    pub fn isa<T: Ty>(&self) -> bool {
+        let context = self.context.upgrade().unwrap();
+        let dialect = context.get_dialect_by_name(T::get_dialect_name()).unwrap();
+        if dialect.get_id() != self.dialect_id {
+            return false;
+        }
+        let type_id = dialect.get_type_id(T::get_type_name());
+        type_id == self.type_id
+    }
 }
 
 pub trait Ty {
     fn get_type_name() -> &'static str;
+    fn get_dialect_name() -> &'static str;
 }
