@@ -1,9 +1,7 @@
 use crate::{BlockRef, ContextRef, Op, OpRef};
 use std::cell::RefCell;
 use std::rc::Rc;
-//
-// pub type OpBuilderRef = Rc<RefCell<OpBuilder>>;
-//
+
 pub struct InsertionPoint {
     block: BlockRef,
     index: usize,
@@ -23,11 +21,16 @@ impl OpBuilderImpl {
         }))
     }
 
-    pub fn insert(&mut self, op: &OpRef) {
+    fn insert(&mut self, op: &OpRef) {
         self.insertion_point
             .block
             .insert(self.insertion_point.index, &op);
         self.insertion_point.index += 1;
+    }
+
+    fn set_insertion_point_to_start(&mut self, block: BlockRef) {
+        self.insertion_point.block = block;
+        self.insertion_point.index = 0;
     }
 }
 
@@ -45,13 +48,16 @@ impl OpBuilder {
         let op: OpRef = op.clone();
         self.0.borrow_mut().insert(&op);
     }
-    //
-    // pub fn get_context(&self) -> ContextRef {
-    //     self.context.clone()
-    // }
-    //
-    // pub fn set_insertion_point_to_start(&mut self, block: BlockRef) {
-    //     self.insertion_point.block = block;
-    //     self.insertion_point.index = 0;
-    // }
+
+    pub fn insert_generic(&self, op: &OpRef) {
+        self.0.borrow_mut().insert(&op);
+    }
+
+    pub fn get_context(&self) -> ContextRef {
+        self.0.borrow().context.clone()
+    }
+
+    pub fn set_insertion_point_to_start(&self, block: BlockRef) {
+        self.0.borrow_mut().set_insertion_point_to_start(block);
+    }
 }

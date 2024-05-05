@@ -109,19 +109,16 @@ register! {
     X31 => { abi_name = "t6", encoding = 31, num = 31 },
 }
 
-pub fn disassemble_gpr(value: u8) -> Option<()> {
-    None
-}
-// seq!(N in 0..31 {
-//     pub fn disassemble_gpr(value: u8) -> Option<Operand> {
-//         match value {
-//         #(
-//             N => Some((Reg::X~N).into()),
-//         )*
-//             _ => None,
-//         }
-//     }
-// });
+seq!(N in 0..31 {
+    pub fn disassemble_gpr(value: u8) -> Option<Register> {
+        match value {
+        #(
+            N => Some(Register::X~N),
+        )*
+            _ => None,
+        }
+    }
+});
 
 #[cfg(test)]
 mod tests {

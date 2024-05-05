@@ -54,29 +54,28 @@ macro_rules! alu_ops {
         )*
 
         pub fn disassemble_alu_instr(context: &ContextRef, stream: &[u8]) -> Option<OpRef> {
-            todo!();
-            // if stream.len() < 4 {
-            //     return None;
-            // }
-            //
-            // let instr = RTypeInstr::from_bytes(&stream[0..4].try_into().unwrap());
-            // if instr.opcode() != ALU_OPCODE {
-            //     return None;
-            // }
-            //
-            // let rd = disassemble_gpr(instr.rd())?;
-            // let rs1 = disassemble_gpr(instr.rs1())?;
-            // let rs2 = disassemble_gpr(instr.rs2())?;
-            //
-            // match (instr.funct3(), instr.funct7()) {
-            //     $(
-            //     ($funct3, $funct7) => {
-            //         let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
-            //         Some(op)
-            //     },
-            //     )*
-            //     _ => None,
-            // }
+            if stream.len() < 4 {
+                return None;
+            }
+
+            let instr = RTypeInstr::from_bytes(&stream[0..4].try_into().unwrap());
+            if instr.opcode() != ALU_OPCODE {
+                return None;
+            }
+
+            let rd = disassemble_gpr(instr.rd())?;
+            let rs1 = disassemble_gpr(instr.rs1())?;
+            let rs2 = disassemble_gpr(instr.rs2())?;
+
+            match (instr.funct3(), instr.funct7()) {
+                $(
+                ($funct3, $funct7) => {
+                    let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
+                    Some(op)
+                },
+                )*
+                _ => None,
+            }
         }
     };
 }

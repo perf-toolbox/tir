@@ -46,33 +46,29 @@ impl BlockImpl {
     }
 }
 
-pub struct Block {
-    r#impl: RefCell<BlockImpl>,
-}
+pub struct Block(RefCell<BlockImpl>);
 
 impl Block {
     pub fn empty(parent: &RegionRef) -> BlockRef {
-        Rc::new(Block {
-            r#impl: RefCell::new(BlockImpl::new(Rc::downgrade(parent))),
-        })
+        Rc::new(Block(RefCell::new(BlockImpl::new(Rc::downgrade(parent)))))
     }
 
     pub fn push(&self, op: &OpRef) {
-        self.r#impl.borrow_mut().push(op.borrow().get_alloc_id());
+        self.0.borrow_mut().push(op.borrow().get_alloc_id());
     }
 
     pub fn insert(&self, index: usize, op: &OpRef) {
-        self.r#impl
+        self.0
             .borrow_mut()
             .insert(index, op.borrow().get_alloc_id());
     }
 
     pub fn get_parent_region(&self) -> RegionRef {
-        self.r#impl.borrow().get_parent_region()
+        self.0.borrow().get_parent_region()
     }
 
     pub fn first(&self) -> Option<OpRef> {
-        self.r#impl.borrow().first()
+        self.0.borrow().first()
     }
 }
 
@@ -96,15 +92,13 @@ impl RegionImpl {
     }
 }
 
-pub struct Region {
-    r#impl: RefCell<RegionImpl>,
-}
+pub struct Region(RefCell<RegionImpl>);
 
 impl Region {
     pub fn empty(context: &ContextRef) -> RegionRef {
-        Rc::new(Region {
-            r#impl: RefCell::new(RegionImpl::new(Arc::downgrade(context))),
-        })
+        Rc::new(Region(RefCell::new(RegionImpl::new(Arc::downgrade(
+            context,
+        )))))
     }
 
     pub fn with_single_block(context: &ContextRef) -> RegionRef {
@@ -116,19 +110,19 @@ impl Region {
     }
 
     pub fn get_context(&self) -> ContextRef {
-        self.r#impl.borrow().get_context()
+        self.0.borrow().get_context()
     }
 
     pub fn add_block(&self, block: BlockRef) {
-        self.r#impl.borrow_mut().blocks.push(block);
+        self.0.borrow_mut().blocks.push(block);
     }
 
     pub fn get_parent_op(&self) -> OpRef {
-        let context = self.r#impl.borrow().context.upgrade().unwrap();
-        context.get_op(self.r#impl.borrow().parent_op).unwrap()
+        let context = self.0.borrow().context.upgrade().unwrap();
+        context.get_op(self.0.borrow().parent_op).unwrap()
     }
 
     pub fn first(&self) -> Option<BlockRef> {
-        self.r#impl.borrow().blocks.first().cloned()
+        self.0.borrow().blocks.first().cloned()
     }
 }
