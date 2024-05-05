@@ -46,6 +46,6 @@ mod test {
         // FIXME: add test
         let body = module.borrow().get_body().clone();
         let op = body.borrow().get_operations().first().unwrap().clone();
-        assert_eq!((*op.borrow()).type_id(), TypeId::of::<IntegerType>());
+        assert_eq!((*op.borrow()).type_id(), TypeId::of::<IntegerConstOp>());
     }
 }
