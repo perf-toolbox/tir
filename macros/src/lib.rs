@@ -101,10 +101,9 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     let ty = input.0;
 
-    // #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name(), None);)*
+            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
         }
     })
 }
@@ -411,7 +410,7 @@ fn build_op_builder(
         }
 
         impl #op {
-            pub fn builder(context: tir_core::ContextRef) -> #builder_name {
+            pub fn builder(context: &tir_core::ContextRef) -> #builder_name {
                 #builder_name {
                     context: context.clone(),
                     #(#builder_setters)*
@@ -432,6 +431,8 @@ fn build_op_builder(
 
                 #(#attr_setters)*
 
+                let weak = std::sync::Arc::downgrade(&context).clone();
+
                 let r#impl = tir_core::OpImpl {
                     context: std::sync::Arc::downgrade(&context),
                     dialect_id,
@@ -445,6 +446,9 @@ fn build_op_builder(
                     #(#field_idents: self.#field_idents.unwrap(),)*
                     r#impl,
                 };
+                
+                let ctx = operation.r#impl.context.upgrade().unwrap();
+                eprintln!("CTX ---> {:?}", ctx);
 
                 context.allocate_op(operation)
             }
@@ -496,7 +500,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
             }
 
             fn get_context(&self) -> tir_core::ContextRef {
-                todo!();
+                // eprintln!("{:?}", self);
+                let context = self.r#impl.context.upgrade();
+                eprintln!("{:?}", context);
+                self.r#impl.context.upgrade().unwrap()
             }
 
             fn get_parent_region(&self) -> Option<tir_core::RegionRef> {
@@ -512,6 +519,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
             fn get_alloc_id(&self) -> tir_core::AllocId {
                 assert_ne!(self.r#impl.alloc_id, tir_core::AllocId::default());
                 self.r#impl.alloc_id
+            }
+
+            fn get_dialect_id(&self) -> u32 {
+                self.r#impl.dialect_id
             }
 
             #return_type
@@ -530,4 +541,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         #builder
     }
     .into()
+}
+
+#[proc_macro_derive(Assembly)]
+pub fn derive_assembly(input: TokenStream) -> TokenStream {
+    let op = parse_macro_input!(input as syn::DeriveInput);
+    make_generic_ir_printer_parser(op.ident).into()
 }

@@ -3,7 +3,7 @@ use crate::Register;
 use crate::{assemble_reg, disassemble_gpr};
 use tir_backend::BinaryEmittable;
 use tir_core::*;
-use tir_macros::Op;
+use tir_macros::{Op, Assembly};
 
 use crate::DIALECT_NAME;
 
@@ -11,7 +11,7 @@ const ALU_OPCODE: u8 = 0b110011;
 
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
-        #[derive(Op)]
+        #[derive(Op, Assembly)]
         #[operation(name = $op_name)]
         pub struct $struct_name {
             #[operand]
@@ -70,7 +70,7 @@ macro_rules! alu_ops {
             match (instr.funct3(), instr.funct7()) {
                 $(
                 ($funct3, $funct7) => {
-                    let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
+                    let op = $struct_name::builder(&context).rs1(rs1).rs2(rs2).rd(rd).build();
                     Some(op)
                 },
                 )*

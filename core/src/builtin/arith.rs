@@ -1,10 +1,10 @@
 use crate::builtin::DIALECT_NAME;
 use crate::{Op, OpImpl, Type};
-use tir_macros::Op;
+use tir_macros::{Assembly, Op};
 
 use crate as tir_core;
 
-#[derive(Op)]
+#[derive(Op, Assembly)]
 #[operation(name = "const", known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
     #[ret_type]
@@ -28,16 +28,19 @@ mod test {
         assert!(ConstOp::get_operation_name() == "const");
 
         let context = Context::new();
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
         let attr = Attr::I8(16);
 
         let ret_type = VoidType::build(context.clone());
-        let constant = ConstOp::builder(context.clone())
+        let constant = ConstOp::builder(&context)
             .value(attr)
             .return_type(ret_type.into())
             .build();
+
+        constant.borrow().get_context();
+        module.borrow().get_context();
 
         builder.insert(&constant);
         assert_eq!(

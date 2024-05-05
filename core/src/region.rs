@@ -1,7 +1,6 @@
 use std::{
     cell::RefCell,
     rc::{Rc, Weak},
-    slice::Iter,
     sync::Arc,
 };
 
@@ -11,6 +10,7 @@ pub type RegionRef = Rc<Region>;
 pub type RegionWRef = Weak<Region>;
 pub type BlockRef = Rc<Block>;
 
+#[derive(Debug)]
 struct BlockImpl {
     parent_region: RegionWRef,
     operations: Vec<AllocId>,
@@ -47,6 +47,7 @@ impl BlockImpl {
     }
 }
 
+#[derive(Debug)]
 pub struct Block(RefCell<BlockImpl>);
 
 pub struct BlockIter {
@@ -101,6 +102,7 @@ impl Block {
     }
 }
 
+#[derive(Debug)]
 struct RegionImpl {
     context: ContextWRef,
     parent_op: AllocId,
@@ -121,6 +123,7 @@ impl RegionImpl {
     }
 }
 
+#[derive(Debug)]
 pub struct Region(RefCell<RegionImpl>);
 
 impl Region {

@@ -1,10 +1,10 @@
 use crate::builtin::DIALECT_NAME;
-use crate::{Op, OpImpl, RegionRef};
+use crate::{parse_single_block_region, Assembly, ContextRef, IRFormatter, Op, OpImpl, OpRef, RegionRef};
 use tir_macros::Op;
 
 use crate as tir_core;
 
-#[derive(Op)]
+#[derive(Op, Debug)]
 #[operation(name = "module")]
 pub struct ModuleOp {
     #[region(single_block, no_args)]
@@ -12,29 +12,29 @@ pub struct ModuleOp {
     r#impl: OpImpl,
 }
 
-// impl IRAssembly for ModuleOp {
-//     fn parse(context: ContextRef, input: &mut &str) -> std::result::Result<Operation, ()>
-//     where
-//         Self: Sized,
-//     {
-//         let ops = parse_single_block_region(context.clone(), input)?;
-//         let module = ModuleOp::builder(context).build();
-//         for op in ops {
-//             module.borrow_mut().get_body().borrow_mut().add_operation(op);
-//         }
-//         Ok(module)
-//     }
-//
-//     fn print(&self, fmt: &mut dyn IRFormatter) {
-//         fmt.start_region();
-//         let body = self.get_body();
-//         for op in &body.borrow().operations {
-//             op.borrow().print(fmt);
-//         }
-//         fmt.end_region();
-//     }
-// }
-//
+impl Assembly for ModuleOp {
+    fn parse(context: ContextRef, input: &mut &str) -> std::result::Result<OpRef, ()>
+    where
+        Self: Sized,
+    {
+        let ops = parse_single_block_region(context.clone(), input)?;
+        let module = ModuleOp::builder(&context).build();
+        for op in ops {
+            module.borrow_mut().get_body().push(&op);
+        }
+        Ok(module)
+    }
+
+    fn print(&self, fmt: &mut dyn IRFormatter) {
+        fmt.start_region();
+        let body = self.get_body();
+        for op in body.iter() {
+            op.borrow().print(fmt);
+        }
+        fmt.end_region();
+    }
+}
+
 
 #[cfg(test)]
 mod test {
@@ -46,9 +46,11 @@ mod test {
         assert!(ModuleOp::get_operation_name() == "module");
 
         let context = Context::new();
-        let module = ModuleOp::builder(context).build();
+        let module = ModuleOp::builder(&context).build();
         module.borrow().get_body_region();
-        // module.borrow().get_body();
+        module.borrow().get_body();
+        module.borrow().get_context();
+        eprint!("{:?}", context);
         // module.borrow().get_region();
     }
 

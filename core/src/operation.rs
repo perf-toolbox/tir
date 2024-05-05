@@ -1,10 +1,10 @@
-use crate::{AllocId, Attr, ContextRef, ContextWRef, RegionRef, RegionWRef, Type};
+use crate::{AllocId, Assembly, Attr, ContextRef, ContextWRef, RegionRef, RegionWRef, Type};
 use std::any::Any;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub type OpRef = Rc<RefCell<dyn Op>>;
 
-pub trait Op: Any {
+pub trait Op: Any + Assembly {
     fn get_operation_name(&self) -> &'static str;
     fn get_attrs(&self) -> &HashMap<String, Attr>;
     fn get_context(&self) -> ContextRef;
@@ -13,8 +13,11 @@ pub trait Op: Any {
 
     fn set_alloc_id(&mut self, id: AllocId);
     fn get_alloc_id(&self) -> AllocId;
+
+    fn get_dialect_id(&self) -> u32;
 }
 
+#[derive(Debug)]
 pub struct OpImpl {
     pub context: ContextWRef,
     pub dialect_id: u32,

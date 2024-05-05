@@ -1,6 +1,6 @@
 use tir_backend::DisassemblerError;
 use tir_core::Dialect;
-use tir_core::{ContextRef, OpBuilder};
+use tir_core::{ContextRef, OpBuilder, Assembly};
 
 mod ops;
 mod registers;
@@ -82,7 +82,7 @@ mod tests {
         let context = Context::new();
         context.add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
 
         let builder = OpBuilder::new(context.clone(), module.borrow_mut().get_body());
 
@@ -115,7 +115,7 @@ mod tests {
         let context = Context::new();
         context.add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
 
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
