@@ -1,13 +1,13 @@
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::Attr;
-use crate::Context;
+use crate::ContextRef;
+use crate::ContextWRef;
 
 #[derive(Debug, Clone)]
 pub struct Type {
-    context: Rc<RefCell<Context>>,
+    context: ContextWRef,
     dialect_id: u32,
     type_id: u32,
     attrs: HashMap<String, Attr>,
@@ -15,21 +15,21 @@ pub struct Type {
 
 impl Type {
     pub fn new(
-        context: Rc<RefCell<Context>>,
+        context: ContextRef,
         dialect_id: u32,
         type_id: u32,
         attrs: HashMap<String, Attr>,
     ) -> Self {
         Type {
-            context,
+            context: Arc::downgrade(&context),
             dialect_id,
             type_id,
             attrs,
         }
     }
 
-    pub fn get_context(&self) -> Rc<RefCell<Context>> {
-        self.context.clone()
+    pub fn get_context(&self) -> Option<ContextRef> {
+        self.context.upgrade()
     }
 
     pub fn get_dialect_id(&self) -> u32 {

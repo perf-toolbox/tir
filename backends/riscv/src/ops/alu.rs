@@ -1,11 +1,9 @@
 use crate::utils::RTypeInstr;
+use crate::Register;
 use crate::{assemble_reg, disassemble_gpr};
-use std::cell::RefCell;
-use std::rc::Rc;
 use tir_backend::BinaryEmittable;
-use tir_core::utils::{trait_id, TraitId};
 use tir_core::*;
-use tir_macros::operation;
+use tir_macros::Op;
 
 use crate::DIALECT_NAME;
 
@@ -13,14 +11,16 @@ const ALU_OPCODE: u8 = 0b110011;
 
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
-        #[operation(name = $op_name, traits(BinaryEmittable))]
+        #[derive(Op)]
+        #[operation(name = $op_name)]
         pub struct $struct_name {
-            #[cfg(operand = true)]
+            #[operand]
             rs1: Register,
-            #[cfg(operand = true)]
+            #[operand]
             rs2: Register,
-            #[cfg(operand = true)]
+            #[operand]
             rd: Register,
+            r#impl: OpImpl,
         }
     };
 }
@@ -41,10 +41,10 @@ macro_rules! alu_ops {
             ) -> tir_core::Result<()> {
                 let instr = RTypeInstr::builder()
                     .opcode(ALU_OPCODE)
-                    .rd(assemble_reg(&self.get_rd())?)
+                    .rd(assemble_reg(self.get_rd())?)
                     .funct3($funct3)
-                    .rs1(assemble_reg(&self.get_rs1())?)
-                    .rs2(assemble_reg(&self.get_rs2())?)
+                    .rs1(assemble_reg(self.get_rs1())?)
+                    .rs2(assemble_reg(self.get_rs2())?)
                     .funct7($funct7)
                     .build();
                 stream.write(&instr.to_bytes());
@@ -53,29 +53,30 @@ macro_rules! alu_ops {
         }
         )*
 
-        pub fn disassemble_alu_instr(context: &Rc<RefCell<Context>>, stream: &[u8]) -> Option<Operation> {
-            if stream.len() < 4 {
-                return None;
-            }
-
-            let instr = RTypeInstr::from_bytes(&stream[0..4].try_into().unwrap());
-            if instr.opcode() != ALU_OPCODE {
-                return None;
-            }
-
-            let rd = disassemble_gpr(instr.rd())?;
-            let rs1 = disassemble_gpr(instr.rs1())?;
-            let rs2 = disassemble_gpr(instr.rs2())?;
-
-            match (instr.funct3(), instr.funct7()) {
-                $(
-                ($funct3, $funct7) => {
-                    let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
-                    Some(op)
-                },
-                )*
-                _ => None,
-            }
+        pub fn disassemble_alu_instr(context: &ContextRef, stream: &[u8]) -> Option<OpRef> {
+            todo!();
+            // if stream.len() < 4 {
+            //     return None;
+            // }
+            //
+            // let instr = RTypeInstr::from_bytes(&stream[0..4].try_into().unwrap());
+            // if instr.opcode() != ALU_OPCODE {
+            //     return None;
+            // }
+            //
+            // let rd = disassemble_gpr(instr.rd())?;
+            // let rs1 = disassemble_gpr(instr.rs1())?;
+            // let rs2 = disassemble_gpr(instr.rs2())?;
+            //
+            // match (instr.funct3(), instr.funct7()) {
+            //     $(
+            //     ($funct3, $funct7) => {
+            //         let op = $struct_name::builder(context.clone()).rs1(rs1).rs2(rs2).rd(rd).build();
+            //         Some(op)
+            //     },
+            //     )*
+            //     _ => None,
+            // }
         }
     };
 }
@@ -125,7 +126,7 @@ mod tests {
         ];
 
         let context = Context::new();
-        context.borrow_mut().add_dialect(crate::create_dialect());
+        context.add_dialect(crate::create_dialect());
 
         let mut ops = vec![];
 
@@ -156,7 +157,7 @@ mod tests {
         let instructions = vec![0x3e830e13_u32, 0xffdff0ef, 0x7fffff3];
 
         let context = Context::new();
-        context.borrow_mut().add_dialect(crate::create_dialect());
+        context.add_dialect(crate::create_dialect());
 
         let mut ops = vec![];
 

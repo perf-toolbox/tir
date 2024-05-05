@@ -1,7 +1,7 @@
-use crate::{Attr, Context, Ty, Type};
-use std::cell::RefCell;
+use crate::{Attr, ContextRef, Ty, Type};
+
 use std::collections::HashMap;
-use std::rc::Rc;
+
 use tir_macros::dialect_type;
 
 use crate::builtin::DIALECT_NAME;
@@ -21,7 +21,7 @@ impl FuncType {
     }
 
     pub fn build(
-        context: Rc<RefCell<Context>>,
+        context: ContextRef,
         input_types: &[Type],
         return_type: Type,
     ) -> FuncType {
@@ -36,7 +36,7 @@ impl FuncType {
             Attr::Type(return_type),
         );
 
-        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
         let type_id = dialect.borrow().get_type_id(FuncType::get_type_name());
         let r#type = Type::new(context.clone(), dialect.borrow().get_id(), type_id, attrs);
 
@@ -71,8 +71,8 @@ impl FuncType {
 }
 
 impl VoidType {
-    pub fn build(context: Rc<RefCell<Context>>) -> VoidType {
-        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
+    pub fn build(context: ContextRef) -> VoidType {
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
         let type_id = dialect.borrow().get_type_id(VoidType::get_type_name());
         let r#type = Type::new(context, dialect.borrow().get_id(), type_id, HashMap::new());
 
