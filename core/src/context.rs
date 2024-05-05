@@ -77,6 +77,10 @@ impl ContextImpl {
 
         op
     }
+
+    pub fn get_op(&self, id: AllocId) -> Option<OpRef> {
+        self.allocated_operations.get(&id).cloned()
+    }
 }
 
 /// Context holds all the resources required for building an IR
@@ -132,9 +136,16 @@ impl Context {
         lock.get_dialect(id)
     }
 
+    /// Take ownership of operation data and return a shared reference
     pub fn allocate_op<T: Op + 'static>(&self, op: T) -> Rc<RefCell<T>> {
         let mut lock = self.r#impl.write().unwrap();
         lock.allocate_op(op)
+    }
+
+    /// Find allocated operation in the current context and return a shared reference
+    pub fn get_op(&self, id: AllocId) -> Option<OpRef> {
+        let lock = self.r#impl.read().unwrap();
+        lock.get_op(id)
     }
 }
 

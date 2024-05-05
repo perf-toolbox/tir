@@ -6,6 +6,8 @@ use tir_macros::dialect_type;
 
 use crate::builtin::DIALECT_NAME;
 
+use crate as tir_core;
+
 dialect_type!(FuncType);
 dialect_type!(VoidType);
 
@@ -20,11 +22,7 @@ impl FuncType {
         "return"
     }
 
-    pub fn build(
-        context: ContextRef,
-        input_types: &[Type],
-        return_type: Type,
-    ) -> FuncType {
+    pub fn build(context: ContextRef, input_types: &[Type], return_type: Type) -> FuncType {
         let mut attrs = HashMap::new();
 
         attrs.insert(
@@ -37,8 +35,8 @@ impl FuncType {
         );
 
         let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.borrow().get_type_id(FuncType::get_type_name());
-        let r#type = Type::new(context.clone(), dialect.borrow().get_id(), type_id, attrs);
+        let type_id = dialect.get_type_id(FuncType::get_type_name());
+        let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
 
         FuncType { r#type }
     }
@@ -73,8 +71,8 @@ impl FuncType {
 impl VoidType {
     pub fn build(context: ContextRef) -> VoidType {
         let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.borrow().get_type_id(VoidType::get_type_name());
-        let r#type = Type::new(context, dialect.borrow().get_id(), type_id, HashMap::new());
+        let type_id = dialect.get_type_id(VoidType::get_type_name());
+        let r#type = Type::new(context, dialect.get_id(), type_id, HashMap::new());
 
         VoidType { r#type }
     }

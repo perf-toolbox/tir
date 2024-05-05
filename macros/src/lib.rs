@@ -54,7 +54,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
             r#type: Type,
         }
 
-        impl Ty for #name_ident {
+        impl tir_core::Ty for #name_ident {
             fn get_type_name() -> &'static str {
                 #name_str
             }
@@ -79,7 +79,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 if let Attr::Type(ty) = attr {
                     let context = ty.get_context().ok_or(())?;
                     let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-                    let type_id = dialect.borrow().get_type_id(#name_ident::get_type_name());
+                    let type_id = dialect.get_type_id(#name_ident::get_type_name());
                     if type_id != ty.get_type_id() {
                         return Err(());
                     }
@@ -267,8 +267,8 @@ fn build_region_accessors(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStrea
             if region.single_block {
                 let get_name = format_ident!("get_{}", ident);
                 accessors.push(quote! {
-                    pub fn #get_name(&self) {
-                        todo!()
+                    pub fn #get_name(&self) -> tir_core::BlockRef {
+                        self.#ident.first().unwrap()
                     }
                 });
             }
@@ -337,6 +337,7 @@ fn build_op_builder(
     let mut builder_accessors = vec![];
     let mut builder_setters = vec![];
     let mut field_idents = vec![];
+    let mut attr_setters = vec![];
 
     for attr in attrs {
         let ident = &attr.0;
@@ -353,6 +354,13 @@ fn build_op_builder(
 
         builder_setters.push(quote! {
             #ident: None,
+        });
+
+        let attr_str = format!("{}", ident);
+        attr_setters.push(quote! {
+            if let Some(attr) = &self.#ident {
+                attrs.insert(#attr_str.to_string(), attr.clone());
+            }
         });
     }
 
@@ -421,6 +429,8 @@ fn build_op_builder(
                 let dialect_id = dialect.get_id();
                 let operation_id = dialect.get_operation_id(#op_name).expect("We just registered the operation");
                 let mut attrs = std::collections::HashMap::new();
+
+                #(#attr_setters)*
 
                 let r#impl = tir_core::OpImpl {
                     context: std::sync::Arc::downgrade(&context),
