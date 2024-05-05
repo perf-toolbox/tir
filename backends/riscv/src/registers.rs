@@ -7,32 +7,6 @@ macro_rules! register {
             $($case_name,)*
         }
 
-        // impl Into<Operand> for Reg {
-        //     fn into(self) -> Operand {
-        //         match self {
-        //         $(
-        //             Reg::$case_name => Operand::Register($num),
-        //         )*
-        //         }
-        //     }
-        // }
-        //
-        // impl TryFrom<&Operand> for Reg {
-        //     type Error = tir_core::Error;
-        //
-        //     fn try_from(operand: &Operand) -> Result<Reg, Self::Error> {
-        //         match operand {
-        //             Operand::Register(value) => match value {
-        //             $(
-        //                 $num => Ok(Reg::$case_name),
-        //             )*
-        //                 _ => Err(tir_core::Error::Unknown),
-        //             },
-        //             _ => Err(tir_core::Error::Unknown),
-        //         }
-        //     }
-        // }
-
         pub fn get_reg_name(reg: &Register) -> &str {
             match reg {
             $(
