@@ -1,10 +1,12 @@
-use crate::{Attr, Context, Ty, Type};
-use std::cell::RefCell;
+use crate::{Attr, ContextRef, Ty, Type};
+
 use std::collections::HashMap;
-use std::rc::Rc;
+
 use tir_macros::dialect_type;
 
 use crate::builtin::DIALECT_NAME;
+
+use crate as tir_core;
 
 dialect_type!(FuncType);
 dialect_type!(VoidType);
@@ -20,11 +22,7 @@ impl FuncType {
         "return"
     }
 
-    pub fn build(
-        context: Rc<RefCell<Context>>,
-        input_types: &[Type],
-        return_type: Type,
-    ) -> FuncType {
+    pub fn build(context: ContextRef, input_types: &[Type], return_type: Type) -> FuncType {
         let mut attrs = HashMap::new();
 
         attrs.insert(
@@ -36,9 +34,9 @@ impl FuncType {
             Attr::Type(return_type),
         );
 
-        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.borrow().get_type_id(FuncType::get_type_name());
-        let r#type = Type::new(context.clone(), dialect.borrow().get_id(), type_id, attrs);
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+        let type_id = dialect.get_type_id(FuncType::get_type_name());
+        let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
 
         FuncType { r#type }
     }
@@ -71,11 +69,35 @@ impl FuncType {
 }
 
 impl VoidType {
-    pub fn build(context: Rc<RefCell<Context>>) -> VoidType {
-        let dialect = context.borrow().get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.borrow().get_type_id(VoidType::get_type_name());
-        let r#type = Type::new(context, dialect.borrow().get_id(), type_id, HashMap::new());
+    pub fn build(context: ContextRef) -> VoidType {
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+        let type_id = dialect.get_type_id(VoidType::get_type_name());
+        let r#type = Type::new(context, dialect.get_id(), type_id, HashMap::new());
 
         VoidType { r#type }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{builtin::FuncType, Context, Type};
+
+    use super::VoidType;
+
+    #[test]
+    fn type_casts() {
+        let context = Context::new();
+
+        let ty = VoidType::build(context.clone());
+        let ty: Type = ty.into();
+        assert!(ty.isa::<VoidType>());
+        assert!(VoidType::try_from(ty.clone()).is_ok());
+        assert!(FuncType::try_from(ty.clone()).is_err());
+
+        let ty = FuncType::build(context.clone(), &[], ty);
+        let ty: Type = ty.into();
+        assert!(ty.isa::<FuncType>());
+        assert!(VoidType::try_from(ty.clone()).is_err());
+        assert!(FuncType::try_from(ty.clone()).is_ok());
     }
 }

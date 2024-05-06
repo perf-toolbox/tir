@@ -6,6 +6,7 @@ mod context;
 mod dialect;
 mod error;
 mod operation;
+mod region;
 mod r#type;
 pub mod utils;
 
@@ -17,3 +18,4 @@ pub use dialect::*;
 pub use error::*;
 pub use operation::*;
 pub use r#type::*;
+pub use region::*;

@@ -4,12 +4,12 @@ use syn::Ident;
 
 pub fn make_generic_ir_printer_parser(op_name: Ident) -> TokenStream {
     quote! {
-      impl IRAssembly for #op_name {
-          fn print(&self, fmt: &mut dyn IRFormatter) {
+      impl tir_core::Assembly for #op_name {
+          fn print(&self, fmt: &mut dyn tir_core::IRFormatter) {
             todo!();
           }
 
-          fn parse<'s>(context: ContextRef, input: &mut &'s str) -> std::result::Result<Operation, ()> {
+          fn parse<'s>(context: tir_core::ContextRef, input: &mut &'s str) -> std::result::Result<tir_core::OpRef, ()> {
             Err(())
           }
       }

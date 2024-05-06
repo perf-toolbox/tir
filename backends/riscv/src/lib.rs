@@ -1,8 +1,6 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 use tir_backend::DisassemblerError;
-use tir_core::IRAssembly;
-use tir_core::{Context, Dialect, Op, OpBuilderRef};
+use tir_core::Dialect;
+use tir_core::{Assembly, ContextRef, OpBuilder};
 
 mod ops;
 mod registers;
@@ -20,8 +18,8 @@ populate_dialect_ops!(
 populate_dialect_types!();
 
 pub fn disassemble(
-    context: &Rc<RefCell<Context>>,
-    builder: OpBuilderRef,
+    context: &ContextRef,
+    builder: OpBuilder,
     stream: &[u8],
 ) -> Result<(), DisassemblerError> {
     if stream.len() % 4 != 0 {
@@ -34,7 +32,7 @@ pub fn disassemble(
     for i in 0..(stream.len() / 4) {
         let offset = i * 4;
         if let Some(op) = disassemble_alu_instr(context, &stream[offset..]) {
-            builder.borrow_mut().insert(op);
+            builder.insert_generic(&op);
         } else {
             // FIXME add an appropriate error
             return Err(DisassemblerError::Unknown);
@@ -82,15 +80,15 @@ mod tests {
         }
 
         let context = Context::new();
-        context.borrow_mut().add_dialect(crate::create_dialect());
+        context.add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
 
         let builder = OpBuilder::new(context.clone(), module.borrow_mut().get_body());
 
         assert!(disassemble(&context, builder, &data).is_ok());
 
-        let ops = module.borrow_mut().get_body().borrow().operations.to_vec();
+        let ops = module.borrow().get_body().iter().collect::<Vec<_>>();
 
         assert_eq!(ops.len(), 9);
         assert_eq!(ops[0].borrow().type_id(), TypeId::of::<AddOp>());
@@ -115,9 +113,9 @@ mod tests {
         }
 
         let context = Context::new();
-        context.borrow_mut().add_dialect(crate::create_dialect());
+        context.add_dialect(crate::create_dialect());
 
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
 
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 

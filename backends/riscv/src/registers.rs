@@ -1,59 +1,33 @@
 use seq_macro::seq;
-use tir_core::Operand;
 
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
-        pub enum Reg {
+        #[derive(Debug, Clone, Copy)]
+        pub enum Register {
             $($case_name,)*
         }
 
-        impl Into<Operand> for Reg {
-            fn into(self) -> Operand {
-                match self {
-                $(
-                    Reg::$case_name => Operand::Register($num),
-                )*
-                }
-            }
-        }
-
-        impl TryFrom<&Operand> for Reg {
-            type Error = tir_core::Error;
-
-            fn try_from(operand: &Operand) -> Result<Reg, Self::Error> {
-                match operand {
-                    Operand::Register(value) => match value {
-                    $(
-                        $num => Ok(Reg::$case_name),
-                    )*
-                        _ => Err(tir_core::Error::Unknown),
-                    },
-                    _ => Err(tir_core::Error::Unknown),
-                }
-            }
-        }
-
-        pub fn get_reg_name(reg: &Reg) -> &str {
+        pub fn get_reg_name(reg: &Register) -> &str {
             match reg {
             $(
-                Reg::$case_name => { let name = stringify!($case_name); name }
+                Register::$case_name => { let name = stringify!($case_name); name }
             )*
             }
         }
 
-        pub fn get_abi_reg_name(reg: &Reg) -> &str {
+        pub fn get_abi_reg_name(reg: &Register) -> &str {
             match reg {
             $(
-                Reg::$case_name => $abi_name,
+                Register::$case_name => $abi_name,
             )*
             }
         }
 
-        pub fn assemble_reg(reg: &Operand) -> tir_core::Result<u8> {
-            let reg = Reg::try_from(reg)?;
+        pub fn assemble_reg<T>(reg: T) -> tir_core::Result<u8> where Register: TryFrom<T> {
+            let reg = Register::try_from(reg).map_err(|_| tir_core::Error::Unknown)?;
             match reg {
             $(
-                Reg::$case_name => Ok($encoding as u8),
+                Register::$case_name => Ok($encoding as u8),
             )*
             }
         }
@@ -110,10 +84,10 @@ register! {
 }
 
 seq!(N in 0..31 {
-    pub fn disassemble_gpr(value: u8) -> Option<Operand> {
+    pub fn disassemble_gpr(value: u8) -> Option<Register> {
         match value {
         #(
-            N => Some((Reg::X~N).into()),
+            N => Some(Register::X~N),
         )*
             _ => None,
         }
@@ -122,7 +96,7 @@ seq!(N in 0..31 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{disassemble_gpr, get_abi_reg_name, get_reg_name, Reg};
+    use crate::{disassemble_gpr, get_abi_reg_name, get_reg_name, Register};
 
     #[test]
     fn disassemble() {
@@ -131,8 +105,8 @@ mod tests {
 
     #[test]
     fn reg_name() {
-        assert_eq!(get_abi_reg_name(&Reg::X0), "zero");
+        assert_eq!(get_abi_reg_name(&Register::X0), "zero");
         // TODO this should be lower case
-        assert_eq!(get_reg_name(&Reg::X0), "X0");
+        assert_eq!(get_reg_name(&Register::X0), "X0");
     }
 }

@@ -1,24 +1,25 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use crate::builtin::DIALECT_NAME;
-use crate::utils::{trait_id, TraitId};
-use crate::*;
-use tir_macros::operation;
+use crate::{Op, OpImpl, Type};
+use tir_macros::{Assembly, Op};
 
-#[operation(name = "const")]
+use crate as tir_core;
+
+#[derive(Op, Assembly)]
+#[operation(name = "const", known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
-    #[cfg(attribute = true)]
-    value: Attr,
-    // FIXME: missing type attribute?
+    #[ret_type]
+    return_type: Type,
+    r#impl: OpImpl,
 }
 
 #[cfg(test)]
 mod test {
     use std::any::TypeId;
 
-    use crate::{builtin::*, OpBuilder};
-    use crate::{Context, Op};
+    use crate::builtin::*;
+    use crate::Attr;
+    use crate::Context;
+    use crate::OpBuilder;
 
     use super::*;
 
@@ -27,20 +28,27 @@ mod test {
         assert!(ConstOp::get_operation_name() == "const");
 
         let context = Context::new();
-        let module = ModuleOp::builder(context.clone()).build();
+        let module = ModuleOp::builder(&context).build();
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
         let attr = Attr::I8(16);
 
-        let constant = ConstOp::builder(context.clone()).value(attr.into()).build();
+        let ret_type = VoidType::build(context.clone());
+        let constant = ConstOp::builder(&context)
+            .value(attr)
+            .return_type(ret_type.into())
+            .build();
 
-        builder.borrow_mut().insert(constant.clone());
+        constant.borrow().get_context();
+        module.borrow().get_context();
+
+        builder.insert(&constant);
         assert_eq!(
-            TryInto::<i8>::try_into(constant.borrow().get_value_attr()).unwrap(),
+            TryInto::<i8>::try_into(constant.borrow().get_value_attr().clone()).unwrap(),
             16
         );
         let body = module.borrow().get_body().clone();
-        let op = body.borrow().get_operations().first().unwrap().clone();
+        let op = body.first().unwrap();
         assert_eq!((*op.borrow()).type_id(), TypeId::of::<ConstOp>());
     }
 }

@@ -6,11 +6,9 @@ use tir_riscv::disassemble;
 
 fuzz_target!(|data: &[u8]| {
     let context = Context::new();
-    context
-        .borrow_mut()
-        .add_dialect(tir_riscv::create_dialect());
+    context.add_dialect(tir_riscv::create_dialect());
 
-    let module = ModuleOp::builder(context.clone()).build();
+    let module = ModuleOp::builder(&context).build();
 
     let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
