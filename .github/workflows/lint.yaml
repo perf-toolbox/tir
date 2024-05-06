@@ -10,19 +10,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo fmt
-      - uses: parkerbxyz/suggest-changes@v1
-        with:
-          comment: 'Please commit the suggested changes from rustfmt.'
-  clippy:
-    name: clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-      - run: cargo clippy --fix
-      - uses: parkerbxyz/suggest-changes@v1
-        with:
-          comment: 'Please commit the suggested changes from clippy.'
+      - run: cargo fmt --check
