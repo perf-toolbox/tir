@@ -101,8 +101,7 @@ pub struct Context {
 }
 
 impl Debug for Context {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result 
-    {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("Context")?;
         Ok(())
     }

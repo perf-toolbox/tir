@@ -2,19 +2,12 @@ name: Linters
 on:
   pull_request_target:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 jobs:
-  lint:
-    permissions:
-      checks: write
+  formatting:
+    name: cargo fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          rustfmt: true
-          clippy: true
+      - run: cargo fmt --check
