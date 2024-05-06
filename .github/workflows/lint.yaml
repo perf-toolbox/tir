@@ -9,7 +9,6 @@ jobs:
   lint:
     permissions:
       checks: write
-    name: cargo fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
