@@ -1,6 +1,5 @@
-use crate::builtin::value::{AnyValue, Value};
+use crate::builtin::value::AnyValue;
 use crate::builtin::DIALECT_NAME;
-use crate::OpRef;
 use crate::{Op, OpImpl, Type};
 use tir_macros::{Assembly, Op};
 
