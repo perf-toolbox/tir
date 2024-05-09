@@ -1,13 +1,12 @@
-use crate::{Attr, ContextRef, Ty, Type};
-
+use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use std::collections::HashMap;
-
 use tir_macros::dialect_type;
-
-use crate::builtin::DIALECT_NAME;
 
 use crate as tir_core;
 
+use crate::builtin::DIALECT_NAME;
+
+// FIXME: figure out way to properly print and parse FuncType
 dialect_type!(FuncType);
 dialect_type!(VoidType);
 
@@ -80,7 +79,7 @@ impl VoidType {
 
 #[cfg(test)]
 mod tests {
-    use crate::{builtin::FuncType, Context, Type};
+    use crate::{builtin::FuncType, Context, Printable, StringPrinter, Type};
 
     use super::VoidType;
 
@@ -89,6 +88,9 @@ mod tests {
         let context = Context::new();
 
         let ty = VoidType::build(context.clone());
+        let mut printer = StringPrinter::new();
+        ty.print(&mut printer);
+        assert_eq!("!void", &printer.get());
         let ty: Type = ty.into();
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());

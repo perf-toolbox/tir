@@ -1,5 +1,5 @@
-use tir_core::Assembly;
 use tir_core::Dialect;
+use tir_core::OpAssembly;
 
 mod ops;
 

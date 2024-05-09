@@ -1,14 +1,20 @@
-use crate::{ContextRef, OpRef};
+use crate::parser::{PResult, ParseStream};
+use crate::{Attr, IRFormatter, OpRef};
 use std::collections::HashMap;
 
-pub type ParseFn = fn(ContextRef, &mut &str) -> Result<OpRef, ()>;
+type ParseFn<T> = fn(&mut ParseStream) -> PResult<T>;
+pub type OpParseFn = ParseFn<OpRef>;
+pub type TyParseFn = ParseFn<HashMap<String, Attr>>;
+pub type TyPrintFn = fn(&HashMap<String, Attr>, &mut dyn IRFormatter);
 
 pub struct Dialect {
     name: &'static str,
     id: u32,
     operation_ids: HashMap<&'static str, u32>,
     type_ids: HashMap<&'static str, u32>,
-    parse_fn: HashMap<u32, ParseFn>,
+    op_parse_fn: HashMap<u32, OpParseFn>,
+    ty_parse_fn: HashMap<u32, TyParseFn>,
+    ty_print_fn: HashMap<u32, TyPrintFn>,
 }
 
 impl Dialect {
@@ -18,7 +24,9 @@ impl Dialect {
             id: 0,
             operation_ids: HashMap::new(),
             type_ids: HashMap::new(),
-            parse_fn: HashMap::new(),
+            op_parse_fn: HashMap::new(),
+            ty_parse_fn: HashMap::new(),
+            ty_print_fn: HashMap::new(),
         }
     }
 
@@ -37,13 +45,13 @@ impl Dialect {
         self.name
     }
 
-    pub fn add_operation(&mut self, name: &'static str, parser: ParseFn) {
+    pub fn add_operation(&mut self, name: &'static str, parser: OpParseFn) {
         if self
             .operation_ids
             .insert(name, self.operation_ids.len().try_into().unwrap())
             .is_none()
         {
-            self.parse_fn
+            self.op_parse_fn
                 .insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
         }
     }
@@ -52,16 +60,26 @@ impl Dialect {
         self.operation_ids.get(name).cloned()
     }
 
-    pub fn get_operation_parser(&self, id: u32) -> Option<ParseFn> {
-        self.parse_fn.get(&id).cloned()
+    pub fn get_operation_parser(&self, id: u32) -> Option<OpParseFn> {
+        self.op_parse_fn.get(&id).cloned()
     }
 
-    pub fn add_type(&mut self, name: &'static str) {
-        self.type_ids
-            .insert(name, self.type_ids.len().try_into().unwrap());
+    pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: TyParseFn) {
+        let id: u32 = self.type_ids.len().try_into().unwrap();
+        self.type_ids.insert(name, id);
+        self.ty_print_fn.insert(id, print_fn);
+        self.ty_parse_fn.insert(id, parse_fn);
     }
 
-    pub fn get_type_id(&self, name: &'static str) -> u32 {
+    pub fn get_type_id(&self, name: &str) -> u32 {
         *self.type_ids.get(name).unwrap()
+    }
+
+    pub fn get_type_printer(&self, id: u32) -> Option<TyPrintFn> {
+        self.ty_print_fn.get(&id).cloned()
+    }
+
+    pub fn get_type_parser(&self, id: u32) -> Option<TyParseFn> {
+        self.ty_parse_fn.get(&id).cloned()
     }
 }

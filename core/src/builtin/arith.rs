@@ -1,11 +1,15 @@
+use crate::assembly::parser::Parseable;
 use crate::builtin::value::AnyValue;
 use crate::builtin::DIALECT_NAME;
-use crate::{Op, OpImpl, Type};
-use tir_macros::{Assembly, Op};
+use crate::OpAssembly;
+use crate::Printable;
+use crate::{Op, OpImpl, OpRef, Type};
+use tir_macros::{Op, OpAssembly};
+use winnow::Parser;
 
 use crate as tir_core;
 
-#[derive(Op, Assembly, Clone)]
+#[derive(Op, OpAssembly, Clone)]
 #[operation(name = "const", known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
     #[ret_type]
@@ -24,12 +28,14 @@ impl From<ConstOp> for AnyValue {
 
 #[cfg(test)]
 mod test {
-    use std::any::TypeId;
-
-    use crate::builtin::*;
+    use crate::parse_ir;
     use crate::Attr;
     use crate::Context;
     use crate::OpBuilder;
+    use crate::Printable;
+    use crate::StringPrinter;
+    use crate::{builtin::*, utils};
+    use std::any::TypeId;
 
     use super::*;
 
@@ -50,6 +56,13 @@ mod test {
             .return_type(ret_type.into())
             .build();
 
+        constant.borrow().get_context();
+        module.borrow().get_context();
+
+        let mut printer = StringPrinter::new();
+        constant.borrow().print(&mut printer);
+        assert_eq!(printer.get(), "const attrs = {value = <i8: 16>} -> !void");
+
         builder.insert(&constant);
         assert_eq!(
             TryInto::<i8>::try_into(constant.borrow().get_value_attr().clone()).unwrap(),
@@ -69,6 +82,25 @@ mod test {
         assert_eq!(
             op.borrow().get_alloc_id(),
             v3.get_defining_op().borrow().get_alloc_id()
+        );
+    }
+
+    #[test]
+    fn parse_const() {
+        let ir = "
+        module {
+            const attrs = {value = <i8: 16>} -> !void 
+        }
+        ";
+
+        let context = Context::new();
+        let module = parse_ir(context.clone(), ir).expect("module");
+
+        let module = utils::op_cast::<ModuleOp>(module).unwrap();
+
+        assert_eq!(
+            (*module.borrow().get_body().first().unwrap().borrow()).type_id(),
+            TypeId::of::<ConstOp>()
         );
     }
 }

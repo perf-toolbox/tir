@@ -2,8 +2,11 @@ use crate::utils::RTypeInstr;
 use crate::Register;
 use crate::{assemble_reg, disassemble_gpr};
 use tir_backend::BinaryEmittable;
+use tir_core::parser::Parseable;
+use tir_core::OpAssembly;
 use tir_core::*;
-use tir_macros::{Assembly, Op};
+use tir_macros::{Op, OpAssembly};
+use winnow::Parser;
 
 use crate::DIALECT_NAME;
 
@@ -11,7 +14,7 @@ const ALU_OPCODE: u8 = 0b110011;
 
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
-        #[derive(Op, Assembly)]
+        #[derive(Op, OpAssembly)]
         #[operation(name = $op_name)]
         pub struct $struct_name {
             #[operand]

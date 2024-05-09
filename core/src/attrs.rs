@@ -1,4 +1,13 @@
-use crate::Type;
+use winnow::{
+    ascii::{alphanumeric1, space0},
+    combinator::{delimited, separated_pair},
+    Parser,
+};
+
+use crate::{
+    parser::{identifier, PResult, ParseStream, Parseable},
+    Printable, Type,
+};
 
 macro_rules! impl_from {
     ($case:ident, $from:ty) => {
@@ -43,6 +52,45 @@ pub enum Attr {
     U64Array(Vec<u64>),
     Type(Type),
     TypeArray(Vec<Type>),
+}
+
+impl Printable for Attr {
+    fn print(&self, fmt: &mut dyn crate::IRFormatter) {
+        match self {
+            Attr::String(value) => fmt.write_direct(&format!("<str: \"{}\">", &value)),
+            Attr::Bool(value) => fmt.write_direct(&format!("<bool: {}>", &value)),
+            Attr::I8(value) => fmt.write_direct(&format!("<i8: {}>", &value)),
+            Attr::U8(value) => fmt.write_direct(&format!("<u8: {}>", &value)),
+            Attr::I16(value) => fmt.write_direct(&format!("<i16: {}>", &value)),
+            Attr::U16(value) => fmt.write_direct(&format!("<u16: {}>", &value)),
+            Attr::I32(value) => fmt.write_direct(&format!("<i32: {}>", &value)),
+            Attr::U32(value) => fmt.write_direct(&format!("<u32: {}>", &value)),
+            Attr::I64(value) => fmt.write_direct(&format!("<i64: {}>", &value)),
+            Attr::U64(value) => fmt.write_direct(&format!("<u64: {}>", &value)),
+            _ => todo!(),
+        }
+    }
+}
+
+impl Parseable<Attr> for Attr {
+    fn parse(input: &mut ParseStream<'_>) -> PResult<Attr> {
+        let atom = separated_pair(identifier, (space0, ":", space0), alphanumeric1);
+        let (ty, value) =
+            delimited((space0, "<", space0), atom, (space0, ">", space0)).parse_next(input)?;
+
+        match ty {
+            "str" => Ok(Attr::String(value.to_string())),
+            "i8" => Ok(Attr::I8(value.parse::<i8>().unwrap())),
+            "u8" => Ok(Attr::U8(value.parse::<u8>().unwrap())),
+            "i16" => Ok(Attr::I16(value.parse::<i16>().unwrap())),
+            "u16" => Ok(Attr::U16(value.parse::<u16>().unwrap())),
+            "i32" => Ok(Attr::I32(value.parse::<i32>().unwrap())),
+            "u32" => Ok(Attr::U32(value.parse::<u32>().unwrap())),
+            "i64" => Ok(Attr::I64(value.parse::<i64>().unwrap())),
+            "u64" => Ok(Attr::U64(value.parse::<u64>().unwrap())),
+            _ => todo!(),
+        }
+    }
 }
 
 impl_from!(String, String);

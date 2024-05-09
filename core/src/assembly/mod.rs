@@ -1,16 +1,28 @@
 mod formatter;
-mod parser;
+pub mod parser;
 mod printer;
 
+use crate::{Attr, OpRef};
+use std::collections::HashMap;
+
 pub use formatter::*;
-pub use parser::*;
+pub use parser::parse_ir;
 pub use printer::*;
 
-use crate::{ContextRef, OpRef};
+pub trait OpAssembly {
+    fn print_assembly(&self, fmt: &mut dyn IRFormatter);
+    fn parse_assembly(input: &mut parser::ParseStream<'_>) -> parser::PResult<OpRef>
+    where
+        Self: Sized;
+}
 
-pub trait Assembly {
-    fn print(&self, fmt: &mut dyn IRFormatter);
-    fn parse(context: ContextRef, input: &mut &str) -> std::result::Result<OpRef, ()>
+pub trait TyAssembly {
+    fn print_assembly(attrs: &HashMap<String, Attr>, fmt: &mut dyn IRFormatter)
+    where
+        Self: Sized;
+    fn parse_assembly(
+        input: &mut parser::ParseStream<'_>,
+    ) -> parser::PResult<HashMap<String, Attr>>
     where
         Self: Sized;
 }

@@ -1,50 +1,63 @@
+use std::collections::HashMap;
+
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
 use winnow::ascii::multispace0;
+use winnow::ascii::space0;
 use winnow::combinator::alt;
+use winnow::combinator::preceded;
+use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
+use winnow::combinator::terminated;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
-use winnow::PResult;
+use winnow::stream::Stateful;
 use winnow::Parser;
 
+use crate::Attr;
 use crate::{ContextRef, OpRef};
 
-fn identifier<'s>(input: &mut &'s str) -> PResult<&'s str> {
+#[derive(Debug, Clone)]
+pub struct ParserState {
+    context: ContextRef,
+}
+
+impl ParserState {
+    pub fn get_context(&self) -> ContextRef {
+        self.context.clone()
+    }
+}
+
+pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
+
+pub type PResult<I> = winnow::PResult<I>;
+
+pub trait Parseable<T> {
+    fn parse(input: &mut ParseStream<'_>) -> PResult<T>;
+}
+
+pub fn identifier<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
     (alpha1, alphanumeric0).recognize().parse_next(input)
 }
 
-fn dialect_op<'s>(input: &mut &'s str) -> PResult<(&'s str, &'s str)> {
+fn dialect_op<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
     separated_pair(identifier, ".", identifier).parse_next(input)
 }
 
-fn builtin_op<'s>(input: &mut &'s str) -> PResult<(&'s str, &'s str)> {
+fn builtin_op<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
     identifier
         .recognize()
         .parse_next(input)
         .map(|op| ("builtin", op))
 }
 
-fn op_tuple<'s>(input: &mut &'s str) -> PResult<(&'s str, &'s str)> {
+pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
-pub fn parse_ir(context: ContextRef, ir: &str) -> Result<OpRef, ()> {
-    let mut input = ir;
-    let (dialect_name, op_name) = op_tuple.parse_next(&mut input).map_err(|_| ())?;
-
-    let dialect = context.get_dialect_by_name(dialect_name).ok_or(())?;
-
-    let operation_id = dialect.get_operation_id(op_name).ok_or(())?;
-    let parser = dialect.get_operation_parser(operation_id).ok_or(())?;
-    parser(context, &mut input)
-}
-
-pub fn parse_single_operation(context: &ContextRef, ir: &mut &str) -> PResult<OpRef> {
-    let ir = ir;
-    let (dialect_name, op_name) = op_tuple
-        .parse_next(ir)
-        .map_err(|_| ErrMode::Backtrack(ContextError::new()))?;
+pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
+    let context = input.state.get_context();
+    let (dialect_name, op_name) = op_tuple.parse_next(input)?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
@@ -53,58 +66,96 @@ pub fn parse_single_operation(context: &ContextRef, ir: &mut &str) -> PResult<Op
     let operation_id = dialect
         .get_operation_id(op_name)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    let parser = dialect
+    let mut parser = dialect
         .get_operation_parser(operation_id)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    parser(context.clone(), ir).map_err(|_| ErrMode::Backtrack(ContextError::new()))
+    parser.parse_next(input)
 }
 
-pub fn parse_single_block_region(context: ContextRef, ir: &mut &str) -> Result<Vec<OpRef>, ()> {
-    let _ = (multispace0, "{", multispace0)
-        .parse_next(ir)
-        .map_err(|_: ErrMode<ContextError>| ())?;
+pub fn parse_ir(
+    context: ContextRef,
+    input: &str,
+) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, winnow::error::ContextError>> {
+    let input = ParseStream {
+        input,
+        state: ParserState { context },
+    };
+
+    preceded(multispace0, single_op).parse(input)
+}
+
+pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
+    let _ = (multispace0, "{", multispace0).parse_next(ir)?;
 
     let mut operations = vec![];
 
-    loop {
-        if let Ok(operation) = parse_single_operation(&context, ir) {
-            operations.push(operation);
-        } else {
-            break;
-        }
+    while let Ok(operation) = single_op.parse_next(ir) {
+        operations.push(operation);
     }
 
-    let _ = (multispace0, "}")
-        .parse_next(ir)
-        .map_err(|_: ErrMode<ContextError>| ())?;
+    let _ = (multispace0, "}", multispace0).parse_next(ir)?;
 
     Ok(operations)
+}
+
+fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
+    separated_pair(
+        identifier.map(|s| s.to_string()),
+        (space0, "=", space0),
+        Attr::parse,
+    )
+    .parse_next(input)
+}
+
+pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> {
+    let attr_pairs = separated::<_, _, HashMap<_, _>, _, _, _, _>(
+        0..,
+        attr_pair,
+        (space0, ",", space0).recognize(),
+    );
+    terminated(
+        preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
+        (space0, "}", space0),
+    )
+    .parse_next(input)
 }
 
 #[cfg(test)]
 mod tests {
     use winnow::Parser;
 
-    use super::{identifier, op_tuple};
+    use super::{identifier, op_tuple, ParseStream, ParserState};
+    use crate::Context;
+
+    macro_rules! input {
+        ($inp:literal, $context:expr) => {
+            ParseStream {
+                input: $inp.into(),
+                state: ParserState { context: $context },
+            }
+        };
+    }
 
     #[test]
     fn parse_ident() {
-        assert!(identifier.parse("abc").is_ok());
-        assert!(identifier.parse("abc123").is_ok());
-        assert!(identifier.parse("123").is_err());
-        assert!(identifier.parse("123abc").is_err());
-        let mut input = "abc123 abc 123";
-        let ident = identifier.parse_next(&mut input).unwrap();
+        let context = Context::new();
+        assert!(identifier.parse(input!("abc", context.clone())).is_ok());
+        assert!(identifier.parse(input!("abc123", context.clone())).is_ok());
+        assert!(identifier.parse(input!("123", context.clone())).is_err());
+        assert!(identifier.parse(input!("123abs", context.clone())).is_err());
+        let mut inp = input!("abc123 abc 123", context.clone());
+        let ident = identifier.parse_next(&mut inp).unwrap();
         assert_eq!(ident, "abc123");
     }
 
     #[test]
     fn parse_op_name() {
-        let mut ir = "module";
+        let context = Context::new();
+        let mut ir = input!("module", context.clone());
         let result = op_tuple.parse_next(&mut ir).unwrap();
         assert_eq!(result, ("builtin", "module"));
 
-        let mut ir = "test.module";
+        let mut ir = input!("test.module", context.clone());
         let result = op_tuple.parse_next(&mut ir).unwrap();
         assert_eq!(result, ("test", "module"));
     }

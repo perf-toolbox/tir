@@ -1,26 +1,14 @@
-use crate::{builtin, IRFormatter, OpRef};
+use crate::IRFormatter;
 
-/// Prints given operation to stdout
-pub fn print_op(op: OpRef, fmt: &mut dyn IRFormatter) {
-    let context = op.borrow().get_context();
-    let dialect = op.borrow().get_dialect_id();
-    let dialect = context.get_dialect(dialect).unwrap();
-
-    if dialect.get_name() != builtin::DIALECT_NAME {
-        fmt.write_direct(dialect.get_name());
-        fmt.write_direct(".");
-    }
-
-    fmt.write_direct(op.borrow().get_operation_name());
-    fmt.write_direct(" ");
-    op.borrow().print(fmt);
+pub trait Printable {
+    fn print(&self, fmt: &mut dyn IRFormatter);
 }
 
 #[cfg(test)]
 mod tests {
-    use super::print_op;
     use crate::builtin::ModuleOp;
     use crate::Context;
+    use crate::Printable;
     use crate::StringPrinter;
 
     #[test]
@@ -30,7 +18,7 @@ mod tests {
 
         let mut printer = StringPrinter::new();
 
-        print_op(module, &mut printer);
+        module.borrow().print(&mut printer);
 
         let result = printer.get();
 

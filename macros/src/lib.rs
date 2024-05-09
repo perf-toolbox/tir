@@ -1,13 +1,16 @@
 extern crate proc_macro;
 
 mod assembly;
+mod op_impl;
 
-use assembly::*;
+pub(crate) use assembly::*;
+pub(crate) use op_impl::*;
+
 use case_converter::camel_to_snake;
-use darling::{FromDeriveInput, FromField, FromMeta};
+use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::parse::{Parse, ParseStream, Parser};
+use syn::parse::{Parse, ParseStream};
 use syn::parse_macro_input;
 use syn::punctuated::Punctuated;
 use syn::Token;
@@ -29,7 +32,7 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     let dialect_name = name_ident.to_string();
 
     TokenStream::from(quote! {
-        pub(crate) const DIALECT_NAME: &str = #dialect_name;
+        pub const DIALECT_NAME: &str = #dialect_name;
 
         pub fn create_dialect() -> Dialect {
             let mut dialect = Dialect::new(DIALECT_NAME);
@@ -47,7 +50,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
     let name_ident = parse_macro_input!(input as syn::Ident);
     let name_string = name_ident.to_string();
     let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
-    let name_str = camel_to_snake(name_str);
+    let name_str = &camel_to_snake(name_str)[1..];
 
     quote! {
         #[derive(Clone)]
@@ -62,6 +65,27 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
 
             fn get_dialect_name() -> &'static str {
                 DIALECT_NAME
+            }
+        }
+
+        impl tir_core::TyAssembly for #name_ident {
+            fn print_assembly(_attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
+                fmt.write_direct(#name_str);
+            }
+
+            fn parse_assembly(_input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
+                Ok(HashMap::new())
+            }
+        }
+
+        impl tir_core::Printable for #name_ident {
+            fn print(&self, fmt: &mut dyn crate::IRFormatter) {
+                fmt.write_direct("!");
+                if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
+                    fmt.write_direct(&format!("{}.", DIALECT_NAME));
+                }
+
+                Self::print_assembly(self.r#type.get_attrs(), fmt);
             }
         }
 
@@ -120,7 +144,7 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
+            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse_assembly);)*
         }
     })
 }
@@ -133,109 +157,9 @@ pub fn populate_dialect_types(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_types(dialect: &mut Dialect) {
-            #(dialect.add_type(#ty::get_type_name());)*
+            #(dialect.add_type(#ty::get_type_name(), #ty::print_assembly, #ty::parse_assembly);)*
         }
     })
-}
-
-#[derive(Debug)]
-struct OpAttrs {
-    attrs: Vec<Attr>,
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone)]
-struct Attr(syn::Ident, syn::Type);
-
-impl Parse for Attr {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let attr_name = input.parse::<syn::Ident>()?;
-        input.parse::<Token![:]>()?;
-        let attr_ty = input.parse::<syn::Type>()?;
-
-        Ok(Self(attr_name, attr_ty))
-    }
-}
-
-impl FromMeta for OpAttrs {
-    fn from_meta(item: &syn::Meta) -> darling::Result<Self> {
-        if let syn::Meta::List(list) = item {
-            let parser = Punctuated::<Attr, Token![,]>::parse_separated_nonempty;
-            let tokens = list.tokens.clone();
-            let attrs = parser
-                .parse(tokens.into())?
-                .iter()
-                .cloned()
-                .collect::<Vec<Attr>>();
-
-            return Ok(OpAttrs { attrs });
-        }
-        // I genuinely have no idea what kind of error to put here
-        panic!("expected syn::MetaList");
-    }
-}
-
-#[derive(Debug, FromDeriveInput)]
-#[darling(attributes(operation), supports(struct_named))]
-struct OpReceiver {
-    ident: syn::Ident,
-    data: darling::ast::Data<(), OpFieldReceiver>,
-    name: String,
-    #[darling(default)]
-    known_attrs: Option<OpAttrs>,
-}
-
-#[derive(Default, Debug, FromMeta)]
-struct RegionAttrs {
-    #[darling(default)]
-    single_block: bool,
-    #[darling(default)]
-    no_args: bool,
-}
-
-fn parse_region_attrs(attr: &syn::Attribute) -> Option<RegionAttrs> {
-    if !attr.path().is_ident("region") {
-        return None;
-    }
-
-    if let syn::Meta::Path(_) = &attr.meta {
-        Some(RegionAttrs::default())
-    } else {
-        RegionAttrs::from_meta(&attr.meta).ok()
-    }
-}
-
-#[derive(Debug)]
-enum OpFieldAttrs {
-    Region(RegionAttrs),
-    Operand,
-    Return,
-    None,
-}
-
-fn transform_field_attrs(attrs: Vec<syn::Attribute>) -> darling::Result<OpFieldAttrs> {
-    for attr in attrs {
-        if let Some(region) = parse_region_attrs(&attr) {
-            return Ok(OpFieldAttrs::Region(region));
-        }
-        if attr.path().is_ident("ret_type") {
-            return Ok(OpFieldAttrs::Return);
-        }
-        if attr.path().is_ident("operand") {
-            return Ok(OpFieldAttrs::Operand);
-        }
-    }
-
-    Ok(OpFieldAttrs::None)
-}
-
-#[derive(Debug, FromField)]
-#[darling(forward_attrs(region, ret_type, operand))]
-struct OpFieldReceiver {
-    ident: Option<syn::Ident>,
-    ty: syn::Type,
-    #[darling(with = transform_field_attrs)]
-    attrs: OpFieldAttrs,
 }
 
 fn build_operand_accessors(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
@@ -504,7 +428,21 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     };
 
     quote! {
-        impl Op for #op_ident {
+        impl tir_core::Printable for #op_ident {
+            fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
+                if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
+                    fmt.write_direct(DIALECT_NAME);
+                    fmt.write_direct(".");
+                }
+
+                fmt.write_direct(self.get_operation_name());
+                fmt.write_direct(" ");
+
+                self.print_assembly(fmt);
+            }
+        }
+
+        impl tir_core::Op for #op_ident {
             fn get_operation_name(&self) -> &'static str {
                 #name
             }
@@ -513,10 +451,14 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
                 todo!();
             }
 
+            fn add_attrs(&mut self, attrs: &std::collections::HashMap<String, tir_core::Attr>) {
+                for (k, v) in attrs {
+                    self.r#impl.attrs.insert(k.clone(), v.clone());
+                }
+            }
+
             fn get_context(&self) -> tir_core::ContextRef {
-                // eprintln!("{:?}", self);
                 let context = self.r#impl.context.upgrade();
-                eprintln!("{:?}", context);
                 self.r#impl.context.upgrade().unwrap()
             }
 
@@ -557,8 +499,8 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     .into()
 }
 
-#[proc_macro_derive(Assembly)]
-pub fn derive_assembly(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(OpAssembly)]
+pub fn derive_op_assembly(input: TokenStream) -> TokenStream {
     let op = parse_macro_input!(input as syn::DeriveInput);
-    make_generic_ir_printer_parser(op.ident).into()
+    make_generic_ir_printer_parser(op).into()
 }
