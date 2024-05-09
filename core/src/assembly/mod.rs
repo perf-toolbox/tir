@@ -1,17 +1,17 @@
 mod formatter;
-mod parser;
+pub mod parser;
 mod printer;
 
 pub use formatter::*;
-pub use parser::*;
 pub use printer::*;
 
-use crate::ContextRef;
+pub use crate::parser::parse_ir;
 
+use crate::OpRef;
 
-pub trait Assembly<T> {
-    fn print_ir(&self, fmt: &mut dyn IRFormatter);
-    fn parse_ir(context: ContextRef, input: &mut &str) -> std::result::Result<T, ()>
+pub trait OpAssembly {
+    fn print_assembly(&self, fmt: &mut dyn IRFormatter);
+    fn parse_assembly(input: &mut parser::ParseStream<'_>) -> parser::PResult<OpRef>
     where
         Self: Sized;
 }

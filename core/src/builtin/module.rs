@@ -1,8 +1,8 @@
 use crate::builtin::DIALECT_NAME;
-use crate::{
-    parse_single_block_region, Assembly, ContextRef, IRFormatter, Op, OpImpl, OpRef, RegionRef,
-};
+use crate::parser::{single_block_region, PResult, ParseStream};
+use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, RegionRef};
 use tir_macros::Op;
+use winnow::Parser;
 
 use crate as tir_core;
 
@@ -14,12 +14,13 @@ pub struct ModuleOp {
     r#impl: OpImpl,
 }
 
-impl Assembly for ModuleOp {
-    fn parse(context: ContextRef, input: &mut &str) -> std::result::Result<OpRef, ()>
+impl OpAssembly for ModuleOp {
+    fn parse_assembly(input: &mut ParseStream) -> PResult<OpRef>
     where
         Self: Sized,
     {
-        let ops = parse_single_block_region(context.clone(), input)?;
+        let ops = single_block_region.parse_next(input)?;
+        let context = input.state.get_context();
         let module = ModuleOp::builder(&context).build();
         for op in ops {
             module.borrow_mut().get_body().push(&op);
@@ -27,7 +28,7 @@ impl Assembly for ModuleOp {
         Ok(module)
     }
 
-    fn print(&self, fmt: &mut dyn IRFormatter) {
+    fn print_assembly(&self, fmt: &mut dyn IRFormatter) {
         fmt.start_region();
         let body = self.get_body();
         for op in body.iter() {
@@ -42,7 +43,7 @@ mod test {
     use std::any::TypeId;
 
     use super::*;
-    use crate::{parse_ir, print_op, Context, StringPrinter};
+    use crate::{parse_ir, Context, Printable, StringPrinter};
 
     #[test]
     fn test_module() {
@@ -63,7 +64,7 @@ mod test {
 
         let mut printer = StringPrinter::new();
 
-        print_op(module, &mut printer);
+        module.borrow().print(&mut printer);
 
         let result = printer.get();
 

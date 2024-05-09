@@ -1,7 +1,8 @@
-use crate::{ContextRef, OpRef};
+use crate::parser::{PResult, ParseStream};
+use crate::OpRef;
 use std::collections::HashMap;
 
-pub type ParseFn = fn(ContextRef, &mut &str) -> Result<OpRef, ()>;
+pub type ParseFn = fn(&mut ParseStream) -> PResult<OpRef>;
 
 pub struct Dialect {
     name: &'static str,

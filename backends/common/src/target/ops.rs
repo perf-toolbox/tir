@@ -1,9 +1,9 @@
 use tir_core::*;
-use tir_macros::{Assembly, Op};
+use tir_macros::{Op, OpAssembly};
 
 use crate::target::DIALECT_NAME;
 
-#[derive(Op, Assembly)]
+#[derive(Op, OpAssembly)]
 #[operation(name = "section", known_attrs(name: String))]
 pub struct SectionOp {
     #[region]

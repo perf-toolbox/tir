@@ -14,7 +14,7 @@ use tir_macros::populate_dialect_ops;
 use tir_macros::populate_dialect_types;
 pub use types::*;
 
-use crate::assembly::Assembly;
+use crate::assembly::OpAssembly;
 
 dialect!(builtin);
 populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);

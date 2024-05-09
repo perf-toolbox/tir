@@ -29,7 +29,7 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     let dialect_name = name_ident.to_string();
 
     TokenStream::from(quote! {
-        pub(crate) const DIALECT_NAME: &str = #dialect_name;
+        pub const DIALECT_NAME: &str = #dialect_name;
 
         pub fn create_dialect() -> Dialect {
             let mut dialect = Dialect::new(DIALECT_NAME);
@@ -119,7 +119,7 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse);)*
+            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse_assembly);)*
         }
     })
 }
@@ -503,7 +503,21 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     };
 
     quote! {
-        impl Op for #op_ident {
+        impl tir_core::Printable for #op_ident {
+            fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
+                if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
+                    fmt.write_direct(DIALECT_NAME);
+                    fmt.write_direct(".");
+                }
+
+                fmt.write_direct(self.get_operation_name());
+                fmt.write_direct(" ");
+
+                self.print_assembly(fmt);
+            }
+        }
+
+        impl tir_core::Op for #op_ident {
             fn get_operation_name(&self) -> &'static str {
                 #name
             }
@@ -513,9 +527,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
             }
 
             fn get_context(&self) -> tir_core::ContextRef {
-                // eprintln!("{:?}", self);
                 let context = self.r#impl.context.upgrade();
-                eprintln!("{:?}", context);
                 self.r#impl.context.upgrade().unwrap()
             }
 
@@ -556,8 +568,8 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     .into()
 }
 
-#[proc_macro_derive(Assembly)]
-pub fn derive_assembly(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(OpAssembly)]
+pub fn derive_op_assembly(input: TokenStream) -> TokenStream {
     let op = parse_macro_input!(input as syn::DeriveInput);
     make_generic_ir_printer_parser(op.ident).into()
 }

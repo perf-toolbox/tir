@@ -1,10 +1,11 @@
 use crate::builtin::DIALECT_NAME;
-use crate::{Op, OpImpl, Type};
-use tir_macros::{Assembly, Op};
+use crate::OpAssembly;
+use crate::{Op, OpImpl, OpRef, Type};
+use tir_macros::{Op, OpAssembly};
 
 use crate as tir_core;
 
-#[derive(Op, Assembly)]
+#[derive(Op, OpAssembly)]
 #[operation(name = "const", known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
     #[ret_type]

@@ -1,11 +1,11 @@
 use crate::builtin::DIALECT_NAME;
 use crate::*;
-use tir_macros::Assembly;
 use tir_macros::Op;
+use tir_macros::OpAssembly;
 
 use crate as tir_core;
 
-#[derive(Op, Assembly)]
+#[derive(Op, OpAssembly)]
 #[operation(name = "func", known_attrs(sym_name: String, func_type: Type))]
 pub struct FuncOp {
     #[region]
