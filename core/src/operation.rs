@@ -20,7 +20,7 @@ pub trait Op: Any + OpAssembly + Printable {
     fn get_dialect_id(&self) -> u32;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OpImpl {
     pub context: ContextWRef,
     pub dialect_id: u32,
