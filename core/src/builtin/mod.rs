@@ -10,11 +10,11 @@ mod value;
 pub use arith::*;
 pub use func::*;
 pub use module::*;
-pub use types::*;
-pub use value::*;
 use tir_macros::dialect;
 use tir_macros::populate_dialect_ops;
 use tir_macros::populate_dialect_types;
+pub use types::*;
+pub use value::*;
 
 use crate::assembly::Assembly;
 

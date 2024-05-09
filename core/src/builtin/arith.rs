@@ -1,6 +1,6 @@
-use crate::OpRef;
 use crate::builtin::value::{AnyValue, Value};
 use crate::builtin::DIALECT_NAME;
+use crate::OpRef;
 use crate::{Op, OpImpl, Type};
 use tir_macros::{Assembly, Op};
 
@@ -61,9 +61,15 @@ mod test {
         assert_eq!((*op.borrow()).type_id(), TypeId::of::<ConstOp>());
         let v1: AnyValue = From::<ConstOp>::from((constant.borrow()).clone());
         let v2: Value<VoidType> = TryInto::<Value<VoidType>>::try_into(v1.clone()).unwrap();
-        assert_eq!(op.borrow().get_alloc_id(), v2.get_defining_op().borrow().get_alloc_id());
+        assert_eq!(
+            op.borrow().get_alloc_id(),
+            v2.get_defining_op().borrow().get_alloc_id()
+        );
         let v3: AnyValue = From::<Value<VoidType>>::from(v2);
         assert_eq!(v1, v3);
-        assert_eq!(op.borrow().get_alloc_id(), v3.get_defining_op().borrow().get_alloc_id());
+        assert_eq!(
+            op.borrow().get_alloc_id(),
+            v3.get_defining_op().borrow().get_alloc_id()
+        );
     }
 }
