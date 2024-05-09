@@ -1,4 +1,5 @@
 use seq_macro::seq;
+use tir_core::{IRFormatter, Printable};
 
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
@@ -29,6 +30,16 @@ macro_rules! register {
             $(
                 Register::$case_name => Ok($encoding as u8),
             )*
+            }
+        }
+
+        impl Printable for Register {
+            fn print(&self, fmt: &mut dyn IRFormatter) {
+                match self {
+                $(
+                    Register::$case_name => fmt.write_direct($abi_name),
+                )*
+                }
             }
         }
     };

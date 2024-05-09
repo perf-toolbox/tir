@@ -1,4 +1,4 @@
-use crate::Type;
+use crate::{Printable, Type};
 
 macro_rules! impl_from {
     ($case:ident, $from:ty) => {
@@ -43,6 +43,24 @@ pub enum Attr {
     U64Array(Vec<u64>),
     Type(Type),
     TypeArray(Vec<Type>),
+}
+
+impl Printable for Attr {
+    fn print(&self, fmt: &mut dyn crate::IRFormatter) {
+        match self {
+            Attr::String(value) => fmt.write_direct(&format!("<str: {}>", &value)),
+            Attr::Bool(value) => fmt.write_direct(&format!("<bool: {}>", &value)),
+            Attr::I8(value) => fmt.write_direct(&format!("<i8: {}>", &value)),
+            Attr::U8(value) => fmt.write_direct(&format!("<u8: {}>", &value)),
+            Attr::I16(value) => fmt.write_direct(&format!("<i16: {}>", &value)),
+            Attr::U16(value) => fmt.write_direct(&format!("<u16: {}>", &value)),
+            Attr::I32(value) => fmt.write_direct(&format!("<i32: {}>", &value)),
+            Attr::U32(value) => fmt.write_direct(&format!("<u32: {}>", &value)),
+            Attr::I64(value) => fmt.write_direct(&format!("<i64: {}>", &value)),
+            Attr::U64(value) => fmt.write_direct(&format!("<u64: {}>", &value)),
+            _ => todo!(),
+        }
+    }
 }
 
 impl_from!(String, String);
