@@ -1,5 +1,5 @@
 use winnow::{
-    ascii::{alphanumeric0, alphanumeric1, space0},
+    ascii::{alphanumeric1, space0},
     combinator::{delimited, separated_pair},
     Parser,
 };

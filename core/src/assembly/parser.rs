@@ -11,7 +11,6 @@ use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
-use winnow::stream::Accumulate;
 use winnow::stream::Stateful;
 use winnow::Parser;
 
@@ -52,7 +51,7 @@ fn builtin_op<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
         .map(|op| ("builtin", op))
 }
 
-fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
+pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
@@ -82,7 +81,7 @@ pub fn parse_ir(
         state: ParserState { context },
     };
 
-    single_op.parse(input)
+    preceded(multispace0, single_op).parse(input)
 }
 
 pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
@@ -99,7 +98,7 @@ pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     Ok(operations)
 }
 
-fn attr_pair<'s>(input: &mut ParseStream<'s>) -> PResult<(String, Attr)> {
+fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
     separated_pair(
         identifier.map(|s| s.to_string()),
         (space0, "=", space0),

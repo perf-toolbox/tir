@@ -38,6 +38,20 @@ fn make_return_type_printer(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStr
     quote! {}
 }
 
+fn make_return_type_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
+    for f in fields {
+        if let OpFieldAttrs::Return = f.attrs {
+            let ident = f.ident.as_ref().unwrap();
+            return quote! {
+                let ty = winnow::combinator::preceded((winnow::ascii::space0, "->", winnow::ascii::space0), tir_core::Type::parse).parse_next(input)?;
+                builder = builder.#ident(ty);
+            };
+        }
+    }
+
+    quote! {}
+}
+
 fn make_operand_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
     let mut parsers = vec![];
 
@@ -76,6 +90,7 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
     let operand_printer = make_operand_printer(&fields);
     let return_printer = make_return_type_printer(&fields);
     let operand_parsers = make_operand_parser(&fields);
+    let return_parser = make_return_type_parser(&fields);
 
     quote! {
       impl tir_core::OpAssembly for #op_name {
@@ -99,8 +114,10 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
 
             let attr_list = tir_core::parser::attr_list.parse_next(input)?;
 
+            #return_parser
+
             let op = builder.build();
-            op.borrow_mut().set_attrs(attr_list);
+            op.borrow_mut().add_attrs(&attr_list);
 
             Ok(op)
           }

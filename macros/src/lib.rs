@@ -72,8 +72,8 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 fmt.write_direct(#name_str);
             }
 
-            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<tir_core::Type> {
-                todo!();
+            fn parse_assembly(_input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
+                Ok(HashMap::new())
             }
         }
 
@@ -450,8 +450,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
                 todo!();
             }
 
-            fn set_attrs(&mut self, attrs: std::collections::HashMap<String, tir_core::Attr>) {
-                self.r#impl.attrs = attrs;
+            fn add_attrs(&mut self, attrs: &std::collections::HashMap<String, tir_core::Attr>) {
+                for (k, v) in attrs {
+                    self.r#impl.attrs.insert(k.clone(), v.clone());
+                }
             }
 
             fn get_context(&self) -> tir_core::ContextRef {

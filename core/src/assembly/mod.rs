@@ -2,7 +2,7 @@ mod formatter;
 pub mod parser;
 mod printer;
 
-use crate::{Attr, OpRef, Type};
+use crate::{Attr, OpRef};
 use std::collections::HashMap;
 
 pub use formatter::*;
@@ -20,7 +20,9 @@ pub trait TyAssembly {
     fn print_assembly(attrs: &HashMap<String, Attr>, fmt: &mut dyn IRFormatter)
     where
         Self: Sized;
-    fn parse_assembly(input: &mut parser::ParseStream<'_>) -> parser::PResult<Type>
+    fn parse_assembly(
+        input: &mut parser::ParseStream<'_>,
+    ) -> parser::PResult<HashMap<String, Attr>>
     where
         Self: Sized;
 }

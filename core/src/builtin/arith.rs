@@ -1,3 +1,4 @@
+use crate::assembly::parser::Parseable;
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
@@ -17,14 +18,14 @@ pub struct ConstOp {
 
 #[cfg(test)]
 mod test {
-    use std::any::TypeId;
-
-    use crate::builtin::*;
+    use crate::parse_ir;
     use crate::Attr;
     use crate::Context;
     use crate::OpBuilder;
     use crate::Printable;
     use crate::StringPrinter;
+    use crate::{builtin::*, utils};
+    use std::any::TypeId;
 
     use super::*;
 
@@ -49,7 +50,7 @@ mod test {
 
         let mut printer = StringPrinter::new();
         constant.borrow().print(&mut printer);
-        panic!("~~ {}", printer.get());
+        assert_eq!(printer.get(), "const attrs = {value = <i8: 16>} -> !void");
 
         builder.insert(&constant);
         assert_eq!(
@@ -59,5 +60,24 @@ mod test {
         let body = module.borrow().get_body().clone();
         let op = body.first().unwrap();
         assert_eq!((*op.borrow()).type_id(), TypeId::of::<ConstOp>());
+    }
+
+    #[test]
+    fn parse_const() {
+        let ir = "
+        module {
+            const attrs = {value = <i8: 16>} -> !void 
+        }
+        ";
+
+        let context = Context::new();
+        let module = parse_ir(context.clone(), ir).expect("module");
+
+        let module = utils::op_cast::<ModuleOp>(module).unwrap();
+
+        assert_eq!(
+            (*module.borrow().get_body().first().unwrap().borrow()).type_id(),
+            TypeId::of::<ConstOp>()
+        );
     }
 }

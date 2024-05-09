@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+use winnow::combinator::preceded;
+use winnow::Parser;
+
+use crate::parser::{op_tuple, PResult, ParseStream, Parseable};
 use crate::Attr;
 use crate::ContextRef;
 use crate::ContextWRef;
@@ -68,6 +72,22 @@ impl Printable for Type {
 
         let printer = dialect.get_type_printer(self.type_id).unwrap();
         printer(&self.attrs, fmt);
+    }
+}
+
+impl Parseable<Type> for Type {
+    fn parse(input: &mut ParseStream<'_>) -> PResult<Type> {
+        let (dialect, ty) = preceded("!", op_tuple).parse_next(input)?;
+
+        let context = input.state.get_context();
+        let dialect = context.get_dialect_by_name(dialect).unwrap();
+        let id = dialect.get_type_id(ty);
+
+        let mut parser = dialect.get_type_parser(id).unwrap();
+
+        let attrs = parser.parse_next(input)?;
+
+        Ok(Type::new(context, dialect.get_id(), id, attrs))
     }
 }
 

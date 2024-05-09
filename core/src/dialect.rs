@@ -1,10 +1,10 @@
 use crate::parser::{PResult, ParseStream};
-use crate::{Attr, IRFormatter, OpRef, Type};
+use crate::{Attr, IRFormatter, OpRef};
 use std::collections::HashMap;
 
 type ParseFn<T> = fn(&mut ParseStream) -> PResult<T>;
 pub type OpParseFn = ParseFn<OpRef>;
-pub type TyParseFn = ParseFn<Type>;
+pub type TyParseFn = ParseFn<HashMap<String, Attr>>;
 pub type TyPrintFn = fn(&HashMap<String, Attr>, &mut dyn IRFormatter);
 
 pub struct Dialect {
@@ -71,11 +71,15 @@ impl Dialect {
         self.ty_parse_fn.insert(id, parse_fn);
     }
 
-    pub fn get_type_id(&self, name: &'static str) -> u32 {
+    pub fn get_type_id(&self, name: &str) -> u32 {
         *self.type_ids.get(name).unwrap()
     }
 
     pub fn get_type_printer(&self, id: u32) -> Option<TyPrintFn> {
         self.ty_print_fn.get(&id).cloned()
+    }
+
+    pub fn get_type_parser(&self, id: u32) -> Option<TyParseFn> {
+        self.ty_parse_fn.get(&id).cloned()
     }
 }
