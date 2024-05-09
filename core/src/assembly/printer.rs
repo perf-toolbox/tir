@@ -1,5 +1,9 @@
 use crate::{builtin, IRFormatter, OpRef};
 
+pub trait Print<T> {
+    fn print(&self, fmt: &mut dyn IRFormatter);
+}
+
 /// Prints given operation to stdout
 pub fn print_op(op: OpRef, fmt: &mut dyn IRFormatter) {
     let context = op.borrow().get_context();
