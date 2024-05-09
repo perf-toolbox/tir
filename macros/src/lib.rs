@@ -50,7 +50,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
     let name_ident = parse_macro_input!(input as syn::Ident);
     let name_string = name_ident.to_string();
     let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
-    let name_str = camel_to_snake(name_str);
+    let name_str = &camel_to_snake(name_str)[1..];
 
     quote! {
         pub struct #name_ident {
@@ -64,6 +64,27 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
 
             fn get_dialect_name() -> &'static str {
                 DIALECT_NAME
+            }
+        }
+
+        impl tir_core::TyAssembly for #name_ident {
+            fn print_assembly(_attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
+                fmt.write_direct(#name_str);
+            }
+
+            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<tir_core::Type> {
+                todo!();
+            }
+        }
+
+        impl tir_core::Printable for #name_ident {
+            fn print(&self, fmt: &mut dyn crate::IRFormatter) {
+                fmt.write_direct("!");
+                if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
+                    fmt.write_direct(&format!("{}.", DIALECT_NAME));
+                }
+
+                Self::print_assembly(self.r#type.get_attrs(), fmt);
             }
         }
 
@@ -135,7 +156,7 @@ pub fn populate_dialect_types(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_types(dialect: &mut Dialect) {
-            #(dialect.add_type(#ty::get_type_name());)*
+            #(dialect.add_type(#ty::get_type_name(), #ty::print_assembly, #ty::parse_assembly);)*
         }
     })
 }
@@ -427,6 +448,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 
             fn get_attrs(&self) -> &std::collections::HashMap<String, tir_core::Attr> {
                 todo!();
+            }
+
+            fn set_attrs(&mut self, attrs: std::collections::HashMap<String, tir_core::Attr>) {
+                self.r#impl.attrs = attrs;
             }
 
             fn get_context(&self) -> tir_core::ContextRef {

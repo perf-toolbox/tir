@@ -9,6 +9,7 @@ pub type OpRef = Rc<RefCell<dyn Op>>;
 pub trait Op: Any + OpAssembly + Printable {
     fn get_operation_name(&self) -> &'static str;
     fn get_attrs(&self) -> &HashMap<String, Attr>;
+    fn set_attrs(&mut self, attrs: HashMap<String, Attr>);
     fn get_context(&self) -> ContextRef;
     fn get_parent_region(&self) -> Option<RegionRef>;
     fn get_return_type(&self) -> Option<Type>;

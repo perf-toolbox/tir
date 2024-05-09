@@ -2,6 +2,7 @@ use crate::builtin::DIALECT_NAME;
 use crate::*;
 use tir_macros::Op;
 use tir_macros::OpAssembly;
+use winnow::Parser;
 
 use crate as tir_core;
 

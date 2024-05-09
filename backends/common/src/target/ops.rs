@@ -1,5 +1,6 @@
 use tir_core::*;
 use tir_macros::{Op, OpAssembly};
+use winnow::Parser;
 
 use crate::target::DIALECT_NAME;
 

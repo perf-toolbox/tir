@@ -1,13 +1,21 @@
+use std::collections::HashMap;
+
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
 use winnow::ascii::multispace0;
+use winnow::ascii::space0;
 use winnow::combinator::alt;
+use winnow::combinator::preceded;
+use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
+use winnow::combinator::terminated;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
+use winnow::stream::Accumulate;
 use winnow::stream::Stateful;
 use winnow::Parser;
 
+use crate::Attr;
 use crate::{ContextRef, OpRef};
 
 #[derive(Debug, Clone)]
@@ -25,7 +33,11 @@ pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
 
 pub type PResult<I> = winnow::PResult<I>;
 
-fn identifier<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
+pub trait Parseable<T> {
+    fn parse(input: &mut ParseStream<'_>) -> PResult<T>;
+}
+
+pub fn identifier<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
     (alpha1, alphanumeric0).recognize().parse_next(input)
 }
 
@@ -85,6 +97,28 @@ pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     let _ = (multispace0, "}", multispace0).parse_next(ir)?;
 
     Ok(operations)
+}
+
+fn attr_pair<'s>(input: &mut ParseStream<'s>) -> PResult<(String, Attr)> {
+    separated_pair(
+        identifier.map(|s| s.to_string()),
+        (space0, "=", space0),
+        Attr::parse,
+    )
+    .parse_next(input)
+}
+
+pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> {
+    let attr_pairs = separated::<_, _, HashMap<_, _>, _, _, _, _>(
+        0..,
+        attr_pair,
+        (space0, ",", space0).recognize(),
+    );
+    terminated(
+        preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
+        (space0, "}", space0),
+    )
+    .parse_next(input)
 }
 
 #[cfg(test)]

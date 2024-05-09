@@ -3,6 +3,7 @@ use crate::OpAssembly;
 use crate::Printable;
 use crate::{Op, OpImpl, OpRef, Type};
 use tir_macros::{Op, OpAssembly};
+use winnow::Parser;
 
 use crate as tir_core;
 
@@ -22,6 +23,8 @@ mod test {
     use crate::Attr;
     use crate::Context;
     use crate::OpBuilder;
+    use crate::Printable;
+    use crate::StringPrinter;
 
     use super::*;
 
@@ -43,6 +46,10 @@ mod test {
 
         constant.borrow().get_context();
         module.borrow().get_context();
+
+        let mut printer = StringPrinter::new();
+        constant.borrow().print(&mut printer);
+        panic!("~~ {}", printer.get());
 
         builder.insert(&constant);
         assert_eq!(
