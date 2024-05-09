@@ -59,3 +59,12 @@ pub trait Ty {
     fn get_type_name() -> &'static str;
     fn get_dialect_name() -> &'static str;
 }
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Self) -> bool {
+        self.context.as_ptr() == other.context.as_ptr()
+            && self.type_id == other.type_id
+            && self.dialect_id == other.dialect_id
+            && self.attrs == other.attrs
+    }
+}

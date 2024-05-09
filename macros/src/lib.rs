@@ -50,6 +50,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
     let name_str = camel_to_snake(name_str);
 
     quote! {
+        #[derive(Clone)]
         pub struct #name_ident {
             r#type: Type,
         }
