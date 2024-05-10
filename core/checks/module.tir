@@ -1,0 +1,7 @@
+; RUN: tir-opt %s | filecheck %s
+
+; CHECK: module {
+; CHECK-NEXT: }
+module {
+
+}
