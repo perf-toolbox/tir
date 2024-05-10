@@ -43,6 +43,15 @@ jobs:
     - name: Install grcov
       run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
     - name: Run grcov
-      run: grcov . --binary-path target/debug/ -s . -t lcov --branch --llvm --ignore '../*' --ignore "/*" --ignore 'macros/*' --ignore 'fuzz/*' --ignore '**/tests/**' -o lcov.info
+      run: |
+        grcov . --binary-path target/debug/ -s . -t lcov --branch --llvm \
+            --ignore '../*' \
+            --ignore "/*" \
+            --ignore 'macros/*' \
+            --ignore 'fuzz/*' \
+            --ignore 'utils/*' \
+            --ignore 'target/**/build/litcheck-filecheck-*/**' \
+            --ignore '**/tests/**' \
+            -o lcov.info
     - name: Coveralls
       uses: coverallsapp/github-action@v2
