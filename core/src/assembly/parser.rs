@@ -2,16 +2,19 @@ use std::collections::HashMap;
 
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
+use winnow::ascii::line_ending;
 use winnow::ascii::multispace0;
 use winnow::ascii::space0;
 use winnow::combinator::alt;
 use winnow::combinator::preceded;
+use winnow::combinator::repeat;
 use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
 use winnow::stream::Stateful;
+use winnow::token::take_till;
 use winnow::Parser;
 
 use crate::Attr;
@@ -55,9 +58,17 @@ pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> 
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
+fn comment<'s>(input: &mut ParseStream<'s>) -> PResult<()> {
+    repeat(
+        0..,
+        (multispace0, ';', take_till(1.., ['\n', '\r']), line_ending).void(),
+    )
+    .parse_next(input)
+}
+
 pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
     let context = input.state.get_context();
-    let (dialect_name, op_name) = op_tuple.parse_next(input)?;
+    let (dialect_name, op_name) = preceded(comment, op_tuple).parse_next(input)?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
@@ -81,7 +92,8 @@ pub fn parse_ir(
         state: ParserState { context },
     };
 
-    preceded(multispace0, single_op).parse(input)
+    // preceded(comment, single_op).parse(input)
+    single_op.parse(input)
 }
 
 pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {

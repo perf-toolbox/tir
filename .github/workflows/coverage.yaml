@@ -20,14 +20,22 @@ jobs:
       with:
         components: llvm-tools-preview
     - uses: Swatinem/rust-cache@v2
+    - name: Install cargo-make
+      run: cargo install cargo-make
     - name: Build
       run: cargo build --verbose
       env:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
         RUSTDOCFLAGS: '-C instrument-coverage'
-    - name: Run tests
+    - name: Run cargo tests
       run: cargo test --verbose
+      env:
+        CARGO_INCREMENTAL: '0'
+        RUSTFLAGS: '-C instrument-coverage --deny warnings'
+        RUSTDOCFLAGS: '-C instrument-coverage'
+    - name: Run check tests
+      run: cargo make check-only
       env:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
