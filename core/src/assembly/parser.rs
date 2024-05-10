@@ -68,6 +68,9 @@ fn comment<'s>(input: &mut ParseStream<'s>) -> PResult<()> {
 
 pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
     let context = input.state.get_context();
+
+    // TODO: find a smarter way
+    multispace0.parse_next(input)?;
     let (dialect_name, op_name) = preceded(comment, op_tuple).parse_next(input)?;
 
     let dialect = context
@@ -92,7 +95,6 @@ pub fn parse_ir(
         state: ParserState { context },
     };
 
-    // preceded(comment, single_op).parse(input)
     single_op.parse(input)
 }
 
