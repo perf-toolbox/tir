@@ -4,6 +4,12 @@ pub trait Printable {
     fn print(&self, fmt: &mut dyn IRFormatter);
 }
 
+pub fn print_comma_separated(fmt: &mut dyn IRFormatter, tokens: &[&str]) {
+    // FIXME: come up with zero allocation way
+    let tokens = tokens.join(", ");
+    fmt.write_direct(&tokens);
+}
+
 #[cfg(test)]
 mod tests {
     use crate::builtin::ModuleOp;

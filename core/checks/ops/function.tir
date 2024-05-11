@@ -1,0 +1,8 @@
+; RUN: tir-opt %s
+
+module {
+  func @foo(%arg0: !void) -> !void {
+    ^entry:
+    const attrs = {value = <i8: 0>} -> !void
+  }
+}

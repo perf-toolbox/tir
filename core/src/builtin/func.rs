@@ -1,17 +1,97 @@
+use std::any::Any;
+
 use crate::builtin::DIALECT_NAME;
+use crate::parser::{region_with_blocks, sym_name, PResult, ParseStream, Parseable};
 use crate::*;
 use tir_macros::Op;
-use tir_macros::OpAssembly;
+use winnow::ascii::space0;
+use winnow::combinator::{delimited, preceded, separated};
 use winnow::Parser;
 
 use crate as tir_core;
 
-#[derive(Op, OpAssembly)]
+use self::parser::identifier;
+
+use super::FuncType;
+
+#[derive(Op)]
 #[operation(name = "func", known_attrs(sym_name: String, func_type: Type))]
 pub struct FuncOp {
     #[region]
     body: RegionRef,
     r#impl: OpImpl,
+}
+
+fn single_arg<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, Type)> {
+    (
+        preceded("%", identifier),
+        preceded((space0, ":", space0), Type::parse),
+    )
+        .parse_next(input)
+}
+
+fn signature<'s>(input: &mut ParseStream<'s>) -> PResult<(Vec<&'s str>, FuncType)> {
+    let braces: Vec<(&'s str, Type)> = delimited(
+        (space0, "(", space0),
+        separated(0.., single_arg, (space0, ",", space0)),
+        (space0, ")", space0),
+    )
+    .parse_next(input)?;
+
+    let (names, input_types): (Vec<&'s str>, Vec<Type>) = braces.iter().cloned().unzip();
+
+    let return_type = preceded((space0, "->", space0), Type::parse).parse_next(input)?;
+
+    let context = input.state.get_context();
+    let func_ty = FuncType::build(context, &input_types, return_type);
+
+    Ok((names, func_ty))
+}
+
+impl OpAssembly for FuncOp {
+    fn parse_assembly(input: &mut ParseStream) -> PResult<OpRef>
+    where
+        Self: Sized,
+    {
+        let sym_name_str = preceded(space0, sym_name).parse_next(input)?;
+
+        let (arg_names, func_ty) = signature.parse_next(input)?;
+
+        println!("args: {:?}", arg_names);
+
+        let region = region_with_blocks.parse_next(input)?;
+
+        let context = input.state.get_context();
+
+        let func = FuncOp::builder(&context)
+            .sym_name(Attr::String(sym_name_str.into()))
+            .func_type(Attr::Type(func_ty.into()))
+            .body(region)
+            .build();
+
+        Ok(func)
+    }
+
+    fn print_assembly(&self, fmt: &mut dyn IRFormatter) {
+        fmt.write_direct(&format!(
+            "@{}",
+            TryInto::<String>::try_into(self.get_sym_name_attr().clone()).unwrap()
+        ));
+
+        let func_ty: FuncType = self.get_func_type_attr().clone().try_into().unwrap();
+
+        fmt.write_direct("(");
+        fmt.write_direct(")");
+        fmt.write_direct(" -> ");
+        func_ty.get_return().print(fmt);
+        // todo!()
+        fmt.start_region();
+        // let body = self.get_body();
+        // for op in body.iter() {
+        //     op.borrow().print(fmt);
+        // }
+        fmt.end_region();
+    }
 }
 
 #[cfg(test)]

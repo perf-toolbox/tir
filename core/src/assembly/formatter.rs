@@ -7,9 +7,18 @@ pub trait IRFormatter {
     fn write_newline(&mut self, data: &str) {
         self.write_direct(data);
         self.write_direct("\n");
+        self.indent()
+    }
+
+    fn indent(&mut self) {
         for _ in 0..self.get_indent() {
             self.write_direct("  ");
         }
+    }
+
+    fn indent_write(&mut self, data: &str) {
+        self.indent();
+        self.write_direct(data)
     }
 
     fn start_region(&mut self) {
@@ -19,7 +28,7 @@ pub trait IRFormatter {
 
     fn end_region(&mut self) {
         self.decrease_indent();
-        self.write_newline("}");
+        self.indent_write("}\n");
     }
 }
 

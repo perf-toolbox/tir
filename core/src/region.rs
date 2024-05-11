@@ -4,23 +4,35 @@ use std::{
     sync::Arc,
 };
 
-use crate::{AllocId, ContextRef, ContextWRef, OpRef};
+use crate::{AllocId, ContextRef, ContextWRef, OpRef, Type, Value};
 
 pub type RegionRef = Rc<Region>;
 pub type RegionWRef = Weak<Region>;
 pub type BlockRef = Rc<Block>;
+pub type BlockWRef = Weak<Block>;
+
+#[derive(Debug, Clone)]
+pub struct BlockArg {
+    parent: BlockWRef,
+    index: usize,
+    ty: Type,
+}
 
 #[derive(Debug)]
 struct BlockImpl {
+    name: String,
     parent_region: RegionWRef,
     operations: Vec<AllocId>,
+    args: Vec<Value>,
 }
 
 impl BlockImpl {
-    fn new(parent_region: RegionWRef) -> Self {
+    fn new(name: String, parent_region: RegionWRef) -> Self {
         Self {
+            name,
             parent_region,
             operations: vec![],
+            args: vec![],
         }
     }
 
@@ -45,6 +57,16 @@ impl BlockImpl {
         let context = self.get_context();
         self.operations.first().map(|id| context.get_op(*id))?
     }
+
+    fn add_argument(&self, ty: Type, name: &str, this: BlockWRef) {
+        let index = self.args.len();
+        
+        let block_arg = BlockArg{
+            parent: this,
+            index,
+            ty,
+        };
+    }
 }
 
 #[derive(Debug)]
@@ -68,7 +90,11 @@ impl Iterator for BlockIter {
 
 impl Block {
     pub fn empty(parent: &RegionRef) -> BlockRef {
-        Rc::new(Block(RefCell::new(BlockImpl::new(Rc::downgrade(parent)))))
+        Rc::new(Block(RefCell::new(BlockImpl::new("entry".to_string(), Rc::downgrade(parent)))))
+    }
+
+    pub fn with_arguments(name: &str, parent: &RegionRef, _arg_types: &[Type], _arg_names: &[&str]) -> BlockRef {
+        Rc::new(Block(RefCell::new(BlockImpl::new(name.to_string(), Rc::downgrade(parent)))))
     }
 
     pub fn push(&self, op: &OpRef) {

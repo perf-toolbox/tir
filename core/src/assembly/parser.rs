@@ -8,6 +8,7 @@ use winnow::ascii::space0;
 use winnow::combinator::alt;
 use winnow::combinator::preceded;
 use winnow::combinator::repeat;
+use winnow::combinator::repeat_till;
 use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
@@ -18,16 +19,42 @@ use winnow::token::take_till;
 use winnow::Parser;
 
 use crate::Attr;
-use crate::{ContextRef, OpRef};
+use crate::Block;
+use crate::BlockRef;
+use crate::Region;
+use crate::RegionRef;
+use crate::{ContextRef, OpRef, Type};
 
 #[derive(Debug, Clone)]
 pub struct ParserState {
     context: ContextRef,
+    deferred_type_list: Vec<Type>,
+    cur_region: Vec<RegionRef>
 }
 
 impl ParserState {
+    pub fn new(context: ContextRef) -> Self {
+        ParserState {
+            context,
+            deferred_type_list: vec![],
+            cur_region: vec![],
+        }
+    }
+
     pub fn get_context(&self) -> ContextRef {
         self.context.clone()
+    }
+
+    pub fn push_region(&mut self, region: RegionRef) {
+        self.cur_region.push(region);
+    }
+
+    pub fn get_region(&self) -> RegionRef {
+        self.cur_region.last().cloned().unwrap()
+    }
+
+    pub fn pop_region(&mut self) {
+        self.cur_region.pop();
     }
 }
 
@@ -58,6 +85,10 @@ pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> 
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
+pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
+    preceded("@", identifier).parse_next(input)
+}
+
 fn comment<'s>(input: &mut ParseStream<'s>) -> PResult<()> {
     repeat(
         0..,
@@ -71,7 +102,9 @@ pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
 
     // TODO: find a smarter way
     multispace0.parse_next(input)?;
-    let (dialect_name, op_name) = preceded(comment, op_tuple).parse_next(input)?;
+    comment.parse_next(input)?;
+    multispace0.parse_next(input)?;
+    let (dialect_name, op_name) = op_tuple.parse_next(input)?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
@@ -92,7 +125,7 @@ pub fn parse_ir(
 ) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, winnow::error::ContextError>> {
     let input = ParseStream {
         input,
-        state: ParserState { context },
+        state: ParserState::new(context),
     };
 
     single_op.parse(input)
@@ -110,6 +143,41 @@ pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     let _ = (multispace0, "}", multispace0).parse_next(ir)?;
 
     Ok(operations)
+}
+
+pub fn single_block<'s>(input: &mut ParseStream<'s>) -> PResult<BlockRef> {
+    let block_name = preceded("^", identifier).parse_next(input)?;
+
+    (":", multispace0).parse_next(input)?;
+
+    let ops: Vec<OpRef> = repeat(0.., single_op).parse_next(input)?;
+
+    let region = input.state.get_region();
+
+    let block = Block::with_arguments(block_name, &region, &[], &[]);
+
+    for op in ops {
+        block.push(&op);
+    }
+
+    Ok(block)
+}
+
+pub fn region_with_blocks<'s>(input: &mut ParseStream<'s>) -> PResult<RegionRef> {
+    (multispace0, "{", multispace0).parse_next(input)?;
+    let context = input.state.get_context();
+    let region = Region::empty(&context);
+    input.state.push_region(region.clone());
+
+    let (blocks, (_, _)): (Vec<BlockRef>, (_, _)) = repeat_till(1.., single_block, (multispace0, "}")).parse_next(input)?;
+
+    for block in blocks {
+        region.add_block(block);
+    }
+
+    input.state.pop_region();
+
+    Ok(region)
 }
 
 fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
@@ -145,7 +213,7 @@ mod tests {
         ($inp:literal, $context:expr) => {
             ParseStream {
                 input: $inp.into(),
-                state: ParserState { context: $context },
+                state: ParserState::new($context),
             }
         };
     }

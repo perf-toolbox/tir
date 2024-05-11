@@ -430,6 +430,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     quote! {
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
+                fmt.indent();
                 if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
                     fmt.write_direct(DIALECT_NAME);
                     fmt.write_direct(".");
