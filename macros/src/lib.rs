@@ -69,8 +69,15 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
         }
 
         impl tir_core::TyAssembly for #name_ident {
-            fn print_assembly(_attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
+            fn print_assembly(attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
                 fmt.write_direct(#name_str);
+                fmt.write_direct("attrs = {");
+                for (name, attr) in attrs {
+                    fmt.write_direct(name);
+                    fmt.write_direct(" = ");
+                    attr.print(fmt);
+                }
+                fmt.write_direct("}");
             }
 
             fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
