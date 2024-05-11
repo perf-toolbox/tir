@@ -276,7 +276,7 @@ pub fn print_parser_diag(
                     .with_message("here"),
             );
             if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
-                if let Some(name) = dialect.get_similarly_named_op(&op_name) {
+                if let Some(name) = dialect.get_similarly_named_op(op_name) {
                     builder.set_note(format!(
                         "There is a similarly named operation '{}' in '{}' dialect",
                         name, &dialect_name

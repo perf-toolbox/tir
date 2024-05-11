@@ -87,7 +87,6 @@ impl Dialect {
         let mut op_names: Vec<_> = self
             .operation_ids
             .keys()
-            .into_iter()
             .map(|k| (k, strsim::levenshtein(k, name)))
             .collect();
 
@@ -95,8 +94,7 @@ impl Dialect {
 
         op_names
             .first()
-            .map(|f| if f.1 < 3 { Some(f.0) } else { None })
-            .flatten()
+            .and_then(|f| if f.1 < 3 { Some(f.0) } else { None })
             .cloned()
     }
 }
