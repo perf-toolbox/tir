@@ -84,10 +84,19 @@ impl Dialect {
     }
 
     pub fn get_similarly_named_op(&self, name: &str) -> Option<&'static str> {
-        let mut op_names: Vec<_> = self.operation_ids.keys().into_iter().map(|k| (k, strsim::levenshtein(k, name))) .collect();
+        let mut op_names: Vec<_> = self
+            .operation_ids
+            .keys()
+            .into_iter()
+            .map(|k| (k, strsim::levenshtein(k, name)))
+            .collect();
 
         op_names.sort_by_key(|cand| cand.1);
 
-        op_names.first().map(|f| if f.1 < 3 { Some(f.0) } else { None }).flatten().cloned()
+        op_names
+            .first()
+            .map(|f| if f.1 < 3 { Some(f.0) } else { None })
+            .flatten()
+            .cloned()
     }
 }
