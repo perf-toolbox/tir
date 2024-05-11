@@ -1,5 +1,10 @@
 use std::collections::HashMap;
 
+use ariadne::Color;
+use ariadne::Label;
+use ariadne::Report;
+use ariadne::ReportKind;
+use thiserror::Error;
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
 use winnow::ascii::line_ending;
@@ -13,9 +18,11 @@ use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
 use winnow::combinator::trace;
-use winnow::error::ContextError;
 use winnow::error::ErrMode;
+use winnow::error::ErrorKind;
+use winnow::error::ParserError;
 use winnow::stream::Stateful;
+use winnow::stream::Stream;
 use winnow::token::take_till;
 use winnow::Parser;
 
@@ -79,7 +86,29 @@ impl ParserState {
 
 pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
 
-pub type PResult<I> = winnow::PResult<I>;
+pub type PResult<I> = winnow::PResult<I, PError>;
+
+#[derive(Debug, PartialEq, Eq, Error)]
+pub enum PError {
+    #[error("unknown dialect '{0}'")]
+    UnknownDialect(String),
+    #[error("unknown operation '{1}' in dialect '{0}'")]
+    UnknownOperation(String, String),
+    #[error("expected {0} got {1}")]
+    UnexpectedToken(String, String),
+    #[error("syntax error")]
+    Unknown,
+}
+
+impl<I: Stream + Clone> ParserError<I> for PError {
+    fn from_error_kind(_input: &I, _kind: ErrorKind) -> Self {
+        PError::Unknown
+    }
+
+    fn append(self, _: &I, _: &<I as Stream>::Checkpoint, _: ErrorKind) -> Self {
+        self
+    }
+}
 
 pub trait Parseable<T> {
     fn parse(input: &mut ParseStream<'_>) -> PResult<T>;
@@ -130,21 +159,27 @@ pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
+        .ok_or(ErrMode::Cut(PError::UnknownDialect(
+            dialect_name.to_owned(),
+        )))?;
 
-    let operation_id = dialect
-        .get_operation_id(op_name)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    let parser = dialect
-        .get_operation_parser(operation_id)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    trace("op_body", parser).parse_next(input)
+    let operation_id =
+        dialect
+            .get_operation_id(op_name)
+            .ok_or(ErrMode::Cut(PError::UnknownOperation(
+                dialect_name.to_owned(),
+                op_name.to_owned(),
+            )))?;
+
+    // It is impossible to add an operation without specifying its parser
+    let parser = dialect.get_operation_parser(operation_id).unwrap();
+    trace("op body", parser).parse_next(input)
 }
 
 pub fn parse_ir(
     context: ContextRef,
     input: &str,
-) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, winnow::error::ContextError>> {
+) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, PError>> {
     let input = ParseStream {
         input,
         state: ParserState::new(context),
@@ -156,11 +191,7 @@ pub fn parse_ir(
 pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     let _ = (multispace0, "{", multispace0).parse_next(ir)?;
 
-    let mut operations = vec![];
-
-    while let Ok(operation) = single_op.parse_next(ir) {
-        operations.push(operation);
-    }
+    let operations = repeat(0.., single_op).parse_next(ir)?;
 
     let _ = (multispace0, "}", multispace0).parse_next(ir)?;
 
@@ -225,6 +256,41 @@ pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> 
         (space0, "}", space0),
     )
     .parse_next(input)
+}
+
+pub fn print_parser_diag(
+    context: ContextRef,
+    diag: &winnow::error::ParseError<ParseStream<'_>, PError>,
+) {
+    let offset = diag.offset();
+    let inner = diag.inner();
+
+    let mut builder = Report::<std::ops::Range<usize>>::build(ReportKind::Error, (), offset)
+        .with_message(&format!("{}", &inner));
+
+    match inner {
+        PError::UnknownOperation(dialect_name, op_name) => {
+            builder.add_label(
+                Label::new((offset - op_name.len())..offset)
+                    .with_color(Color::Red)
+                    .with_message("here"),
+            );
+            if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
+                if let Some(name) = dialect.get_similarly_named_op(&op_name) {
+                    builder.set_note(format!(
+                        "There is a similarly named operation '{}' in '{}' dialect",
+                        name, &dialect_name
+                    ));
+                }
+            }
+        }
+        _ => {}
+    }
+
+    builder
+        .finish()
+        .print(ariadne::Source::from(diag.input().input))
+        .unwrap();
 }
 
 #[cfg(test)]
