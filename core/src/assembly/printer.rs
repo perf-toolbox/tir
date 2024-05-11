@@ -1,13 +1,33 @@
-use crate::IRFormatter;
+use crate::{BlockRef, IRFormatter, RegionRef};
 
 pub trait Printable {
     fn print(&self, fmt: &mut dyn IRFormatter);
 }
 
-pub fn print_comma_separated(fmt: &mut dyn IRFormatter, tokens: &[&str]) {
+/// Prints given values as a comma separated list
+pub fn print_comma_separated(fmt: &mut dyn IRFormatter, tokens: &[String]) {
     // FIXME: come up with zero allocation way
     let tokens = tokens.join(", ");
     fmt.write_direct(&tokens);
+}
+
+pub fn print_block(fmt: &mut dyn IRFormatter, block: &BlockRef) {
+    fmt.indent();
+    fmt.write_direct(&format!("^{}:\n", block.get_name()));
+
+    for op in block.iter() {
+        op.borrow().print(fmt);
+    }
+}
+
+/// Prints region with all its blocks and their names and operations.
+/// Automatically adds opening and closing brackets.
+pub fn print_region(fmt: &mut dyn IRFormatter, region: &RegionRef) {
+    fmt.start_region();
+    for block in region.iter() {
+        print_block(fmt, &block);
+    }
+    fmt.end_region();
 }
 
 #[cfg(test)]

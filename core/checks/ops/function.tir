@@ -1,5 +1,6 @@
 ; RUN: tir-opt %s
 
+; test
 module {
   func @foo(%arg0: !void) -> !void {
     ^entry:

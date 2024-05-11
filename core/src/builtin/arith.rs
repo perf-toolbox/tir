@@ -1,5 +1,5 @@
 use crate::assembly::parser::Parseable;
-use crate::builtin::value::AnyValue;
+// use crate::builtin::value::AnyValue;arith
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
@@ -17,15 +17,6 @@ pub struct ConstOp {
     r#impl: OpImpl,
 }
 
-impl From<ConstOp> for AnyValue {
-    fn from(c: ConstOp) -> Self {
-        Self {
-            op_id: c.get_alloc_id(),
-            ty: c.get_return_type().unwrap(),
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::parse_ir;
@@ -34,6 +25,7 @@ mod test {
     use crate::OpBuilder;
     use crate::Printable;
     use crate::StringPrinter;
+    use crate::Value;
     use crate::{builtin::*, utils};
     use std::any::TypeId;
 
@@ -52,8 +44,8 @@ mod test {
         // FIXME: this cannot be void
         let ret_type = VoidType::build(context.clone());
         let constant = ConstOp::builder(&context)
-            .value(attr)
-            .return_type(ret_type.into())
+            .value(attr.clone())
+            .return_type(ret_type.clone().into())
             .build();
 
         constant.borrow().get_context();
@@ -71,18 +63,17 @@ mod test {
         let body = module.borrow().get_body().clone();
         let op = body.first().unwrap();
         assert_eq!((*op.borrow()).type_id(), TypeId::of::<ConstOp>());
-        let v1: AnyValue = From::<ConstOp>::from((constant.borrow()).clone());
-        let v2: Value<VoidType> = TryInto::<Value<VoidType>>::try_into(v1.clone()).unwrap();
-        assert_eq!(
-            op.borrow().get_alloc_id(),
-            v2.get_defining_op().borrow().get_alloc_id()
-        );
-        let v3: AnyValue = From::<Value<VoidType>>::from(v2);
-        assert_eq!(v1, v3);
-        assert_eq!(
-            op.borrow().get_alloc_id(),
-            v3.get_defining_op().borrow().get_alloc_id()
-        );
+
+        let other_constant = ConstOp::builder(&context)
+            .value(attr)
+            .return_type(ret_type.into())
+            .build();
+        let value = constant.borrow().get_return_value().unwrap();
+        let other_value = other_constant.borrow().get_return_value().unwrap();
+
+        assert_ne!(value, other_value);
+        let v2: Result<Value<VoidType>, ()> = value.try_cast();
+        assert!(v2.is_ok());
     }
 
     #[test]

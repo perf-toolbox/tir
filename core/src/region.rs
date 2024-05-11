@@ -1,5 +1,6 @@
 use std::{
     cell::RefCell,
+    iter::zip,
     rc::{Rc, Weak},
     sync::Arc,
 };
@@ -14,8 +15,25 @@ pub type BlockWRef = Weak<Block>;
 #[derive(Debug, Clone)]
 pub struct BlockArg {
     parent: BlockWRef,
+    #[allow(dead_code)]
     index: usize,
     ty: Type,
+}
+
+impl BlockArg {
+    pub fn get_type(&self) -> Type {
+        self.ty.clone()
+    }
+
+    pub fn get_block(&self) -> Option<BlockRef> {
+        self.parent.upgrade()
+    }
+}
+
+impl PartialEq for BlockArg {
+    fn eq(&self, _other: &Self) -> bool {
+        todo!()
+    }
 }
 
 #[derive(Debug)]
@@ -58,14 +76,23 @@ impl BlockImpl {
         self.operations.first().map(|id| context.get_op(*id))?
     }
 
-    fn add_argument(&self, ty: Type, name: &str, this: BlockWRef) {
+    fn add_argument(&mut self, ty: Type, name: &str, this: BlockWRef) {
         let index = self.args.len();
-        
-        let block_arg = BlockArg{
+
+        let context = Arc::downgrade(&ty.get_context().unwrap());
+
+        let block_arg = BlockArg {
             parent: this,
             index,
             ty,
         };
+
+        self.args
+            .push(Value::from_block_arg(context, name, block_arg));
+    }
+
+    fn get_name(&self) -> String {
+        self.name.clone()
     }
 }
 
@@ -88,13 +115,43 @@ impl Iterator for BlockIter {
     }
 }
 
+pub struct BlockArgIter {
+    data: Vec<Value>,
+    index: usize,
+}
+
+impl Iterator for BlockArgIter {
+    type Item = Value;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let data = self.data.get(self.index);
+        self.index += 1;
+        data.cloned()
+    }
+}
+
 impl Block {
     pub fn empty(parent: &RegionRef) -> BlockRef {
-        Rc::new(Block(RefCell::new(BlockImpl::new("entry".to_string(), Rc::downgrade(parent)))))
+        Rc::new(Block(RefCell::new(BlockImpl::new(
+            "entry".to_string(),
+            Rc::downgrade(parent),
+        ))))
     }
 
-    pub fn with_arguments(name: &str, parent: &RegionRef, _arg_types: &[Type], _arg_names: &[&str]) -> BlockRef {
-        Rc::new(Block(RefCell::new(BlockImpl::new(name.to_string(), Rc::downgrade(parent)))))
+    pub fn with_arguments<T: AsRef<str>>(
+        name: &str,
+        parent: &RegionRef,
+        arg_types: &[Type],
+        arg_names: &[T],
+    ) -> BlockRef {
+        let block = Rc::new(Block(RefCell::new(BlockImpl::new(
+            name.to_string(),
+            Rc::downgrade(parent),
+        ))));
+
+        block.clone().add_arguments(zip(arg_names, arg_types));
+
+        block
     }
 
     pub fn push(&self, op: &OpRef) {
@@ -125,6 +182,44 @@ impl Block {
             data: self.0.borrow().operations.clone(),
             index: 0,
         }
+    }
+
+    pub fn get_args(&self) -> BlockArgIter {
+        BlockArgIter {
+            data: self.0.borrow().args.clone(),
+            index: 0,
+        }
+    }
+
+    pub fn add_arguments<'s, S: AsRef<str>, T: IntoIterator<Item = (S, &'s Type)>>(
+        self: Rc<Self>,
+        args: T,
+    ) {
+        let this = Rc::downgrade(&self);
+        for (name, ty) in args {
+            self.0
+                .borrow_mut()
+                .add_argument(ty.clone(), name.as_ref(), this.clone());
+        }
+    }
+
+    pub fn get_name(&self) -> String {
+        self.0.borrow().get_name()
+    }
+}
+
+pub struct RegionIter {
+    data: Vec<BlockRef>,
+    index: usize,
+}
+
+impl Iterator for RegionIter {
+    type Item = BlockRef;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let data = self.data.get(self.index);
+        self.index += 1;
+        data.cloned()
     }
 }
 
@@ -182,5 +277,12 @@ impl Region {
 
     pub fn first(&self) -> Option<BlockRef> {
         self.0.borrow().blocks.first().cloned()
+    }
+
+    pub fn iter(&self) -> RegionIter {
+        RegionIter {
+            data: self.0.borrow().blocks.clone(),
+            index: 0,
+        }
     }
 }

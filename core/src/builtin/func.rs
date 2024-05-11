@@ -1,11 +1,9 @@
-use std::any::Any;
-
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{region_with_blocks, sym_name, PResult, ParseStream, Parseable};
 use crate::*;
 use tir_macros::Op;
 use winnow::ascii::space0;
-use winnow::combinator::{delimited, preceded, separated};
+use winnow::combinator::{delimited, preceded, separated, trace};
 use winnow::Parser;
 
 use crate as tir_core;
@@ -53,11 +51,15 @@ impl OpAssembly for FuncOp {
     where
         Self: Sized,
     {
-        let sym_name_str = preceded(space0, sym_name).parse_next(input)?;
+        let sym_name_str = trace("sym_name", preceded(space0, sym_name)).parse_next(input)?;
 
         let (arg_names, func_ty) = signature.parse_next(input)?;
 
-        println!("args: {:?}", arg_names);
+        let arg_names: Vec<_> = arg_names.into_iter().map(|n| n.to_owned()).collect();
+        let arg_types = func_ty.get_inputs().to_vec();
+
+        input.state.set_deferred_types(arg_types);
+        input.state.set_deferred_names(arg_names);
 
         let region = region_with_blocks.parse_next(input)?;
 
@@ -81,16 +83,25 @@ impl OpAssembly for FuncOp {
         let func_ty: FuncType = self.get_func_type_attr().clone().try_into().unwrap();
 
         fmt.write_direct("(");
+
+        let types: Vec<_> = self
+            .get_body_region()
+            .first()
+            .unwrap()
+            .get_args()
+            .map(|arg| {
+                let mut printer = StringPrinter::new();
+                printer.write_direct(&format!("%{}: ", &arg.get_name()));
+                arg.get_type().print(&mut printer);
+                printer.get()
+            })
+            .collect();
+        print_comma_separated(fmt, &types);
         fmt.write_direct(")");
         fmt.write_direct(" -> ");
         func_ty.get_return().print(fmt);
-        // todo!()
-        fmt.start_region();
-        // let body = self.get_body();
-        // for op in body.iter() {
-        //     op.borrow().print(fmt);
-        // }
-        fmt.end_region();
+        fmt.write_direct(" ");
+        print_region(fmt, &self.get_body_region());
     }
 }
 

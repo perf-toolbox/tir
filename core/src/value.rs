@@ -3,10 +3,11 @@ use std::sync::Arc;
 
 use crate::AllocId;
 use crate::BlockArg;
-use crate::BlockWRef;
+use crate::BlockRef;
 use crate::ContextRef;
 use crate::ContextWRef;
 use crate::OpRef;
+use crate::Ty;
 use crate::Type;
 
 #[derive(Debug, Clone)]
@@ -15,21 +16,61 @@ pub enum ValueOwner {
     BlockArg(BlockArg),
 }
 
-#[derive(Debug)]
-pub struct Value<T: Into<Type> + TryFrom<Type> = Type> {
+#[derive(Debug, Clone)]
+pub struct Value<T: Into<Type> + TryFrom<Type> + Clone = Type> {
     owner: ValueOwner,
     context: ContextWRef,
     name: Arc<String>,
     _a: PhantomData<T>,
 }
 
+impl PartialEq for Value {
+    fn eq(&self, other: &Self) -> bool {
+        let context = self.context.upgrade();
+        let other_context = other.context.upgrade();
+
+        if context.is_none() || other_context.is_none() {
+            return false;
+        }
+
+        let context = context.unwrap();
+        let other_context = other_context.unwrap();
+
+        let context = Arc::into_raw(context);
+        let other_context = Arc::into_raw(other_context);
+        let eq_context = context == other_context;
+
+        let _ = unsafe { Arc::from_raw(context) };
+        let _ = unsafe { Arc::from_raw(other_context) };
+
+        if !eq_context {
+            return false;
+        }
+
+        match (&self.owner, &other.owner) {
+            (ValueOwner::Op(id), ValueOwner::Op(other_id)) => id == other_id,
+            (ValueOwner::BlockArg(arg), ValueOwner::BlockArg(other_arg)) => arg == other_arg,
+            _ => false,
+        }
+    }
+}
+
 impl<T: Into<Type> + TryFrom<Type> + Clone> Value<T> {
     pub fn from_block_arg(context: ContextWRef, name: &str, arg: BlockArg) -> Self {
-        Value{
+        Value {
             owner: ValueOwner::BlockArg(arg),
             context,
             name: Arc::new(name.to_string()),
-            _a: PhantomData::default(),
+            _a: PhantomData,
+        }
+    }
+
+    pub fn from_op(context: ContextRef, name: &str, alloc_id: AllocId) -> Self {
+        Value {
+            owner: ValueOwner::Op(alloc_id),
+            context: Arc::downgrade(&context),
+            name: Arc::new(name.to_string()),
+            _a: PhantomData,
         }
     }
 
@@ -37,60 +78,73 @@ impl<T: Into<Type> + TryFrom<Type> + Clone> Value<T> {
         self.context.upgrade().unwrap()
     }
 
-    // pub fn get_defining_op(&self) -> OpRef {
-    //     self.get_context().get_op(self.op_id).unwrap()
-    // }
+    pub fn get_defining_op(&self) -> Option<OpRef> {
+        match &self.owner {
+            ValueOwner::Op(alloc_id) => {
+                let context = self.context.upgrade().unwrap();
+                context.get_op(*alloc_id)
+            }
+            _ => None,
+        }
+    }
+
+    pub fn get_defining_block(&self) -> Option<BlockRef> {
+        match &self.owner {
+            ValueOwner::BlockArg(arg) => arg.get_block(),
+            _ => None,
+        }
+    }
 
     pub fn get_type(&self) -> T {
         match &self.owner {
-            ValueOwner::BlockArg(arg) => { todo!() },
-            _ => unimplemented!(),
+            ValueOwner::BlockArg(arg) => match arg.get_type().try_into() {
+                Ok(res) => res,
+                _ => unreachable!(),
+            },
+            ValueOwner::Op(alloc_id) => {
+                let context = self.context.upgrade().unwrap();
+                let op = context.get_op(*alloc_id).clone().unwrap();
+                let ret_ty = op.borrow().get_return_type().unwrap();
+
+                match ret_ty.try_into() {
+                    Ok(res) => res,
+                    _ => unreachable!(),
+                }
+            }
         }
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
 }
 
-// pub type AnyValue = Value<Type>;
+impl Value<Type> {
+    pub fn try_cast<Target: Ty + Clone + Into<Type> + TryFrom<Type>>(
+        &self,
+    ) -> Result<Value<Target>, ()> {
+        let ty = self.get_type();
 
-// #[derive(Debug, PartialEq, Clone)]
-// pub struct AnyValue {
-//     pub op_id: AllocId,
-//     pub ty: Type,
-// }
+        if !ty.isa::<Target>() {
+            return Err(());
+        }
 
-// During code parsing, Type cannot be known statically, so AnyValue is used to represent a value without knowing
-// its type at compile time, while Value<T> is used to represent a value with a statically known type.
-// This allows us to convert an AnyValue to a Value<T> when we know the type of the value at compile time, and vice versa.
-// impl AnyValue {
-//     pub fn get_context(&self) -> ContextRef {
-//         self.get_type().get_context().unwrap()
-//     }
+        Ok(Value {
+            owner: self.owner.clone(),
+            context: self.context.clone(),
+            name: self.name.clone(),
+            _a: PhantomData,
+        })
+    }
+}
 
-//     pub fn get_defining_op(&self) -> OpRef {
-//         self.get_context().get_op(self.op_id).unwrap()
-//     }
-
-//     pub fn get_type(&self) -> Type {
-//         self.ty.clone()
-//     }
-// }
-
-// impl<T: Into<Type> + TryFrom<Type>> From<Value<T>> for AnyValue {
-//     fn from(value: Value<T>) -> Self {
-//         AnyValue {
-//             op_id: value.op_id,
-//             ty: value.ty.into(),
-//         }
-//     }
-// }
-
-// impl<T: Into<Type> + TryFrom<Type>> TryInto<Value<T>> for AnyValue {
-//     type Error = ();
-
-//     fn try_into(self) -> Result<Value<T>, Self::Error> {
-//         let ty: T = self.ty.try_into().map_err(|_| ())?;
-//         Ok(Value {
-//             op_id: self.op_id,
-//             ty,
-//         })
-//     }
-// }
+impl<T: Ty + Clone + Into<Type> + TryFrom<Type>> From<Value<T>> for Value {
+    fn from(value: Value<T>) -> Self {
+        Value {
+            owner: value.owner,
+            context: value.context,
+            name: value.name,
+            _a: PhantomData,
+        }
+    }
+}

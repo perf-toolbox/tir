@@ -12,6 +12,7 @@ use winnow::combinator::repeat_till;
 use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
+use winnow::combinator::trace;
 use winnow::error::ContextError;
 use winnow::error::ErrMode;
 use winnow::stream::Stateful;
@@ -29,7 +30,8 @@ use crate::{ContextRef, OpRef, Type};
 pub struct ParserState {
     context: ContextRef,
     deferred_type_list: Vec<Type>,
-    cur_region: Vec<RegionRef>
+    deferred_arg_names: Vec<String>,
+    cur_region: Vec<RegionRef>,
 }
 
 impl ParserState {
@@ -37,6 +39,7 @@ impl ParserState {
         ParserState {
             context,
             deferred_type_list: vec![],
+            deferred_arg_names: vec![],
             cur_region: vec![],
         }
     }
@@ -55,6 +58,22 @@ impl ParserState {
 
     pub fn pop_region(&mut self) {
         self.cur_region.pop();
+    }
+
+    pub fn take_deferred_types(&mut self) -> Vec<Type> {
+        std::mem::take(&mut self.deferred_type_list)
+    }
+
+    pub fn set_deferred_types(&mut self, types: Vec<Type>) {
+        self.deferred_type_list = types;
+    }
+
+    pub fn take_deferred_names(&mut self) -> Vec<String> {
+        std::mem::take(&mut self.deferred_arg_names)
+    }
+
+    pub fn set_deferred_names(&mut self, names: Vec<String>) {
+        self.deferred_arg_names = names;
     }
 }
 
@@ -89,10 +108,13 @@ pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
     preceded("@", identifier).parse_next(input)
 }
 
-fn comment<'s>(input: &mut ParseStream<'s>) -> PResult<()> {
-    repeat(
-        0..,
-        (multispace0, ';', take_till(1.., ['\n', '\r']), line_ending).void(),
+fn comment(input: &mut ParseStream<'_>) -> PResult<()> {
+    trace(
+        "comment",
+        repeat(
+            0..,
+            (multispace0, ';', take_till(1.., ['\n', '\r']), line_ending).void(),
+        ),
     )
     .parse_next(input)
 }
@@ -104,7 +126,7 @@ pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
     multispace0.parse_next(input)?;
     comment.parse_next(input)?;
     multispace0.parse_next(input)?;
-    let (dialect_name, op_name) = op_tuple.parse_next(input)?;
+    let (dialect_name, op_name) = trace("op name", op_tuple).parse_next(input)?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
@@ -113,10 +135,10 @@ pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
     let operation_id = dialect
         .get_operation_id(op_name)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    let mut parser = dialect
+    let parser = dialect
         .get_operation_parser(operation_id)
         .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    parser.parse_next(input)
+    trace("op_body", parser).parse_next(input)
 }
 
 pub fn parse_ir(
@@ -145,7 +167,7 @@ pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     Ok(operations)
 }
 
-pub fn single_block<'s>(input: &mut ParseStream<'s>) -> PResult<BlockRef> {
+pub fn single_block(input: &mut ParseStream<'_>) -> PResult<BlockRef> {
     let block_name = preceded("^", identifier).parse_next(input)?;
 
     (":", multispace0).parse_next(input)?;
@@ -154,7 +176,9 @@ pub fn single_block<'s>(input: &mut ParseStream<'s>) -> PResult<BlockRef> {
 
     let region = input.state.get_region();
 
-    let block = Block::with_arguments(block_name, &region, &[], &[]);
+    let names = input.state.take_deferred_names();
+    let types = input.state.take_deferred_types();
+    let block = Block::with_arguments(block_name, &region, &types, &names);
 
     for op in ops {
         block.push(&op);
@@ -163,13 +187,14 @@ pub fn single_block<'s>(input: &mut ParseStream<'s>) -> PResult<BlockRef> {
     Ok(block)
 }
 
-pub fn region_with_blocks<'s>(input: &mut ParseStream<'s>) -> PResult<RegionRef> {
+pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
     (multispace0, "{", multispace0).parse_next(input)?;
     let context = input.state.get_context();
     let region = Region::empty(&context);
     input.state.push_region(region.clone());
 
-    let (blocks, (_, _)): (Vec<BlockRef>, (_, _)) = repeat_till(1.., single_block, (multispace0, "}")).parse_next(input)?;
+    let (blocks, (_, _)): (Vec<BlockRef>, (_, _)) =
+        repeat_till(1.., single_block, (multispace0, "}")).parse_next(input)?;
 
     for block in blocks {
         region.add_block(block);

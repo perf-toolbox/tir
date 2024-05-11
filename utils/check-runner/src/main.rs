@@ -41,7 +41,7 @@ fn run_command(command: &str, test_path: &PathBuf) -> Result<Output, std::io::Er
     let script = words.join(" ");
 
     let mut filtered_env: HashMap<String, String> = env::vars()
-        .filter(|&(ref k, _)| k == "TERM" || k == "TZ" || k == "LANG" || k == "LD_LIBRARY_PATH")
+        .filter(|(k, _)| k == "TERM" || k == "TZ" || k == "LANG" || k == "LD_LIBRARY_PATH")
         .collect();
     filtered_env.insert("PATH".to_string(), resolve_path());
 
@@ -55,16 +55,14 @@ fn run_command(command: &str, test_path: &PathBuf) -> Result<Output, std::io::Er
 fn run_test(test: &PathBuf) -> bool {
     let path_str = test.to_str().unwrap();
 
-    let test_contents = std::fs::read_to_string(&test).expect("Failed to read test file");
+    let test_contents = std::fs::read_to_string(test).expect("Failed to read test file");
     let lines = test_contents.lines();
 
     let re = Regex::new(".*RUN:(.*)$").unwrap();
 
     let run_lines = lines
-        .map(|line| re.captures_iter(line))
-        .flatten()
-        .map(|c| c.get(1).map(|c| c.as_str().trim()))
-        .flatten()
+        .flat_map(|line| re.captures_iter(line))
+        .filter_map(|c| c.get(1).map(|c| c.as_str().trim()))
         .collect::<Vec<&str>>();
 
     let mut has_failures = false;
@@ -120,13 +118,12 @@ pub fn main() -> Result<(), String> {
         let tests = suite
             .glob
             .iter()
-            .map(|pattern| glob(&format!("{}/{}", path, &pattern)).expect("Failed to glob tests"))
-            .flatten()
+            .flat_map(|pattern| glob(&format!("{}/{}", path, &pattern)).expect("Failed to glob tests"))
             .filter_map(|test| test.ok())
             .collect::<Vec<_>>();
 
         for test in tests {
-            has_failures = has_failures | run_test(&test);
+            has_failures |= run_test(&test);
         }
     }
 

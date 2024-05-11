@@ -254,12 +254,21 @@ fn build_return_type_accessor(fields: &[OpFieldReceiver]) -> proc_macro2::TokenS
                 fn get_return_type(&self) -> Option<tir_core::Type> {
                     Some(self.#ident.clone())
                 }
+
+                fn get_return_value(&self) -> Option<tir_core::Value> {
+                    let context = self.get_context();
+                    Some(tir_core::Value::from_op(context, "todo", self.r#impl.alloc_id))
+                }
             };
         }
     }
 
     quote! {
         fn get_return_type(&self) -> Option<tir_core::Type> {
+            None
+        }
+
+        fn get_return_value(&self) -> Option<tir_core::Value> {
             None
         }
     }
