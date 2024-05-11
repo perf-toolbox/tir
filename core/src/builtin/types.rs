@@ -1,3 +1,4 @@
+use crate::Printable;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use std::collections::HashMap;
 use tir_macros::dialect_type;
@@ -6,11 +7,9 @@ use crate as tir_core;
 
 use crate::builtin::DIALECT_NAME;
 
-// FIXME: figure out way to properly print and parse FuncType
 dialect_type!(FuncType);
 dialect_type!(VoidType);
-
-// FIXME: we need scalar types
+dialect_type!(IntType);
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
@@ -77,11 +76,42 @@ impl VoidType {
     }
 }
 
+impl IntType {
+    fn get_bits_attr_name() -> &'static str {
+        "bits"
+    }
+
+    pub fn build(context: ContextRef, bits: u32) -> IntType {
+        let mut attrs = HashMap::new();
+
+        attrs.insert(IntType::get_bits_attr_name().to_string(), Attr::U32(bits));
+
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+        let type_id = dialect.get_type_id(IntType::get_type_name());
+        let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
+
+        IntType { r#type }
+    }
+
+    pub fn get_bits(&self) -> u32 {
+        match self
+            .r#type
+            .get_attrs()
+            .get(Self::get_bits_attr_name())
+            .as_ref()
+            .unwrap()
+        {
+            Attr::U32(bits) => *bits,
+            _ => panic!("Expected 'bits' to be u32"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{builtin::FuncType, Context, Printable, StringPrinter, Type};
+    use crate::{Context, Printable, StringPrinter, Type};
 
-    use super::VoidType;
+    use super::*;
 
     #[test]
     fn type_casts() {
@@ -90,16 +120,26 @@ mod tests {
         let ty = VoidType::build(context.clone());
         let mut printer = StringPrinter::new();
         ty.print(&mut printer);
-        assert_eq!("!void", &printer.get());
+        assert_eq!("!void attrs = {}", &printer.get());
         let ty: Type = ty.into();
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());
         assert!(FuncType::try_from(ty.clone()).is_err());
+        assert!(IntType::try_from(ty.clone()).is_err());
 
         let ty = FuncType::build(context.clone(), &[], ty);
         let ty: Type = ty.into();
         assert!(ty.isa::<FuncType>());
         assert!(VoidType::try_from(ty.clone()).is_err());
         assert!(FuncType::try_from(ty.clone()).is_ok());
+        assert!(IntType::try_from(ty.clone()).is_err());
+
+        let ty = IntType::build(context.clone(), 8);
+        let ty: Type = ty.into();
+        assert!(ty.isa::<IntType>());
+        assert!(VoidType::try_from(ty.clone()).is_err());
+        assert!(FuncType::try_from(ty.clone()).is_err());
+        assert!(IntType::try_from(ty.clone()).is_ok());
+        assert_eq!(IntType::try_from(ty.clone()).unwrap().get_bits(), 8);
     }
 }
