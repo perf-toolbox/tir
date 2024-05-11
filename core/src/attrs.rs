@@ -5,7 +5,7 @@ use winnow::{
 };
 
 use crate::{
-    parser::{identifier, PResult, ParseStream, Parseable},
+    parser::{identifier, PResult, Parsable, ParseStream},
     Printable, Type,
 };
 
@@ -72,7 +72,7 @@ impl Printable for Attr {
     }
 }
 
-impl Parseable<Attr> for Attr {
+impl Parsable<Attr> for Attr {
     fn parse(input: &mut ParseStream<'_>) -> PResult<Attr> {
         let atom = separated_pair(identifier, (space0, ":", space0), alphanumeric1);
         let (ty, value) =

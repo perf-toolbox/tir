@@ -2,7 +2,7 @@ use crate::utils::RTypeInstr;
 use crate::Register;
 use crate::{assemble_reg, disassemble_gpr};
 use tir_backend::BinaryEmittable;
-use tir_core::parser::Parseable;
+use tir_core::parser::Parsable;
 use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{Op, OpAssembly};

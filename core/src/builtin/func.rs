@@ -1,5 +1,5 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{region_with_blocks, sym_name, PResult, ParseStream, Parseable};
+use crate::parser::{region_with_blocks, sym_name, PResult, Parsable, ParseStream};
 use crate::*;
 use tir_macros::Op;
 use winnow::ascii::space0;

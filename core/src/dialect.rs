@@ -94,7 +94,7 @@ impl Dialect {
 
         op_names
             .first()
-            .and_then(|f| if f.1 < 3 { Some(f.0) } else { None })
+            .and_then(|f| if f.1 < 5 { Some(f.0) } else { None })
             .cloned()
     }
 }
