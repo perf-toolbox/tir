@@ -1,5 +1,5 @@
 fn main() {
-    let mut args = std::env::args().into_iter().skip(1);
+    let mut args = std::env::args().skip(1);
 
     let exec = args.next();
     let cli_args: Vec<_> = args.collect();

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use ariadne::Color;
-use ariadne::ColorGenerator;
 use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
@@ -33,7 +32,6 @@ use winnow::stream::Stream;
 use winnow::token::take_till;
 use winnow::Parser;
 
-use crate::value;
 use crate::Attr;
 use crate::Block;
 use crate::BlockRef;
