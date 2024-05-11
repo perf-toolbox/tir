@@ -4,12 +4,6 @@ pub trait IRFormatter {
     fn get_indent(&self) -> u32;
     fn write_direct(&mut self, data: &str);
 
-    fn write_newline(&mut self, data: &str) {
-        self.write_direct(data);
-        self.write_direct("\n");
-        self.indent()
-    }
-
     fn indent(&mut self) {
         for _ in 0..self.get_indent() {
             self.write_direct("  ");

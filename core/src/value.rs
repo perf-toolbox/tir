@@ -36,14 +36,7 @@ impl PartialEq for Value {
         let context = context.unwrap();
         let other_context = other_context.unwrap();
 
-        let context = Arc::into_raw(context);
-        let other_context = Arc::into_raw(other_context);
-        let eq_context = context == other_context;
-
-        let _ = unsafe { Arc::from_raw(context) };
-        let _ = unsafe { Arc::from_raw(other_context) };
-
-        if !eq_context {
+        if Arc::as_ptr(&context) != Arc::as_ptr(&other_context) {
             return false;
         }
 

@@ -118,7 +118,9 @@ pub fn main() -> Result<(), String> {
         let tests = suite
             .glob
             .iter()
-            .flat_map(|pattern| glob(&format!("{}/{}", path, &pattern)).expect("Failed to glob tests"))
+            .flat_map(|pattern| {
+                glob(&format!("{}/{}", path, &pattern)).expect("Failed to glob tests")
+            })
             .filter_map(|test| test.ok())
             .collect::<Vec<_>>();
 
