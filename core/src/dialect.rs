@@ -82,4 +82,19 @@ impl Dialect {
     pub fn get_type_parser(&self, id: u32) -> Option<TyParseFn> {
         self.ty_parse_fn.get(&id).cloned()
     }
+
+    pub fn get_similarly_named_op(&self, name: &str) -> Option<&'static str> {
+        let mut op_names: Vec<_> = self
+            .operation_ids
+            .keys()
+            .map(|k| (k, strsim::levenshtein(k, name)))
+            .collect();
+
+        op_names.sort_by_key(|cand| cand.1);
+
+        op_names
+            .first()
+            .and_then(|f| if f.1 < 5 { Some(f.0) } else { None })
+            .cloned()
+    }
 }

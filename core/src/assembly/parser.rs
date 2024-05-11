@@ -1,11 +1,19 @@
 use std::collections::HashMap;
 
+use ariadne::Color;
+use ariadne::Config;
+use ariadne::Label;
+use ariadne::Report;
+use ariadne::ReportKind;
+use thiserror::Error;
 use winnow::ascii::alpha1;
 use winnow::ascii::alphanumeric0;
 use winnow::ascii::line_ending;
 use winnow::ascii::multispace0;
 use winnow::ascii::space0;
 use winnow::combinator::alt;
+use winnow::combinator::cut_err;
+use winnow::combinator::delimited;
 use winnow::combinator::preceded;
 use winnow::combinator::repeat;
 use winnow::combinator::repeat_till;
@@ -13,9 +21,14 @@ use winnow::combinator::separated;
 use winnow::combinator::separated_pair;
 use winnow::combinator::terminated;
 use winnow::combinator::trace;
-use winnow::error::ContextError;
+use winnow::error::AddContext;
 use winnow::error::ErrMode;
+use winnow::error::ErrorKind;
+use winnow::error::ParserError;
+use winnow::error::StrContext;
+use winnow::error::StrContextValue;
 use winnow::stream::Stateful;
+use winnow::stream::Stream;
 use winnow::token::take_till;
 use winnow::Parser;
 
@@ -79,10 +92,60 @@ impl ParserState {
 
 pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
 
-pub type PResult<I> = winnow::PResult<I>;
+pub type PResult<I> = winnow::PResult<I, PError>;
 
-pub trait Parseable<T> {
+#[derive(Debug, PartialEq, Eq, Error)]
+pub enum PError {
+    #[error("unknown dialect '{0}'")]
+    UnknownDialect(String),
+    #[error("unknown operation '{1}' in dialect '{0}'")]
+    UnknownOperation(String, String),
+    #[error("expected '{0}'")]
+    ExpectedNotFound(String),
+    #[error("syntax error")]
+    Unknown,
+}
+
+impl<I: Stream + Clone> ParserError<I> for PError {
+    fn from_error_kind(_input: &I, _kind: ErrorKind) -> Self {
+        PError::Unknown
+    }
+
+    fn append(self, _: &I, _: &<I as Stream>::Checkpoint, _: ErrorKind) -> Self {
+        self
+    }
+}
+
+impl<I: Stream> AddContext<I, StrContext> for PError {
+    fn add_context(
+        self,
+        _input: &I,
+        _token_start: &<I as Stream>::Checkpoint,
+        context: StrContext,
+    ) -> Self {
+        match context {
+            StrContext::Expected(value) => match value {
+                StrContextValue::CharLiteral(value) => PError::ExpectedNotFound(value.to_string()),
+                StrContextValue::StringLiteral(value) => {
+                    PError::ExpectedNotFound(value.to_string())
+                }
+                StrContextValue::Description(value) => PError::ExpectedNotFound(value.to_string()),
+                _ => todo!(),
+            },
+            _ => PError::Unknown,
+        }
+    }
+}
+
+pub trait Parsable<T> {
     fn parse(input: &mut ParseStream<'_>) -> PResult<T>;
+}
+
+pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> PResult<()> {
+    delimited(multispace0, token, multispace0)
+        .context(StrContext::Expected(StrContextValue::StringLiteral(token)))
+        .void()
+        .parse_next(input)
 }
 
 pub fn identifier<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
@@ -108,43 +171,58 @@ pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
     preceded("@", identifier).parse_next(input)
 }
 
+pub fn word<'a, F, O, E: ParserError<ParseStream<'a>>>(
+    inner: F,
+) -> impl Parser<ParseStream<'a>, O, E>
+where
+    F: Parser<ParseStream<'a>, O, E>,
+{
+    delimited(space0, inner, space0)
+}
+
+fn single_comment(input: &mut ParseStream<'_>) -> PResult<()> {
+    (';', take_till(1.., ['\n', '\r']), line_ending)
+        .void()
+        .parse_next(input)
+}
+
 fn comment(input: &mut ParseStream<'_>) -> PResult<()> {
-    trace(
-        "comment",
-        repeat(
-            0..,
-            (multispace0, ';', take_till(1.., ['\n', '\r']), line_ending).void(),
-        ),
-    )
-    .parse_next(input)
+    repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
 }
 
 pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
     let context = input.state.get_context();
 
-    // TODO: find a smarter way
-    multispace0.parse_next(input)?;
-    comment.parse_next(input)?;
-    multispace0.parse_next(input)?;
-    let (dialect_name, op_name) = trace("op name", op_tuple).parse_next(input)?;
+    let skip = trace(
+        "skip comments",
+        alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
+    );
+
+    let (dialect_name, op_name) = trace("op name", preceded(skip, op_tuple)).parse_next(input)?;
 
     let dialect = context
         .get_dialect_by_name(dialect_name)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
+        .ok_or(ErrMode::Cut(PError::UnknownDialect(
+            dialect_name.to_owned(),
+        )))?;
 
-    let operation_id = dialect
-        .get_operation_id(op_name)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    let parser = dialect
-        .get_operation_parser(operation_id)
-        .ok_or(ErrMode::Backtrack(ContextError::new()))?;
-    trace("op_body", parser).parse_next(input)
+    let operation_id =
+        dialect
+            .get_operation_id(op_name)
+            .ok_or(ErrMode::Cut(PError::UnknownOperation(
+                dialect_name.to_owned(),
+                op_name.to_owned(),
+            )))?;
+
+    // It is impossible to add an operation without specifying its parser
+    let parser = dialect.get_operation_parser(operation_id).unwrap();
+    trace("op body", parser).parse_next(input)
 }
 
 pub fn parse_ir(
     context: ContextRef,
     input: &str,
-) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, winnow::error::ContextError>> {
+) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, PError>> {
     let input = ParseStream {
         input,
         state: ParserState::new(context),
@@ -154,23 +232,31 @@ pub fn parse_ir(
 }
 
 pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
-    let _ = (multispace0, "{", multispace0).parse_next(ir)?;
+    expected_token("{", ir)?;
 
-    let mut operations = vec![];
+    let operations = repeat(0.., single_op).parse_next(ir)?;
 
-    while let Ok(operation) = single_op.parse_next(ir) {
-        operations.push(operation);
-    }
-
-    let _ = (multispace0, "}", multispace0).parse_next(ir)?;
+    expected_token("}", ir)?;
 
     Ok(operations)
 }
 
 pub fn single_block(input: &mut ParseStream<'_>) -> PResult<BlockRef> {
-    let block_name = preceded("^", identifier).parse_next(input)?;
-
-    (":", multispace0).parse_next(input)?;
+    let skip = trace(
+        "skip comments",
+        alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
+    );
+    let block_name = preceded(
+        (skip, '^'),
+        terminated(
+            identifier,
+            (
+                cut_err(':'.context(StrContext::Expected(StrContextValue::CharLiteral(':')))),
+                multispace0,
+            ),
+        ),
+    )
+    .parse_next(input)?;
 
     let ops: Vec<OpRef> = repeat(0.., single_op).parse_next(input)?;
 
@@ -188,7 +274,7 @@ pub fn single_block(input: &mut ParseStream<'_>) -> PResult<BlockRef> {
 }
 
 pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
-    (multispace0, "{", multispace0).parse_next(input)?;
+    expected_token("{", input)?;
     let context = input.state.get_context();
     let region = Region::empty(&context);
     input.state.push_region(region.clone());
@@ -206,12 +292,7 @@ pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
 }
 
 fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
-    separated_pair(
-        identifier.map(|s| s.to_string()),
-        (space0, "=", space0),
-        Attr::parse,
-    )
-    .parse_next(input)
+    separated_pair(identifier.map(|s| s.to_string()), word('='), Attr::parse).parse_next(input)
 }
 
 pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> {
@@ -221,10 +302,64 @@ pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> 
         (space0, ",", space0).recognize(),
     );
     terminated(
-        preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
+        preceded(
+            (space0, "attrs", space0, "=", space0, "{", space0),
+            attr_pairs,
+        ),
         (space0, "}", space0),
     )
     .parse_next(input)
+}
+
+pub fn print_parser_diag(
+    context: ContextRef,
+    diag: &winnow::error::ParseError<ParseStream<'_>, PError>,
+) {
+    let offset = diag.offset();
+    let inner = diag.inner();
+
+    let mut builder = Report::<std::ops::Range<usize>>::build(ReportKind::Error, (), offset)
+        .with_config(
+            Config::default()
+                .with_tab_width(2)
+                .with_index_type(ariadne::IndexType::Byte),
+        )
+        .with_message(&format!("{}", &inner));
+
+    match inner {
+        PError::UnknownOperation(dialect_name, op_name) => {
+            builder.add_label(
+                Label::new((offset - op_name.len())..offset)
+                    .with_color(Color::Red)
+                    .with_message("unknown operation"),
+            );
+            if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
+                if let Some(name) = dialect.get_similarly_named_op(op_name) {
+                    builder.set_note(format!(
+                        "there is a similarly named operation '{}' in '{}' dialect",
+                        name, &dialect_name
+                    ));
+                }
+            }
+        }
+        PError::ExpectedNotFound(token) => {
+            builder.add_label(
+                Label::new(offset..(offset + token.len()))
+                    .with_message("unexpected token")
+                    .with_color(Color::Red),
+            );
+        }
+        _ => {
+            builder.add_label(Label::new(offset..(offset + 1)).with_message("unexpected token"));
+            #[cfg(debug_assertions)]
+            builder.set_note("for development purpose try re-building with --features=winnow/debug")
+        }
+    }
+
+    builder
+        .finish()
+        .print(ariadne::Source::from(diag.input().input))
+        .unwrap();
 }
 
 #[cfg(test)]

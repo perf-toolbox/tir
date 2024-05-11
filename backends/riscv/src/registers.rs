@@ -1,6 +1,6 @@
 use seq_macro::seq;
 use tir_core::{
-    parser::{identifier, PResult, ParseStream, Parseable},
+    parser::{identifier, PResult, Parsable, ParseStream},
     IRFormatter, Printable,
 };
 use winnow::Parser;
@@ -47,7 +47,7 @@ macro_rules! register {
             }
         }
 
-        impl Parseable<Register> for Register {
+        impl Parsable<Register> for Register {
             fn parse(input: &mut ParseStream<'_>) -> PResult<Register> {
                 let ident = identifier.parse_next(input)?;
 

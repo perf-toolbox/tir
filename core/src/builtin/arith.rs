@@ -1,4 +1,4 @@
-use crate::assembly::parser::Parseable;
+use crate::assembly::parser::Parsable;
 // use crate::builtin::value::AnyValue;arith
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
