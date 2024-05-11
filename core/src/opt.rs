@@ -9,7 +9,11 @@ pub fn opt_main() {
 
     let context = Context::new();
 
-    let ir = std::fs::read_to_string(path).unwrap();
+    let ir = if let Ok(i) = std::fs::read_to_string(path) {
+        i
+    } else {
+        panic!("Could not read file")
+    };
 
     let module = parse_ir(context.clone(), &ir);
 

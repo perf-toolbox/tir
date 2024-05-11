@@ -80,7 +80,7 @@ mod test {
     fn parse_const() {
         let ir = "
         module {
-            const attrs = {value = <i8: 16>} -> !void 
+            const attrs = {value = <i8: 16>} -> !void attrs = {}
         }
         ";
 

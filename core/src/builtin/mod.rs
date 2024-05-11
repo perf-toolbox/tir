@@ -19,4 +19,4 @@ use crate::assembly::TyAssembly;
 
 dialect!(builtin);
 populate_dialect_ops!(ModuleOp, FuncOp, ConstOp);
-populate_dialect_types!(FuncType, VoidType, IntegerType);
+populate_dialect_types!(FuncType, VoidType, IntType);

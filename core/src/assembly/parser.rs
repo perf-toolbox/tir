@@ -292,7 +292,15 @@ pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
 }
 
 fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
-    separated_pair(identifier.map(|s| s.to_string()), word('='), Attr::parse).parse_next(input)
+    trace(
+        "attr pair",
+        separated_pair(
+            identifier.map(|s| s.to_string()),
+            (space0, "=", space0),
+            Attr::parse,
+        ),
+    )
+    .parse_next(input)
 }
 
 pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> {
@@ -301,12 +309,12 @@ pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> 
         attr_pair,
         (space0, ",", space0).recognize(),
     );
-    terminated(
-        preceded(
-            (space0, "attrs", space0, "=", space0, "{", space0),
-            attr_pairs,
+    trace(
+        "attribute list",
+        terminated(
+            preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
+            (space0, "}", space0),
         ),
-        (space0, "}", space0),
     )
     .parse_next(input)
 }

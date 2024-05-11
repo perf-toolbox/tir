@@ -73,8 +73,8 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 fmt.write_direct(#name_str);
             }
 
-            fn parse_assembly(_input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
-                Ok(HashMap::new())
+            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
+                tir_core::parser::attr_list(input)
             }
         }
 
