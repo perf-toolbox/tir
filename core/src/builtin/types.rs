@@ -1,3 +1,4 @@
+use crate::Printable;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use std::collections::HashMap;
 use tir_macros::dialect_type;
@@ -119,7 +120,7 @@ mod tests {
         let ty = VoidType::build(context.clone());
         let mut printer = StringPrinter::new();
         ty.print(&mut printer);
-        assert_eq!("!void", &printer.get());
+        assert_eq!("!void attrs = {}", &printer.get());
         let ty: Type = ty.into();
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());
