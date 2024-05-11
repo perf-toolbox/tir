@@ -6,11 +6,9 @@ use crate as tir_core;
 
 use crate::builtin::DIALECT_NAME;
 
-// FIXME: figure out way to properly print and parse FuncType
 dialect_type!(FuncType);
 dialect_type!(VoidType);
-
-// FIXME: we need scalar types
+dialect_type!(IntegerType);
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
@@ -77,11 +75,45 @@ impl VoidType {
     }
 }
 
+impl IntegerType {
+    fn get_bit_width_attr_name() -> &'static str {
+        "bit_width"
+    }
+
+    pub fn build(context: ContextRef, bit_width: u32) -> IntegerType {
+        let mut attrs = HashMap::new();
+
+        attrs.insert(
+            IntegerType::get_bit_width_attr_name().to_string(),
+            Attr::U32(bit_width),
+        );
+
+        let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+        let type_id = dialect.get_type_id(IntegerType::get_type_name());
+        let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
+
+        IntegerType { r#type }
+    }
+
+    pub fn get_bit_width(&self) -> u32 {
+        match self
+            .r#type
+            .get_attrs()
+            .get(Self::get_bit_width_attr_name())
+            .as_ref()
+            .unwrap()
+        {
+            Attr::U32(bit_width) => *bit_width,
+            _ => panic!("Expected 'inputs' to be a TypeArray"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{builtin::FuncType, Context, Printable, StringPrinter, Type};
+    use crate::{Context, Printable, StringPrinter, Type};
 
-    use super::VoidType;
+    use super::*;
 
     #[test]
     fn type_casts() {
@@ -95,11 +127,24 @@ mod tests {
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());
         assert!(FuncType::try_from(ty.clone()).is_err());
+        assert!(IntegerType::try_from(ty.clone()).is_err());
 
         let ty = FuncType::build(context.clone(), &[], ty);
         let ty: Type = ty.into();
         assert!(ty.isa::<FuncType>());
         assert!(VoidType::try_from(ty.clone()).is_err());
         assert!(FuncType::try_from(ty.clone()).is_ok());
+        assert!(IntegerType::try_from(ty.clone()).is_err());
+
+        let ty = IntegerType::build(context.clone(), 8);
+        let ty: Type = ty.into();
+        assert!(ty.isa::<IntegerType>());
+        assert!(VoidType::try_from(ty.clone()).is_err());
+        assert!(FuncType::try_from(ty.clone()).is_err());
+        assert!(IntegerType::try_from(ty.clone()).is_ok());
+        assert_eq!(
+            IntegerType::try_from(ty.clone()).unwrap().get_bit_width(),
+            8
+        );
     }
 }
