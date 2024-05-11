@@ -104,7 +104,7 @@ impl IntegerType {
             .unwrap()
         {
             Attr::U32(bit_width) => *bit_width,
-            _ => panic!("Expected 'inputs' to be a TypeArray"),
+            _ => panic!("Expected 'bit_width' to be u32"),
         }
     }
 }
