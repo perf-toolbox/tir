@@ -1,5 +1,6 @@
 use crate::{
     AllocId, Attr, ContextRef, ContextWRef, OpAssembly, Printable, RegionRef, RegionWRef, Type,
+    Value,
 };
 use std::any::Any;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
@@ -13,6 +14,7 @@ pub trait Op: Any + OpAssembly + Printable {
     fn get_context(&self) -> ContextRef;
     fn get_parent_region(&self) -> Option<RegionRef>;
     fn get_return_type(&self) -> Option<Type>;
+    fn get_return_value(&self) -> Option<Value>;
 
     fn set_alloc_id(&mut self, id: AllocId);
     fn get_alloc_id(&self) -> AllocId;

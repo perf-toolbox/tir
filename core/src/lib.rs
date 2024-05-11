@@ -10,6 +10,7 @@ pub mod opt;
 mod region;
 mod r#type;
 pub mod utils;
+mod value;
 
 pub use assembly::*;
 pub use attrs::*;
@@ -20,3 +21,4 @@ pub use error::*;
 pub use operation::*;
 pub use r#type::*;
 pub use region::*;
+pub use value::*;

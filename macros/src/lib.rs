@@ -254,12 +254,21 @@ fn build_return_type_accessor(fields: &[OpFieldReceiver]) -> proc_macro2::TokenS
                 fn get_return_type(&self) -> Option<tir_core::Type> {
                     Some(self.#ident.clone())
                 }
+
+                fn get_return_value(&self) -> Option<tir_core::Value> {
+                    let context = self.get_context();
+                    Some(tir_core::Value::from_op(context, "todo", self.r#impl.alloc_id))
+                }
             };
         }
     }
 
     quote! {
         fn get_return_type(&self) -> Option<tir_core::Type> {
+            None
+        }
+
+        fn get_return_value(&self) -> Option<tir_core::Value> {
             None
         }
     }
@@ -430,6 +439,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
     quote! {
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
+                fmt.indent();
                 if DIALECT_NAME != tir_core::builtin::DIALECT_NAME {
                     fmt.write_direct(DIALECT_NAME);
                     fmt.write_direct(".");
