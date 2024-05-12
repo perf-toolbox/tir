@@ -38,4 +38,4 @@ techniques or creating ISA extensions.
 
 TIR is a Rust project, and can be built with `cargo`, just like any other Rust
 project. If you want to contribute to this repository, refer to our
-[Developer guide](docs/dev_guide.md) and [Contribution guide](./CONTRIBUTING).
+[Developer guide](docs/src/dev_guide.md) and [Contribution guide](./CONTRIBUTING).
