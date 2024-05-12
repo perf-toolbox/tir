@@ -2,11 +2,13 @@ use crate::{BlockRef, ContextRef, Op, OpRef};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct InsertionPoint {
     block: BlockRef,
     index: usize,
 }
 
+#[derive(Debug)]
 pub struct OpBuilderImpl {
     context: ContextRef,
     insertion_point: InsertionPoint,
@@ -34,6 +36,7 @@ impl OpBuilderImpl {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct OpBuilder(Rc<RefCell<OpBuilderImpl>>);
 
 impl OpBuilder {

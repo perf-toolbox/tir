@@ -1,8 +1,8 @@
-use crate::parser::{PResult, ParseStream};
+use crate::parser::{AsmPResult, ParseStream};
 use crate::{Attr, IRFormatter, OpRef};
 use std::collections::HashMap;
 
-type ParseFn<T> = fn(&mut ParseStream) -> PResult<T>;
+type ParseFn<T> = fn(&mut ParseStream) -> AsmPResult<T>;
 pub type OpParseFn = ParseFn<OpRef>;
 pub type TyParseFn = ParseFn<HashMap<String, Attr>>;
 pub type TyPrintFn = fn(&HashMap<String, Attr>, &mut dyn IRFormatter);

@@ -22,7 +22,7 @@ pub trait IRFormatter {
 
     fn end_region(&mut self) {
         self.decrease_indent();
-        self.indent_write("}\n");
+        self.indent_write("}");
     }
 }
 

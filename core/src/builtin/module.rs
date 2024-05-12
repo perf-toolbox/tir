@@ -1,5 +1,5 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{single_block_region, PResult, ParseStream};
+use crate::parser::{single_block_region, AsmPResult, ParseStream};
 use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, RegionRef};
 use tir_macros::Op;
 use winnow::Parser;
@@ -15,7 +15,7 @@ pub struct ModuleOp {
 }
 
 impl OpAssembly for ModuleOp {
-    fn parse_assembly(input: &mut ParseStream) -> PResult<OpRef>
+    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
     where
         Self: Sized,
     {
