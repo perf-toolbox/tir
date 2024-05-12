@@ -118,7 +118,8 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 if let Attr::Type(ty) = attr {
                     let context = ty.get_context().ok_or(())?;
                     let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-                    let type_id = dialect.get_type_id(#name_ident::get_type_name());
+                    // we are sure the type exists, because we are the type!
+                    let type_id = dialect.get_type_id(#name_ident::get_type_name()).unwrap();
                     if type_id != ty.get_type_id() {
                         return Err(());
                     }

@@ -33,7 +33,8 @@ impl FuncType {
         );
 
         let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.get_type_id(FuncType::get_type_name());
+        // we are sure the type exists, because we are the type!
+        let type_id = dialect.get_type_id(FuncType::get_type_name()).unwrap();
         let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
 
         FuncType { r#type }
@@ -69,7 +70,8 @@ impl FuncType {
 impl VoidType {
     pub fn build(context: ContextRef) -> VoidType {
         let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.get_type_id(VoidType::get_type_name());
+        // we are sure the type exists, because we are the type!
+        let type_id = dialect.get_type_id(VoidType::get_type_name()).unwrap();
         let r#type = Type::new(context, dialect.get_id(), type_id, HashMap::new());
 
         VoidType { r#type }
@@ -87,7 +89,8 @@ impl IntType {
         attrs.insert(IntType::get_bits_attr_name().to_string(), Attr::U32(bits));
 
         let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
-        let type_id = dialect.get_type_id(IntType::get_type_name());
+        // we are sure the type exists, because we are the type!
+        let type_id = dialect.get_type_id(IntType::get_type_name()).unwrap();
         let r#type = Type::new(context.clone(), dialect.get_id(), type_id, attrs);
 
         IntType { r#type }

@@ -57,7 +57,7 @@ impl Dialect {
     }
 
     pub fn get_operation_id(&self, name: &str) -> Option<u32> {
-        self.operation_ids.get(name).cloned()
+        self.operation_ids.get(name).copied()
     }
 
     pub fn get_operation_parser(&self, id: u32) -> Option<OpParseFn> {
@@ -71,8 +71,8 @@ impl Dialect {
         self.ty_parse_fn.insert(id, parse_fn);
     }
 
-    pub fn get_type_id(&self, name: &str) -> u32 {
-        *self.type_ids.get(name).unwrap()
+    pub fn get_type_id(&self, name: &str) -> Option<u32> {
+        self.type_ids.get(name).copied()
     }
 
     pub fn get_type_printer(&self, id: u32) -> Option<TyPrintFn> {
