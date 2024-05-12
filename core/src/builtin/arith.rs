@@ -55,7 +55,7 @@ mod test {
         constant.borrow().print(&mut printer);
         assert_eq!(
             printer.get(),
-            "const attrs = {value = <i8: 16>} -> !void attrs = {}"
+            "const attrs = {value = <i8: 16>} -> !void attrs = {}\n"
         );
 
         builder.insert(&constant);
