@@ -2,7 +2,7 @@
 
 ## Setting up Rust
 
-The easiest way to set up Rust toolchain is with https://rustup.rs/.
+The easiest way to set up Rust toolchain is with [https://rustup.rs/](https://rustup.rs/).
 By default, only stable toolchain is installed. Active Rust development
 also requires nightly toolchain:
 

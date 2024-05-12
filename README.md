@@ -2,37 +2,40 @@
 
 # Target Intermediate Representation
 
-TIR  is a collection of modular tools designed for efficient and flexible
-binary analysis, particularly for ELF binaries. Inspired by projects like
-LLVM and MLIR, TIR aims to provide a comprehensive and extensible platform for
-various binary analysis tasks.
+TIR project aims to provide a flexible compiler and binary analysis toolchain,
+including various transformations, optimizations and executable generation.
+It is inspired by LLVM, Bolt and MLIR. At the heart of TIR is a generic
+intermediate representation and a number of purpose-specific dialects.
+Users can use it to create new tools by introducing new dialects,
+optimizations or use it TIR as a generic assembler tool.
 
-## Goals and non-goals
+## Short-term goals
 
-### Goals
+TIR is a research project. Unlike MLIR, which is very similar in the spirit,
+TIR focuses on classic compilers and transformations exclusively (at least
+for now). The success criteria for the research is to:
+1) Have a simple C compiler capable of compiling a simple project, like SQLite
+2) Have a functional RISC-V and/or AArch64 backend
+3) Have competitive performance on SQLite benchmarks
 
-- **Flexible Binary Analysis:** Provide a modular and extensible framework for
-  analyzing ELF binaries, enabling developers to create custom analysis tools
-  and algorithms.
-- **Integration with Existing Projects:** Seamlessly integrate with other
-  projects, leveraging their capabilities and contributing modular tools and
-  algorithms.
-- **Simplicity and Accessibility:** Maintain a codebase that is simple to
-  understand and work on, lowering the barrier to entry for contributors.
-- **Reasonable Performance:** Ensure that TIR delivers acceptable performance
-  for binary analysis tasks, without sacrificing code simplicity.
+Once completed, the project is supposed to be good enough to teach students
+basics of compiler construction and do research in the field of compiler
+optimizations, including but not limited to ML-driven, affine, solver-based
+techniques or creating ISA extensions. 
 
-### Non-goals
+## Project overview
 
-- **Replacing LLVM:** TIR is not intended to replace LLVM in all capacities,
-  but rather to complement it by providing specialized tools for binary
-  analysis.
-- **One-Size-Fits-All Solution:** TIR does not aim to be a one-size-fits-all
-  tool for all binary analysis needs, but rather a modular framework that can
-  be extended and customized as needed.
+- `backends/`
+  - [`common/`](./backends/common/) - common utils for binary code generation
+  - [`riscv/`](./backends/riscv/) - generic RISC-V backend
+- [`core/`](./core/src) - generic IR definitions
+  - [`src/builtin/`](./core/src/builtin/) - builtin dialect, roughly implementing
+    functionality of LLVM IR
+- [`tools/`](./tools/) - tools meant to be distributed as part of the toolchain
+- [`utils/`](./utils/) - internal utilities, primarily for testing purposes
 
 ## Building from source
 
 TIR is a Rust project, and can be built with `cargo`, just like any other Rust
 project. If you want to contribute to this repository, refer to our
-[Developer guide](docs/dev_guide.md) and [Contribution guide](./CONTRIBUTING).
+[Developer guide](docs/src/dev_guide.md) and [Contribution guide](./CONTRIBUTING).

@@ -2,7 +2,11 @@
 
 ## Intro
 
-TBD
+Dialects are semantically-complete purpose-focused pieces of intermediate
+representation. An example of a TIR dialect is `riscv` dialect, that contains
+operations, types and algorithms to accurately represent RISC-V ISA on both
+assembly and binary levels. Dialects can both co-exist together and progressively
+lower one to another.
 
 ## Defining Operations
 
@@ -35,7 +39,7 @@ The helper macros would implement the following things for you:
 
 Additional methods can be defined manually by implementing `impl SuperOp {...}`.
 
-### Field configurations
+### Field Configurations
 
 **`#[operation(..., known_attrs(attr1: AttrType))]`**
 

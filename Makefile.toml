@@ -23,3 +23,18 @@ args = ["test", "${@}"]
 [tasks.test]
 workspace = false
 dependencies = ["build", "test-only", "check-only"]
+
+[tasks.api-docs]
+workspace = false
+command = "cargo"
+args = ["doc", "--no-deps"]
+
+[tasks.cp-docs]
+workspace = false
+script = "mv target/doc docs/api"
+
+[tasks.docs]
+workspace = false
+command = "mdbook"
+args = ["build"]
+dependencies = ["api-docs", "cp-docs"]
