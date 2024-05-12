@@ -17,6 +17,8 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - name: Install cargo-make
       run: cargo install cargo-make
+    - name: Install mdbook
+      run: cargo install mdbook
     - name: Build docs
       run: cargo make docs
     - uses: actions/upload-pages-artifact@v3.0.1
