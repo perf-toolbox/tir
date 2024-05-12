@@ -92,7 +92,7 @@ impl ParserState {
 
 pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
 
-pub type PResult<I> = winnow::PResult<I, PError>;
+pub type AsmPResult<I> = winnow::PResult<I, PError>;
 
 #[derive(Debug, PartialEq, Eq, Error)]
 pub enum PError {
@@ -138,36 +138,36 @@ impl<I: Stream> AddContext<I, StrContext> for PError {
 }
 
 pub trait Parsable<T> {
-    fn parse(input: &mut ParseStream<'_>) -> PResult<T>;
+    fn parse(input: &mut ParseStream<'_>) -> AsmPResult<T>;
 }
 
-pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> PResult<()> {
+pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> AsmPResult<()> {
     delimited(multispace0, token, multispace0)
         .context(StrContext::Expected(StrContextValue::StringLiteral(token)))
         .void()
         .parse_next(input)
 }
 
-pub fn identifier<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
+pub fn identifier<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
     (alpha1, alphanumeric0).recognize().parse_next(input)
 }
 
-fn dialect_op<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
+fn dialect_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
     separated_pair(identifier, ".", identifier).parse_next(input)
 }
 
-fn builtin_op<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
+fn builtin_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
     identifier
         .recognize()
         .parse_next(input)
         .map(|op| ("builtin", op))
 }
 
-pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, &'s str)> {
+pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
     alt((dialect_op, builtin_op)).parse_next(input)
 }
 
-pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> PResult<&'s str> {
+pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
     preceded("@", identifier).parse_next(input)
 }
 
@@ -180,17 +180,17 @@ where
     delimited(space0, inner, space0)
 }
 
-fn single_comment(input: &mut ParseStream<'_>) -> PResult<()> {
+fn single_comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
     (';', take_till(1.., ['\n', '\r']), line_ending)
         .void()
         .parse_next(input)
 }
 
-fn comment(input: &mut ParseStream<'_>) -> PResult<()> {
+fn comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
     repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
 }
 
-pub fn single_op(input: &mut ParseStream) -> PResult<OpRef> {
+pub fn single_op(input: &mut ParseStream) -> AsmPResult<OpRef> {
     let context = input.state.get_context();
 
     let skip = trace(
@@ -231,7 +231,7 @@ pub fn parse_ir(
     single_op.parse(input)
 }
 
-pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
+pub fn single_block_region(ir: &mut ParseStream<'_>) -> AsmPResult<Vec<OpRef>> {
     expected_token("{", ir)?;
 
     let operations = repeat(0.., single_op).parse_next(ir)?;
@@ -241,7 +241,7 @@ pub fn single_block_region(ir: &mut ParseStream<'_>) -> PResult<Vec<OpRef>> {
     Ok(operations)
 }
 
-pub fn single_block(input: &mut ParseStream<'_>) -> PResult<BlockRef> {
+pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {
     let skip = trace(
         "skip comments",
         alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
@@ -273,7 +273,7 @@ pub fn single_block(input: &mut ParseStream<'_>) -> PResult<BlockRef> {
     Ok(block)
 }
 
-pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
+pub fn region_with_blocks(input: &mut ParseStream<'_>) -> AsmPResult<RegionRef> {
     expected_token("{", input)?;
     let context = input.state.get_context();
     let region = Region::empty(&context);
@@ -291,7 +291,7 @@ pub fn region_with_blocks(input: &mut ParseStream<'_>) -> PResult<RegionRef> {
     Ok(region)
 }
 
-fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
+fn attr_pair(input: &mut ParseStream<'_>) -> AsmPResult<(String, Attr)> {
     trace(
         "attr pair",
         separated_pair(
@@ -303,7 +303,7 @@ fn attr_pair(input: &mut ParseStream<'_>) -> PResult<(String, Attr)> {
     .parse_next(input)
 }
 
-pub fn attr_list(input: &mut ParseStream<'_>) -> PResult<HashMap<String, Attr>> {
+pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr>> {
     let attr_pairs = separated::<_, _, HashMap<_, _>, _, _, _, _>(
         0..,
         attr_pair,

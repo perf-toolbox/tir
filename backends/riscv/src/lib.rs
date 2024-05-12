@@ -2,9 +2,11 @@ use tir_backend::DisassemblerError;
 use tir_core::Dialect;
 use tir_core::{ContextRef, OpAssembly, OpBuilder};
 
+mod asm_parser;
 mod ops;
 mod registers;
 pub mod utils;
+pub use asm_parser::*;
 pub use ops::*;
 pub use registers::*;
 

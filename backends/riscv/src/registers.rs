@@ -1,9 +1,16 @@
 use seq_macro::seq;
 use tir_core::{
-    parser::{identifier, PResult, Parsable, ParseStream},
+    parser::{AsmPResult, Parsable, ParseStream},
     IRFormatter, Printable,
 };
-use winnow::Parser;
+use tir_macros::{lowercase, uppercase};
+
+use winnow::stream::Compare;
+use winnow::{
+    ascii::{alpha1, alphanumeric0},
+    stream::{AsChar, Stream, StreamIsPartial},
+    Parser,
+};
 
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
@@ -47,20 +54,30 @@ macro_rules! register {
             }
         }
 
-        impl Parsable<Register> for Register {
-            fn parse(input: &mut ParseStream<'_>) -> PResult<Register> {
-                let ident = identifier.parse_next(input)?;
-
-                match ident {
+        pub fn register_parser<'a, Input>(input: &mut Input) -> AsmPResult<Register>
+        where
+            Input: StreamIsPartial + Stream<Slice = &'a str> + Clone + Compare<&'a str>,
+            <Input as Stream>::Token: AsChar, {
+            (alpha1, alphanumeric0).recognize().verify_map(|reg| {
+                match reg {
                 $(
-                    $abi_name => Ok(Register::$case_name),
-                    stringify!($case_name) => Ok(Register::$case_name),
+                    $abi_name => Some(Register::$case_name),
+                    uppercase!($abi_name) => Some(Register::$case_name),
+                    stringify!($case_name) => Some(Register::$case_name),
+                    lowercase!($case_name) => Some(Register::$case_name),
                 )*
-                    _ => panic!(),
+                    _ => None,
                 }
-            }
+            }).parse_next(input)
         }
+
     };
+}
+
+impl Parsable<Register> for Register {
+    fn parse(input: &mut ParseStream<'_>) -> AsmPResult<Register> {
+        register_parser.parse_next(input)
+    }
 }
 
 register! {

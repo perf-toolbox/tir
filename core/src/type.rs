@@ -4,7 +4,7 @@ use std::sync::Arc;
 use winnow::combinator::preceded;
 use winnow::Parser;
 
-use crate::parser::{op_tuple, PResult, Parsable, ParseStream};
+use crate::parser::{op_tuple, AsmPResult, Parsable, ParseStream};
 use crate::Attr;
 use crate::ContextRef;
 use crate::ContextWRef;
@@ -76,7 +76,7 @@ impl Printable for Type {
 }
 
 impl Parsable<Type> for Type {
-    fn parse(input: &mut ParseStream<'_>) -> PResult<Type> {
+    fn parse(input: &mut ParseStream<'_>) -> AsmPResult<Type> {
         let (dialect, ty) = preceded("!", op_tuple).parse_next(input)?;
 
         let context = input.state.get_context();

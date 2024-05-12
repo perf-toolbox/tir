@@ -1,5 +1,5 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{region_with_blocks, sym_name, PResult, Parsable, ParseStream};
+use crate::parser::{region_with_blocks, sym_name, AsmPResult, Parsable, ParseStream};
 use crate::*;
 use tir_macros::Op;
 use winnow::ascii::space0;
@@ -20,7 +20,7 @@ pub struct FuncOp {
     r#impl: OpImpl,
 }
 
-fn single_arg<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, Type)> {
+fn single_arg<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, Type)> {
     (
         preceded("%", identifier),
         preceded((space0, ":", space0), Type::parse),
@@ -28,7 +28,7 @@ fn single_arg<'s>(input: &mut ParseStream<'s>) -> PResult<(&'s str, Type)> {
         .parse_next(input)
 }
 
-fn signature<'s>(input: &mut ParseStream<'s>) -> PResult<(Vec<&'s str>, FuncType)> {
+fn signature<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(Vec<&'s str>, FuncType)> {
     let braces: Vec<(&'s str, Type)> = delimited(
         (space0, "(", space0),
         separated(0.., single_arg, (space0, ",", space0)),
@@ -47,7 +47,7 @@ fn signature<'s>(input: &mut ParseStream<'s>) -> PResult<(Vec<&'s str>, FuncType
 }
 
 impl OpAssembly for FuncOp {
-    fn parse_assembly(input: &mut ParseStream) -> PResult<OpRef>
+    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
     where
         Self: Sized,
     {

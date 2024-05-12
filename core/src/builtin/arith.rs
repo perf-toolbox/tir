@@ -53,7 +53,10 @@ mod test {
 
         let mut printer = StringPrinter::new();
         constant.borrow().print(&mut printer);
-        assert_eq!(printer.get(), "const attrs = {value = <i8: 16>} -> !void attrs = {}");
+        assert_eq!(
+            printer.get(),
+            "const attrs = {value = <i8: 16>} -> !void attrs = {}"
+        );
 
         builder.insert(&constant);
         assert_eq!(

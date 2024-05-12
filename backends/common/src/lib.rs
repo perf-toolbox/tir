@@ -2,6 +2,7 @@ pub mod target;
 mod target_options;
 pub use target_options::*;
 use thiserror::Error;
+pub mod parser;
 
 use tir_core::Result;
 

@@ -108,7 +108,7 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
             #return_printer
           }
 
-          fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<OpRef> {
+          fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<OpRef> {
             let mut builder = Self::builder(&input.state.get_context());
             #operand_parsers
 

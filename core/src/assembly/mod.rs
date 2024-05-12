@@ -11,7 +11,7 @@ pub use printer::*;
 
 pub trait OpAssembly {
     fn print_assembly(&self, fmt: &mut dyn IRFormatter);
-    fn parse_assembly(input: &mut parser::ParseStream<'_>) -> parser::PResult<OpRef>
+    fn parse_assembly(input: &mut parser::ParseStream<'_>) -> parser::AsmPResult<OpRef>
     where
         Self: Sized;
 }
@@ -22,7 +22,7 @@ pub trait TyAssembly {
         Self: Sized;
     fn parse_assembly(
         input: &mut parser::ParseStream<'_>,
-    ) -> parser::PResult<HashMap<String, Attr>>
+    ) -> parser::AsmPResult<HashMap<String, Attr>>
     where
         Self: Sized;
 }

@@ -11,9 +11,9 @@ use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream};
-use syn::parse_macro_input;
 use syn::punctuated::Punctuated;
 use syn::Token;
+use syn::{parse_macro_input, LitStr};
 
 #[derive(Debug)]
 struct Types(Vec<syn::Ident>);
@@ -82,7 +82,7 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 fmt.write_direct("}");
             }
 
-            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::PResult<std::collections::HashMap<String, tir_core::Attr>> {
+            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
                 // FIXME: make attrs optional
                 tir_core::parser::attr_list(input)
             }
@@ -459,6 +459,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
                 fmt.write_direct(" ");
 
                 self.print_assembly(fmt);
+                fmt.write_direct("\n");
             }
         }
 
@@ -523,4 +524,38 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 pub fn derive_op_assembly(input: TokenStream) -> TokenStream {
     let op = parse_macro_input!(input as syn::DeriveInput);
     make_generic_ir_printer_parser(op).into()
+}
+
+#[proc_macro]
+pub fn lowercase(input: TokenStream) -> TokenStream {
+    let literal = if let Ok(literal) = syn::parse::<LitStr>(input.clone()) {
+        literal.value()
+    } else {
+        let input = parse_macro_input!(input as syn::Ident);
+        format!("{}", input)
+    };
+
+    let res = literal.to_lowercase();
+
+    quote! {
+        #res
+    }
+    .into()
+}
+
+#[proc_macro]
+pub fn uppercase(input: TokenStream) -> TokenStream {
+    let literal = if let Ok(literal) = syn::parse::<LitStr>(input.clone()) {
+        literal.value()
+    } else {
+        let input = parse_macro_input!(input as syn::Ident);
+        format!("{}", input)
+    };
+
+    let res = literal.to_uppercase();
+
+    quote! {
+        #res
+    }
+    .into()
 }
