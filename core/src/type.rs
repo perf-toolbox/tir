@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use winnow::combinator::preceded;
+use winnow::error::ErrMode;
 use winnow::Parser;
 
-use crate::parser::{op_tuple, AsmPResult, Parsable, ParseStream};
+use crate::parser::{op_tuple, AsmPResult, PError, Parsable, ParseStream};
 use crate::Attr;
 use crate::ContextRef;
 use crate::ContextWRef;
@@ -55,8 +56,11 @@ impl Type {
         if dialect.get_id() != self.dialect_id {
             return false;
         }
-        let type_id = dialect.get_type_id(T::get_type_name());
-        type_id == self.type_id
+        if let Some(type_id) = dialect.get_type_id(T::get_type_name()) {
+            return type_id == self.type_id;
+        };
+
+        false
     }
 }
 
@@ -81,8 +85,12 @@ impl Parsable<Type> for Type {
 
         let context = input.state.get_context();
         let dialect = context.get_dialect_by_name(dialect).unwrap();
-        let id = dialect.get_type_id(ty);
+        let id = dialect
+            .get_type_id(ty)
+            .ok_or(ErrMode::Cut(PError::UnknownType(ty.to_string())))?;
 
+        // By definition every existing type has a parser, and we just obtained type id from this
+        // dialect.
         let mut parser = dialect.get_type_parser(id).unwrap();
 
         let attrs = parser.parse_next(input)?;

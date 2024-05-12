@@ -102,6 +102,8 @@ pub enum PError {
     UnknownOperation(String, String),
     #[error("expected '{0}'")]
     ExpectedNotFound(String),
+    #[error("unknown type '{0}'")]
+    UnknownType(String),
     #[error("syntax error")]
     Unknown,
 }
