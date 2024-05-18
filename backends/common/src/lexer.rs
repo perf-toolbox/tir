@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::iter::{Enumerate};
+use std::iter::Enumerate;
 use std::ops::Range;
 use std::rc::Rc;
-use tir_core::{OpBuilder};
+use tir_core::OpBuilder;
 use winnow::ascii::{alpha1, alphanumeric0, line_ending, multispace0, space1};
 use winnow::combinator::dispatch;
 use winnow::combinator::{alt, delimited, empty, fail, repeat, terminated};

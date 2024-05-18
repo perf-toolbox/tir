@@ -1,12 +1,9 @@
 use tir_core::parser::AsmPResult;
 use tir_core::{Block, OpBuilder, Region};
-use winnow::combinator::{peek};
+use winnow::combinator::peek;
 use winnow::error::StrContext;
 use winnow::Parser;
-use winnow::{
-    token::{one_of},
-    Stateful,
-};
+use winnow::{token::one_of, Stateful};
 
 use crate::target::SectionOp;
 use crate::{AsmToken, TokenStream};
