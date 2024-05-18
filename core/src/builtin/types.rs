@@ -11,6 +11,27 @@ dialect_type!((FuncType, true));
 dialect_type!((VoidType, true));
 dialect_type!((IntType, false));
 
+impl tir_core::TyAssembly for IntType {
+    fn print_assembly(
+        attrs: &HashMap<String, tir_core::Attr>,
+        fmt: &mut dyn tir_core::IRFormatter,
+    ) {
+        fmt.write_direct("int attrs = {");
+        for (name, attr) in attrs {
+            fmt.write_direct(name);
+            fmt.write_direct(" = ");
+            attr.print(fmt);
+        }
+        fmt.write_direct("}");
+    }
+
+    fn parse_assembly(
+        input: &mut tir_core::parser::ParseStream<'_>,
+    ) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
+        tir_core::parser::attr_list(input)
+    }
+}
+
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
         "inputs"
