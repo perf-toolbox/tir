@@ -4,7 +4,7 @@ use winnow::Parser;
 
 use crate::target::DIALECT_NAME;
 
-#[derive(Op, OpAssembly)]
+#[derive(Op, OpAssembly, Debug, Clone)]
 #[operation(name = "section", known_attrs(name: String))]
 pub struct SectionOp {
     #[region]

@@ -1,5 +1,6 @@
 use crate::parser::{AsmPResult, ParseStream};
 use crate::{Attr, IRFormatter, OpRef};
+use std::any::Any;
 use std::collections::HashMap;
 
 type ParseFn<T> = fn(&mut ParseStream) -> AsmPResult<T>;
@@ -15,6 +16,7 @@ pub struct Dialect {
     op_parse_fn: HashMap<u32, OpParseFn>,
     ty_parse_fn: HashMap<u32, TyParseFn>,
     ty_print_fn: HashMap<u32, TyPrintFn>,
+    ext: Option<Box<dyn Any>>,
 }
 
 impl Dialect {
@@ -27,6 +29,7 @@ impl Dialect {
             op_parse_fn: HashMap::new(),
             ty_parse_fn: HashMap::new(),
             ty_print_fn: HashMap::new(),
+            ext: None,
         }
     }
 
@@ -96,5 +99,18 @@ impl Dialect {
             .first()
             .and_then(|f| if f.1 < 5 { Some(f.0) } else { None })
             .cloned()
+    }
+
+    pub fn get_dialect_extension(&self) -> Option<&dyn Any> {
+        self.ext.as_ref().map(|e| e.as_ref())
+    }
+
+    pub fn get_dialect_extension_mut(&mut self) -> Option<&mut dyn Any> {
+        self.ext.as_mut().map(|e| e.as_mut())
+    }
+
+    pub fn set_dialect_extension(&mut self, ext: Box<dyn Any>) {
+        assert!(self.ext.is_none());
+        self.ext = Some(ext);
     }
 }

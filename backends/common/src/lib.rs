@@ -1,12 +1,14 @@
 pub mod target;
 mod target_options;
 pub mod parser;
-mod tokenizer;
+mod lexer;
 
 pub use target_options::*;
-use thiserror::Error;
+pub use lexer::*;
 
-use tir_core::Result;
+use tir_core::{parser::AsmPResult, Result};
+
+use thiserror::Error;
 
 pub trait BinaryStream {
     fn write(&mut self, data: &[u8]);
@@ -21,6 +23,10 @@ pub trait AsmPrintable {
     fn print(&self, target_opts: &TargetOptions)
     where
         Self: Sized;
+}
+
+pub trait ISAParser {
+    fn parse<'tok, 'str>(input: &mut TokenStream<'tok, 'str>) -> AsmPResult<()>;
 }
 
 #[derive(Error, Debug)]

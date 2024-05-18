@@ -3,6 +3,8 @@ use crate::{assemble_reg, disassemble_gpr};
 use crate::{register_parser, Register};
 use tir_backend::parser::AsmStream;
 use tir_backend::BinaryEmittable;
+use tir_backend::ISAParser;
+use tir_backend::TokenStream;
 use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
@@ -55,6 +57,12 @@ macro_rules! alu_ops {
                     .build();
                 stream.write(&instr.to_bytes());
                 Ok(())
+            }
+        }
+
+        impl ISAParser for $struct_name {
+            fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
+                todo!();
             }
         }
         )*

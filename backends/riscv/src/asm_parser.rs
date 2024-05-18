@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use tir_backend::parser::{comment, AsmParserState, AsmStream};
+use tir_backend::parser::{AsmParserState, AsmStream};
 use tir_core::parser::PError;
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 use winnow::ascii::multispace0;
@@ -24,8 +24,8 @@ pub fn parse_asm<'a>(
     repeat(
         0..,
         preceded(
-            (comment, multispace0),
-            terminated(r_instr, (comment, multispace0)),
+            /*comment, */multispace0,
+            terminated(r_instr, /*comment, */multispace0),
         ),
     )
     .parse(stream)?;
