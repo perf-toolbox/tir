@@ -1,13 +1,10 @@
 use tir_core::parser::AsmPResult;
 use tir_core::{Block, OpBuilder, Region};
-use winnow::ascii::{alpha1, alphanumeric0, alphanumeric1, space1};
-use winnow::combinator::{alt, opt, peek};
+use winnow::combinator::{peek};
 use winnow::error::StrContext;
 use winnow::Parser;
 use winnow::{
-    ascii::{line_ending, multispace0},
-    combinator::{preceded, repeat},
-    token::{one_of, take_till},
+    token::{one_of},
     Stateful,
 };
 
@@ -32,7 +29,7 @@ impl AsmParserState {
 
 pub type AsmStream<'a> = Stateful<&'a str, AsmParserState>;
 
-pub fn section<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()> {
+pub fn section(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     let s: AsmToken = one_of(|t| matches!(t, AsmToken::Section(_))).parse_next(input)?;
     peek(one_of(|t| matches!(t, AsmToken::Label(_))))
         .context(StrContext::Expected(
@@ -61,7 +58,7 @@ pub fn section<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()
     Ok(())
 }
 
-pub fn label<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()> {
+pub fn label(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     let l = one_of(|t| matches!(t, AsmToken::Label(_))).parse_next(input)?;
 
     let AsmToken::Label(name) = l else {

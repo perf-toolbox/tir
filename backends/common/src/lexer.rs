@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::iter::{Cloned, Enumerate};
+use std::iter::{Enumerate};
 use std::ops::Range;
 use std::rc::Rc;
-use tir_core::{ContextRef, OpBuilder};
+use tir_core::{OpBuilder};
 use winnow::ascii::{alpha1, alphanumeric0, line_ending, multispace0, space1};
 use winnow::combinator::dispatch;
 use winnow::combinator::{alt, delimited, empty, fail, repeat, terminated};
@@ -225,7 +225,7 @@ fn ident<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
 
 /// Punctuation sign, currently only `,`
 fn punct<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
-    let mut chr = delimited(multispace0, take(1 as usize), multispace0);
+    let mut chr = delimited(multispace0, take(1_usize), multispace0);
 
     dispatch! {chr;
         "," => empty.value(AsmToken::Comma),
@@ -234,7 +234,7 @@ fn punct<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
     .parse_next(input)
 }
 
-fn single_comment<'a>(input: &mut Located<&'a str>) -> PResult<()> {
+fn single_comment(input: &mut Located<&str>) -> PResult<()> {
     (
         one_of([';', '#']),
         take_till(1.., ['\n', '\r']),
@@ -245,7 +245,7 @@ fn single_comment<'a>(input: &mut Located<&'a str>) -> PResult<()> {
 }
 
 /// Parse assembly single-line comment starting with `;` or `#`
-pub fn comment<'a>(input: &mut Located<&'a str>) -> PResult<()> {
+pub fn comment(input: &mut Located<&str>) -> PResult<()> {
     repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
 }
 
@@ -257,9 +257,9 @@ fn token<'a>(input: &mut Located<&'a str>) -> PResult<Spanned<'a>> {
 }
 
 /// Split input assembly string into tokens
-pub fn lex_asm<'a>(
-    input: &'a str,
-) -> Result<Vec<Spanned<'a>>, winnow::error::ParseError<Located<&'a str>, ContextError>> {
+pub fn lex_asm(
+    input: &str,
+) -> Result<Vec<Spanned<'_>>, winnow::error::ParseError<Located<&str>, ContextError>> {
     let input = Located::new(input);
 
     repeat(0.., token).parse(input)
