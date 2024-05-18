@@ -39,10 +39,7 @@ impl Parse for DialectInput {
             Err(_) => None,
         };
 
-        Ok(Self{
-            name,
-            init
-        })
+        Ok(Self { name, init })
     }
 }
 
@@ -53,13 +50,13 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     let dialect_name = input.name.to_string();
     // let name_ident = parse_macro_input!(input as syn::Ident);
     // let dialect_name = name_ident.to_string();
-    
+
     let init = match input.init {
         Some(init) => quote! {
             let init = #init;
             init(&mut dialect);
         },
-        _ => quote! {}
+        _ => quote! {},
     };
 
     TokenStream::from(quote! {

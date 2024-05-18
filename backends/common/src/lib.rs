@@ -1,10 +1,10 @@
+mod lexer;
+pub mod parser;
 pub mod target;
 mod target_options;
-pub mod parser;
-mod lexer;
 
-pub use target_options::*;
 pub use lexer::*;
+pub use target_options::*;
 
 use tir_core::{parser::AsmPResult, Result};
 

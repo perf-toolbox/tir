@@ -24,8 +24,8 @@ pub fn parse_asm<'a>(
     repeat(
         0..,
         preceded(
-            /*comment, */multispace0,
-            terminated(r_instr, /*comment, */multispace0),
+            /*comment, */ multispace0,
+            terminated(r_instr, /*comment, */ multispace0),
         ),
     )
     .parse(stream)?;

@@ -5,6 +5,7 @@ use std::ops::Range;
 use std::rc::Rc;
 use tir_core::{ContextRef, OpBuilder};
 use winnow::ascii::{alpha1, alphanumeric0, line_ending, multispace0, space1};
+use winnow::combinator::dispatch;
 use winnow::combinator::{alt, delimited, empty, fail, repeat, terminated};
 use winnow::error::ContextError;
 use winnow::stream::{ContainsToken, Offset, Stream, StreamIsPartial};
@@ -15,7 +16,6 @@ use winnow::{
     PResult,
 };
 use winnow::{Located, Parser};
-use winnow::combinator::dispatch;
 
 use crate::target::SectionOp;
 
@@ -93,7 +93,7 @@ impl<'stream, 'tok, 'src> Iterator for TokenStreamIterator<'stream, 'tok, 'src> 
     type Item = AsmToken<'src>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let tok = self.stream.source.get(self.offset).cloned().map(|t| t.0); 
+        let tok = self.stream.source.get(self.offset).cloned().map(|t| t.0);
         self.offset += 1;
         tok
     }
@@ -112,7 +112,7 @@ impl Offset for Checkpoint {
 
 impl Checkpoint {
     pub fn new(offset: usize) -> Self {
-        Self{offset}
+        Self { offset }
     }
 
     pub fn offset(&self) -> usize {
@@ -147,9 +147,10 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
     }
 
     fn offset_for<P>(&self, predicate: P) -> Option<usize>
-        where
-            P: Fn(Self::Token) -> bool {
-       todo!() 
+    where
+        P: Fn(Self::Token) -> bool,
+    {
+        todo!()
     }
 
     fn offset_at(&self, tokens: usize) -> Result<usize, winnow::error::Needed> {
@@ -213,7 +214,13 @@ fn label<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
 
 /// Any other identifier
 fn ident<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
-  (alpha1, take_while(0.., |c: char| c.is_alphanumeric() || c == '.' || c == '_')).recognize().map(AsmToken::Ident).parse_next(input)
+    (
+        alpha1,
+        take_while(0.., |c: char| c.is_alphanumeric() || c == '.' || c == '_'),
+    )
+        .recognize()
+        .map(AsmToken::Ident)
+        .parse_next(input)
 }
 
 /// Punctuation sign, currently only `,`
@@ -223,7 +230,8 @@ fn punct<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
     dispatch! {chr;
         "," => empty.value(AsmToken::Comma),
         _ => fail::<_, AsmToken, _>,
-    }.parse_next(input)
+    }
+    .parse_next(input)
 }
 
 fn single_comment<'a>(input: &mut Located<&'a str>) -> PResult<()> {
@@ -243,16 +251,15 @@ pub fn comment<'a>(input: &mut Located<&'a str>) -> PResult<()> {
 
 /// Common parser for any token kind
 fn token<'a>(input: &mut Located<&'a str>) -> PResult<Spanned<'a>> {
-    delimited(comment, alt((
-        section,
-        label,
-        ident,
-        punct
-    )), multispace0).with_span().parse_next(input)
+    delimited(comment, alt((section, label, ident, punct)), multispace0)
+        .with_span()
+        .parse_next(input)
 }
 
 /// Split input assembly string into tokens
-pub fn lex_asm<'a>(input: &'a str) -> Result<Vec<Spanned<'a>>, winnow::error::ParseError<Located<&'a str>, ContextError>> {
+pub fn lex_asm<'a>(
+    input: &'a str,
+) -> Result<Vec<Spanned<'a>>, winnow::error::ParseError<Located<&'a str>, ContextError>> {
     let input = Located::new(input);
 
     repeat(0.., token).parse(input)
@@ -283,9 +290,7 @@ mod tests {
 
     #[test]
     fn labels() {
-        let res = label
-            .parse(Located::new("foo:"))
-            .expect("label");
+        let res = label.parse(Located::new("foo:")).expect("label");
         match res {
             AsmToken::Label(name) => assert_eq!(name, "foo"),
             _ => panic!("Not a section"),

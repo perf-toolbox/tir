@@ -40,7 +40,9 @@ pub fn section<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()
         ))
         .parse_next(input)?;
 
-    let AsmToken::Section(name) = s else {unreachable!()};
+    let AsmToken::Section(name) = s else {
+        unreachable!()
+    };
     let builder = input.get_builder();
     let context = builder.get_context();
 
@@ -62,7 +64,9 @@ pub fn section<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()
 pub fn label<'tok, 'src>(input: &mut TokenStream<'tok, 'src>) -> AsmPResult<()> {
     let l = one_of(|t| matches!(t, AsmToken::Label(_))).parse_next(input)?;
 
-    let AsmToken::Label(name) = l else {unreachable!()};
+    let AsmToken::Label(name) = l else {
+        unreachable!()
+    };
 
     let section = input.get_active_section().unwrap();
     let parent = section.borrow().get_body_region();

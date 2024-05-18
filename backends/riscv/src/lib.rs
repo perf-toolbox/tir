@@ -1,4 +1,4 @@
-use tir_backend::{DisassemblerError, TokenStream, ISAParser};
+use tir_backend::{DisassemblerError, ISAParser, TokenStream};
 use tir_core::parser::AsmPResult;
 use tir_core::Dialect;
 use tir_core::{ContextRef, OpAssembly, OpBuilder};
@@ -24,7 +24,6 @@ macro_rules! populate_riscv_ops {
         }
     };
 }
-
 
 dialect!(riscv, |dialect: &mut Dialect| {
     let mut ext = RVExt::default();
