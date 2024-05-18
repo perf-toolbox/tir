@@ -7,9 +7,9 @@ use crate as tir_core;
 
 use crate::builtin::DIALECT_NAME;
 
-dialect_type!(FuncType);
-dialect_type!(VoidType);
-dialect_type!(IntType);
+dialect_type!((FuncType, true));
+dialect_type!((VoidType, true));
+dialect_type!((IntType, false));
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {

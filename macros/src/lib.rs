@@ -9,7 +9,7 @@ pub(crate) use op_impl::*;
 use case_converter::camel_to_snake;
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::Token;
@@ -47,12 +47,16 @@ pub fn dialect(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn dialect_type(input: TokenStream) -> TokenStream {
-    let name_ident = parse_macro_input!(input as syn::Ident);
+    let expr = parse_macro_input!(input as syn::ExprTuple);
+    let name_input = expr.elems.first().unwrap().to_token_stream().into();
+    let extension_flag_input = expr.elems.last().unwrap().to_token_stream().into();
+    let name_ident = parse_macro_input!(name_input as syn::Ident);
+    let extension_flag = parse_macro_input!(extension_flag_input as syn::LitBool).value();
     let name_string = name_ident.to_string();
     let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
     let name_str = &camel_to_snake(name_str)[1..];
 
-    quote! {
+    let base = quote! {
         #[derive(Clone)]
         pub struct #name_ident {
             r#type: Type,
@@ -68,25 +72,6 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
             }
         }
 
-        impl tir_core::TyAssembly for #name_ident {
-            fn print_assembly(attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
-                // FIXME: make attrs optional
-                fmt.write_direct(#name_str);
-                fmt.write_direct(" ");
-                fmt.write_direct("attrs = {");
-                for (name, attr) in attrs {
-                    fmt.write_direct(name);
-                    fmt.write_direct(" = ");
-                    attr.print(fmt);
-                }
-                fmt.write_direct("}");
-            }
-
-            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
-                // FIXME: make attrs optional
-                tir_core::parser::attr_list(input)
-            }
-        }
 
         impl tir_core::Printable for #name_ident {
             fn print(&self, fmt: &mut dyn crate::IRFormatter) {
@@ -143,8 +128,36 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
                 Ok(Self { r#type: ty })
             }
         }
-    }
-    .into()
+    };
+
+    let extension = if extension_flag {
+        quote! {
+        impl tir_core::TyAssembly for #name_ident {
+            fn print_assembly(attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
+                // FIXME: make attrs optional
+                fmt.write_direct(#name_str);
+                fmt.write_direct(" ");
+                fmt.write_direct("attrs = {");
+                for (name, attr) in attrs {
+                    fmt.write_direct(name);
+                    fmt.write_direct(" = ");
+                    attr.print(fmt);
+                }
+                fmt.write_direct("}");
+            }
+
+            fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
+                // FIXME: make attrs optional
+                tir_core::parser::attr_list(input)
+            }
+        }
+
+        }
+    } else {
+        quote!()
+    };
+
+    quote!(#base #extension).into()
 }
 
 #[proc_macro]
