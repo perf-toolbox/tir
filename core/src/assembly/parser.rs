@@ -182,6 +182,13 @@ where
     delimited(space0, inner, space0)
 }
 
+pub fn skip_attrs(
+    _input: &mut ParseStream<'_>,
+) -> AsmPResult<std::collections::HashMap<String, Attr>> {
+    let res: std::collections::HashMap<String, Attr> = HashMap::new();
+    Ok(res)
+}
+
 fn single_comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
     (';', take_till(1.., ['\n', '\r']), line_ending)
         .void()

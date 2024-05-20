@@ -1,15 +1,30 @@
 use crate::Printable;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use std::collections::HashMap;
-use tir_macros::dialect_type;
+use tir_macros::{dialect_type, dialect_type_with_extensions};
 
 use crate as tir_core;
 
 use crate::builtin::DIALECT_NAME;
 
-dialect_type!(FuncType);
+dialect_type_with_extensions!(FuncType);
 dialect_type!(VoidType);
-dialect_type!(IntType);
+dialect_type_with_extensions!(IntType);
+
+impl TyAssembly for VoidType {
+    fn print_assembly(
+        _attrs: &HashMap<String, tir_core::Attr>,
+        fmt: &mut dyn tir_core::IRFormatter,
+    ) {
+        fmt.write_direct("void");
+    }
+
+    fn parse_assembly(
+        input: &mut tir_core::parser::ParseStream<'_>,
+    ) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
+        tir_core::parser::skip_attrs(input)
+    }
+}
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
@@ -123,7 +138,7 @@ mod tests {
         let ty = VoidType::build(context.clone());
         let mut printer = StringPrinter::new();
         ty.print(&mut printer);
-        assert_eq!("!void attrs = {}", &printer.get());
+        assert_eq!("!void", &printer.get());
         let ty: Type = ty.into();
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());
