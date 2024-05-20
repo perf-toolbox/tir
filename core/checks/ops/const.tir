@@ -2,7 +2,7 @@
 
 ; test
 module {
-  func @foo(%arg0: !void attrs = {}) -> !void attrs = {} {
+  func @foo(%arg0: !void) -> !void {
     ^entry:
     const attrs = {value = <i8: 0>} -> !int attrs = {bits = <u32: 8>}
   }

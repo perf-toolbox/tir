@@ -45,29 +45,12 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     })
 }
 
-#[proc_macro]
-pub fn dialect_type(input: TokenStream) -> TokenStream {
-    let name_ident = parse_macro_input!(input as syn::Ident);
+fn dialect_type_extension(name_ident: syn::Ident) -> TokenStream {
     let name_string = name_ident.to_string();
     let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
     let name_str = &camel_to_snake(name_str)[1..];
 
     quote! {
-        #[derive(Clone)]
-        pub struct #name_ident {
-            r#type: Type,
-        }
-
-        impl tir_core::Ty for #name_ident {
-            fn get_type_name() -> &'static str {
-                #name_str
-            }
-
-            fn get_dialect_name() -> &'static str {
-                DIALECT_NAME
-            }
-        }
-
         impl tir_core::TyAssembly for #name_ident {
             fn print_assembly(attrs: &HashMap<String, tir_core::Attr>, fmt: &mut dyn tir_core::IRFormatter) {
                 // FIXME: make attrs optional
@@ -85,6 +68,30 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
             fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
                 // FIXME: make attrs optional
                 tir_core::parser::attr_list(input)
+            }
+        }
+    }
+    .into()
+}
+
+fn dialect_type_base(name_ident: syn::Ident) -> TokenStream {
+    let name_string = name_ident.to_string();
+    let name_str = name_string.strip_suffix("Type").unwrap_or(&name_string);
+    let name_str = &camel_to_snake(name_str)[1..];
+
+    quote! {
+        #[derive(Clone)]
+        pub struct #name_ident {
+            r#type: Type,
+        }
+
+        impl tir_core::Ty for #name_ident {
+            fn get_type_name() -> &'static str {
+                #name_str
+            }
+
+            fn get_dialect_name() -> &'static str {
+                DIALECT_NAME
             }
         }
 
@@ -145,6 +152,21 @@ pub fn dialect_type(input: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+#[proc_macro]
+pub fn dialect_type(input: TokenStream) -> TokenStream {
+    let name_ident = parse_macro_input!(input as syn::Ident);
+    dialect_type_base(name_ident)
+}
+
+#[proc_macro]
+pub fn dialect_type_with_extensions(input: TokenStream) -> TokenStream {
+    let name_ident = parse_macro_input!(input as syn::Ident);
+    let base = dialect_type_base(name_ident.clone());
+    let extension = dialect_type_extension(name_ident);
+    let res = vec![base, extension];
+    TokenStream::from_iter(res)
 }
 
 #[proc_macro]

@@ -53,10 +53,7 @@ mod test {
 
         let mut printer = StringPrinter::new();
         constant.borrow().print(&mut printer);
-        assert_eq!(
-            printer.get(),
-            "const attrs = {value = <i8: 16>} -> !void attrs = {}\n"
-        );
+        assert_eq!(printer.get(), "const attrs = {value = <i8: 16>} -> !void\n");
 
         builder.insert(&constant);
         assert_eq!(
@@ -83,7 +80,7 @@ mod test {
     fn parse_const() {
         let ir = "
         module {
-            const attrs = {value = <i8: 16>} -> !void attrs = {}
+            const attrs = {value = <i8: 16>} -> !void
         }
         ";
 
