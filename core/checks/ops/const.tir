@@ -1,9 +1,10 @@
-; RUN: tir-opt %s
+; RUN: tir-opt %s | filecheck %s
 
 ; test
 module {
   func @foo(%arg0: !void) -> !void {
     ^entry:
-    const attrs = {value = <i8: 0>} -> !int attrs = {bits = <u32: 8>}
+    ; CHECK: !int<8>
+    const attrs = {value = <i8: 0>} -> !int<8>
   }
 }

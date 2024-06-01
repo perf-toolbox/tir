@@ -328,6 +328,27 @@ pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr
     .parse_next(input)
 }
 
+fn parse_digits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
+    winnow::token::take_while(1.., '0'..='9').parse_next(input)
+}
+
+pub fn parse_int_bits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<HashMap<String, Attr>> {
+    let parse_int_bits_impl = |input: &mut ParseStream<'s>| {
+        terminated(preceded("<", parse_digits), ">").parse_next(input)
+    };
+    let bits_str = parse_int_bits_impl(input)?;
+    let maybe_bits_num: AsmPResult<u32> = match str::parse(&bits_str) {
+        Ok(n) => Ok(n),
+        Err(..) => Err(winnow::error::ErrMode::Cut(PError::ExpectedNotFound(
+            String::from("integer"),
+        ))),
+    };
+    let bits_num = maybe_bits_num?;
+    let mut r = HashMap::<String, Attr>::new();
+    r.insert("bits".into(), Attr::U32(bits_num));
+    Ok(r)
+}
+
 pub fn print_parser_diag(
     context: ContextRef,
     diag: &winnow::error::ParseError<ParseStream<'_>, PError>,

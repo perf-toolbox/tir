@@ -9,7 +9,7 @@ use crate::builtin::DIALECT_NAME;
 
 dialect_type_with_extensions!(FuncType);
 dialect_type!(VoidType);
-dialect_type_with_extensions!(IntType);
+dialect_type!(IntType);
 
 impl TyAssembly for VoidType {
     fn print_assembly(
@@ -122,6 +122,29 @@ impl IntType {
             Attr::U32(bits) => *bits,
             _ => panic!("Expected 'bits' to be u32"),
         }
+    }
+}
+
+impl TyAssembly for IntType {
+    fn print_assembly(
+        attrs: &HashMap<String, tir_core::Attr>,
+        fmt: &mut dyn tir_core::IRFormatter,
+    ) {
+        fmt.write_direct("int<");
+        if let Some(bits) = attrs.get("bits") {
+            let bits_int: u32 = (bits.clone()).try_into().unwrap();
+            fmt.write_direct(&bits_int.to_string());
+        }
+        fmt.write_direct(">");
+    }
+
+    fn parse_assembly(
+        input: &mut tir_core::parser::ParseStream<'_>,
+    ) -> tir_core::parser::AsmPResult<HashMap<String, Attr>>
+    where
+        Self: Sized,
+    {
+        tir_core::parser::parse_int_bits(input)
     }
 }
 
