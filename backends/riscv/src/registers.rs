@@ -22,7 +22,7 @@ macro_rules! register {
         pub fn get_reg_name(reg: &Register) -> &str {
             match reg {
             $(
-                Register::$case_name => { let name = stringify!($case_name); name }
+                Register::$case_name => { let name = lowercase!($case_name); name }
             )*
             }
         }
@@ -153,6 +153,6 @@ mod tests {
     fn reg_name() {
         assert_eq!(get_abi_reg_name(&Register::X0), "zero");
         // TODO this should be lower case
-        assert_eq!(get_reg_name(&Register::X0), "X0");
+        assert_eq!(get_reg_name(&Register::X0), "x0");
     }
 }

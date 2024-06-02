@@ -15,6 +15,7 @@ fn main() {
 
     let context = Context::new();
     context.add_dialect(tir_riscv::create_dialect());
+    context.add_dialect(tir_backend::target::create_dialect());
 
     let module = tir_riscv::parse_asm(&context, &input);
 
@@ -23,9 +24,9 @@ fn main() {
             let mut printer = StdoutPrinter::new();
             module.borrow().print(&mut printer);
         }
-        Err(err) => {
-            eprintln!("{}", err);
-            std::process::exit(1);
+        Err(_err) => {
+            // FIXME figure out how to tie syntax errors with tokens
+            panic!("ASM syntax error");
         }
     }
 }

@@ -26,10 +26,38 @@ impl Parse for Types {
     }
 }
 
+struct DialectInput {
+    name: syn::Ident,
+    init: Option<syn::Expr>,
+}
+
+impl Parse for DialectInput {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let name: syn::Ident = input.parse()?;
+        let init = match input.parse::<Token![,]>() {
+            Ok(_) => Some(input.parse::<syn::Expr>()?),
+            Err(_) => None,
+        };
+
+        Ok(Self { name, init })
+    }
+}
+
 #[proc_macro]
 pub fn dialect(input: TokenStream) -> TokenStream {
-    let name_ident = parse_macro_input!(input as syn::Ident);
-    let dialect_name = name_ident.to_string();
+    let input = parse_macro_input!(input as DialectInput);
+
+    let dialect_name = input.name.to_string();
+    // let name_ident = parse_macro_input!(input as syn::Ident);
+    // let dialect_name = name_ident.to_string();
+
+    let init = match input.init {
+        Some(init) => quote! {
+            let init = #init;
+            init(&mut dialect);
+        },
+        _ => quote! {},
+    };
 
     TokenStream::from(quote! {
         pub const DIALECT_NAME: &str = #dialect_name;
@@ -39,6 +67,8 @@ pub fn dialect(input: TokenStream) -> TokenStream {
 
             populate_dialect_ops(&mut dialect);
             populate_dialect_types(&mut dialect);
+
+            #init
 
             dialect
         }
@@ -407,9 +437,9 @@ fn build_op_builder(
 
             pub fn build(self) -> std::rc::Rc<std::cell::RefCell<#op>> {
                 let context = self.context.clone();
-                let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+                let dialect = context.get_dialect_by_name(DIALECT_NAME).expect("Did you forget to register the dialect?");
                 let dialect_id = dialect.get_id();
-                let operation_id = dialect.get_operation_id(#op_name).expect("We just registered the operation");
+                let operation_id = dialect.get_operation_id(#op_name).expect("Did you forget to register operation?");
                 let mut attrs = std::collections::HashMap::new();
 
                 #(#attr_setters)*
