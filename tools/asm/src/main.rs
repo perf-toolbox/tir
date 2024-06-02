@@ -24,7 +24,7 @@ fn main() {
             module.borrow().print(&mut printer);
         }
         Err(err) => {
-            eprintln!("{}", err);
+            // eprintln!("{}", err);
             std::process::exit(1);
         }
     }

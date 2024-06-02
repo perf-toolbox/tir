@@ -1,34 +1,51 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use tir_backend::parser::{AsmParserState, AsmStream};
-use tir_core::parser::PError;
+use tir_backend::parser::{label, section, AsmParserState, AsmStream};
+use tir_backend::{lex_asm, TokenStream};
+use tir_core::parser::{AsmPResult, PError};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 use winnow::ascii::multispace0;
-use winnow::combinator::{preceded, repeat, terminated};
+use winnow::combinator::{alt, preceded, repeat, terminated};
 use winnow::Parser;
 
-use crate::r_instr;
+use crate::{r_instr, RVExt};
+
+fn asm_instr<'tok, 'str>(input: &mut TokenStream<'tok, 'str>) -> AsmPResult<()> {
+    let builder = input.get_builder();
+    let context = builder.get_context();
+    let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
+
+    let mut parsers = dialect.get_dialect_extension().unwrap().downcast_ref::<RVExt>().unwrap().get_asm_parsers();
+
+    for p in &mut parsers {
+        if let Ok(_) = p.parse_next(input) {
+            return Ok(());
+        }
+    }
+
+    Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
+}
 
 pub fn parse_asm<'a>(
     context: &ContextRef,
     input: &'a str,
-) -> Result<Rc<RefCell<ModuleOp>>, winnow::error::ParseError<AsmStream<'a>, PError>> {
+) -> Result<Rc<RefCell<ModuleOp>>, winnow::error::ParseError<TokenStream<'a, 'a>, PError>> {
     let module = ModuleOp::builder(context).build();
     let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
-    let stream = AsmStream {
-        input,
-        state: AsmParserState::new(builder.clone()),
-    };
 
-    repeat(
+    let tokens = lex_asm(input).expect("todo err handling");
+    let stream = TokenStream::new(&builder, &tokens);
+
+    let _: Vec<()> = repeat(
         0..,
-        preceded(
-            /*comment, */ multispace0,
-            terminated(r_instr, /*comment, */ multispace0),
-        ),
+        alt((
+            section,
+            label,
+            asm_instr,
+        ))
     )
-    .parse(stream)?;
+    .parse(stream).expect("todo err handling");
 
     Ok(module)
 }
@@ -53,6 +70,7 @@ and x28, x6, x7";
 
         let context = Context::new();
         context.add_dialect(crate::create_dialect());
+        context.add_dialect(tir_backend::target::create_dialect());
 
         assert!(parse_asm(&context, input).is_ok());
     }

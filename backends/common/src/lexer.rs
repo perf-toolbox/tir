@@ -137,7 +137,7 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
     }
 
     fn eof_offset(&self) -> usize {
-        todo!()
+        self.source.len()
     }
 
     fn next_token(&mut self) -> Option<Self::Token> {

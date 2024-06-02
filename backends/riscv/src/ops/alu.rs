@@ -5,6 +5,7 @@ use tir_backend::parser::AsmStream;
 use tir_backend::BinaryEmittable;
 use tir_backend::ISAParser;
 use tir_backend::TokenStream;
+use tir_backend::AsmToken;
 use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
@@ -62,7 +63,9 @@ macro_rules! alu_ops {
 
         impl ISAParser for $struct_name {
             fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                todo!();
+                (AsmToken::Ident($op_name), AsmToken::Comma).parse_next(input)?;
+                Ok(())
+                // todo!("Tokens: {:?}", input);
             }
         }
         )*

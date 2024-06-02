@@ -43,8 +43,13 @@ pub struct RVExt {
 }
 
 impl RVExt {
-    fn register_asm_parser(&mut self, parser: fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>) {
+    pub fn register_asm_parser(&mut self, parser: fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>) {
         self.asm_parsers.push(parser);
+    }
+
+    // TODO check if this can be zero-copy
+    pub fn get_asm_parsers(&self) -> Vec<fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>> {
+        self.asm_parsers.clone()
     }
 }
 
