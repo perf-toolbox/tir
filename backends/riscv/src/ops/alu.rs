@@ -1,7 +1,6 @@
 use crate::utils::RTypeInstr;
 use crate::{assemble_reg, disassemble_gpr};
 use crate::{register_parser, Register};
-use tir_backend::parser::AsmStream;
 use tir_backend::BinaryEmittable;
 use tir_backend::ISAParser;
 use tir_backend::TokenStream;
@@ -10,9 +9,10 @@ use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{Op, OpAssembly};
-use winnow::ascii::space0;
-use winnow::combinator::{alt, cut_err};
+use winnow::combinator::{preceded, separated};
+use winnow::token::one_of;
 use winnow::Parser;
+use tir_macros::{lowercase, uppercase};
 
 use crate::DIALECT_NAME;
 
@@ -63,9 +63,29 @@ macro_rules! alu_ops {
 
         impl ISAParser for $struct_name {
             fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                (AsmToken::Ident($op_name), AsmToken::Comma).parse_next(input)?;
+                let opcode = one_of(|t| if let AsmToken::Ident(name) = t {
+                    name == lowercase!($op_name) || name == uppercase!($op_name)
+                } else {
+                    false
+                });
+                let reg = one_of(|t| matches!(t, AsmToken::Ident(_))).map(|t| {
+                    if let AsmToken::Ident(name) = t {
+                        name
+                    } else {
+                        unreachable!();
+                    }
+                }).and_then(register_parser);
+                let comma = one_of(|t| t == AsmToken::Comma).void();
+
+                let regs: Vec<Register> = preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
+                let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
+
+                let builder = input.get_builder();
+                let context = builder.get_context();
+                let op = $struct_name::builder(&context).rs1(rs1).rs2(rs2).rd(rd).build();
+                builder.insert(&op);
+
                 Ok(())
-                // todo!("Tokens: {:?}", input);
             }
         }
         )*
@@ -94,42 +114,6 @@ macro_rules! alu_ops {
                 _ => None,
             }
         }
-
-        // FIXME: find a way to support upper case syntax
-        pub(crate) fn r_instr(input: &mut AsmStream<'_>) -> AsmPResult<()> {
-            let mnemonic = alt([
-            $(
-                $op_name
-            ),*
-            ]);
-            let comma1 = (space0, ',', space0).void();
-            let comma2 = (space0, ',', space0).void();
-
-            let builder = input.state.get_builder();
-            let context = builder.get_context();
-
-            (
-                mnemonic,
-                space0.void(),
-                register_parser,
-                cut_err(comma1),
-                register_parser,
-                cut_err(comma2),
-                register_parser,
-            )
-                .verify_map(|(instr, _, rs1, _, rs2, _, rd): (&str, _, _, _, _, _, _)| match instr.to_lowercase().as_str() {
-                    $(
-                    $op_name => {
-                        let op = $struct_name::builder(&context).rs1(rs1).rs2(rs2).rd(rd).build();
-                        builder.insert(&op);
-                        Some(())
-
-                    },
-                    )*
-                    _ => None,
-                })
-                .parse_next(input)
-        }
     };
 }
 
@@ -154,8 +138,8 @@ mod tests {
     use super::*;
     use crate::disassemble_alu_instr;
     use std::any::TypeId;
-    use tir_backend::parser::AsmParserState;
-    use tir_core::{builtin::ModuleOp, Context};
+    
+    use tir_core::{Context};
 
     #[test]
     fn test_alu_disassembler() {
@@ -223,49 +207,5 @@ mod tests {
         }
 
         assert_eq!(ops.len(), 0);
-    }
-
-    macro_rules! input {
-        ($inp:literal, $builder:expr) => {
-            AsmStream {
-                input: $inp.into(),
-                state: AsmParserState::new($builder),
-            }
-        };
-    }
-
-    #[test]
-    fn test_asm_parser() {
-        let context = Context::new();
-        context.add_dialect(crate::create_dialect());
-        let module = ModuleOp::builder(&context).build();
-        let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
-        assert!(r_instr
-            .parse(input!("add x28, x6, x7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("sub X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("sll X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("slt X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("sltu X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("srl X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("sra X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("or X28, X6, X7", builder.clone()))
-            .is_ok());
-        assert!(r_instr
-            .parse(input!("and X28, X6, X7", builder.clone()))
-            .is_ok());
     }
 }

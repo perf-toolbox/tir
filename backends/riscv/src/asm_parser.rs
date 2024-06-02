@@ -1,17 +1,16 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use tir_backend::parser::{label, section, AsmParserState, AsmStream};
+use tir_backend::parser::{label, section};
 use tir_backend::{lex_asm, TokenStream};
 use tir_core::parser::{AsmPResult, PError};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
-use winnow::ascii::multispace0;
-use winnow::combinator::{alt, preceded, repeat, terminated};
+use winnow::combinator::{alt, repeat};
 use winnow::Parser;
 
-use crate::{r_instr, RVExt};
+use crate::{RVExt};
 
-fn asm_instr<'tok, 'str>(input: &mut TokenStream<'tok, 'str>) -> AsmPResult<()> {
+fn asm_instr(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     let builder = input.get_builder();
     let context = builder.get_context();
     let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
@@ -19,7 +18,7 @@ fn asm_instr<'tok, 'str>(input: &mut TokenStream<'tok, 'str>) -> AsmPResult<()> 
     let mut parsers = dialect.get_dialect_extension().unwrap().downcast_ref::<RVExt>().unwrap().get_asm_parsers();
 
     for p in &mut parsers {
-        if let Ok(_) = p.parse_next(input) {
+        if p.parse_next(input).is_ok() {
             return Ok(());
         }
     }

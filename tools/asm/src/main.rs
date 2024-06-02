@@ -23,8 +23,10 @@ fn main() {
             let mut printer = StdoutPrinter::new();
             module.borrow().print(&mut printer);
         }
-        Err(err) => {
+        Err(_err) => {
+            // FIXME figure out how to tie syntax errors with tokens
             // eprintln!("{}", err);
+            eprintln!("ASM syntax error");
             std::process::exit(1);
         }
     }

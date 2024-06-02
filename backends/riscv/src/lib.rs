@@ -20,7 +20,7 @@ macro_rules! populate_riscv_ops {
         fn populate_riscv_asm_parsers(ext: &mut RVExt) {
             $(
             ext.register_asm_parser(<$op as ISAParser>::parse);
-            )*;
+            )*
         }
     };
 }

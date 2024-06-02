@@ -137,7 +137,7 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
     }
 
     fn eof_offset(&self) -> usize {
-        self.source.len()
+        self.source.len() - self.offset
     }
 
     fn next_token(&mut self) -> Option<Self::Token> {
@@ -146,19 +146,19 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
         token
     }
 
-    fn offset_for<P>(&self, predicate: P) -> Option<usize>
+    fn offset_for<P>(&self, _predicate: P) -> Option<usize>
     where
         P: Fn(Self::Token) -> bool,
     {
-        todo!()
+        unimplemented!();
     }
 
-    fn offset_at(&self, tokens: usize) -> Result<usize, winnow::error::Needed> {
-        todo!()
+    fn offset_at(&self, _tokens: usize) -> Result<usize, winnow::error::Needed> {
+        unimplemented!();
     }
 
     fn next_slice(&mut self, offset: usize) -> Self::Slice {
-        todo!()
+        self.source.next_slice(offset)
     }
 
     fn checkpoint(&self) -> Self::Checkpoint {
@@ -170,7 +170,7 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
     }
 
     fn raw(&self) -> &dyn std::fmt::Debug {
-        todo!();
+        unimplemented!();
     }
 }
 
