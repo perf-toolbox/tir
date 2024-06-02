@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 tir-core = { path = "../../core" }
 tir-riscv = { path = "../../backends/riscv/" }
+tir-backend = { path = "../../backends/common/" }

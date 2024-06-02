@@ -13,6 +13,8 @@ example:
     and x28, x6, x7
 
 # CHECK: module {
+# CHECK-NEXT: target.section ".text" {
+# CHECK-NEXT: ^example:
 # CHECK-NEXT: riscv.add rs1 = t3, rs2 = t1, rd = t2, attrs = {}
 # CHECK-NEXT: riscv.sub rs1 = t3, rs2 = t1, rd = t2, attrs = {}
 # CHECK-NEXT: riscv.sll rs1 = t3, rs2 = t1, rd = t2, attrs = {}
@@ -22,4 +24,5 @@ example:
 # CHECK-NEXT: riscv.sra rs1 = t3, rs2 = t1, rd = t2, attrs = {}
 # CHECK-NEXT: riscv.or rs1 = t3, rs2 = t1, rd = t2, attrs = {}
 # CHECK-NEXT: riscv.and rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+# CHECK-NEXT: }
 # CHECK-NEXT: }

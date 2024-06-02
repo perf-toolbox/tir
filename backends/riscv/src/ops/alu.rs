@@ -1,18 +1,18 @@
 use crate::utils::RTypeInstr;
 use crate::{assemble_reg, disassemble_gpr};
 use crate::{register_parser, Register};
+use tir_backend::AsmToken;
 use tir_backend::BinaryEmittable;
 use tir_backend::ISAParser;
 use tir_backend::TokenStream;
-use tir_backend::AsmToken;
 use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
+use tir_macros::{lowercase, uppercase};
 use tir_macros::{Op, OpAssembly};
 use winnow::combinator::{preceded, separated};
 use winnow::token::one_of;
 use winnow::Parser;
-use tir_macros::{lowercase, uppercase};
 
 use crate::DIALECT_NAME;
 
@@ -78,7 +78,7 @@ macro_rules! alu_ops {
                 let comma = one_of(|t| t == AsmToken::Comma).void();
 
                 let regs: Vec<Register> = preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
-                let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
+                let (rs1, rs2, rd) = (regs[0], regs[1], regs[2]);
 
                 let builder = input.get_builder();
                 let context = builder.get_context();
@@ -138,8 +138,8 @@ mod tests {
     use super::*;
     use crate::disassemble_alu_instr;
     use std::any::TypeId;
-    
-    use tir_core::{Context};
+
+    use tir_core::Context;
 
     #[test]
     fn test_alu_disassembler() {

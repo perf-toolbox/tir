@@ -5,8 +5,8 @@ use std::ops::Range;
 use std::rc::Rc;
 use tir_core::OpBuilder;
 use winnow::ascii::{alpha1, alphanumeric0, line_ending, multispace0, space1};
-use winnow::combinator::dispatch;
 use winnow::combinator::{alt, delimited, empty, fail, repeat, terminated};
+use winnow::combinator::{dispatch, trace};
 use winnow::error::ContextError;
 use winnow::stream::{ContainsToken, Offset, Stream, StreamIsPartial};
 use winnow::token::{one_of, take, take_till, take_while};
@@ -170,7 +170,7 @@ impl<'tok, 'src> Stream for TokenStream<'tok, 'src> {
     }
 
     fn raw(&self) -> &dyn std::fmt::Debug {
-        unimplemented!();
+        &self.source
     }
 }
 
@@ -192,35 +192,51 @@ impl<'tok, 'str> StreamIsPartial for TokenStream<'tok, 'str> {
 
 /// Shortcut for well-known sections like `.text`. These do not need a `.section` prefix.
 fn known_section<'a>(input: &mut Located<&'a str>) -> PResult<&'a str> {
-    alt((".text", ".data", ".rodata", ".bss")).parse_next(input)
+    trace(
+        "known section",
+        preceded(multispace0, alt((".text", ".data", ".rodata", ".bss"))),
+    )
+    .parse_next(input)
 }
 
 /// A generic section in the format `.section <name>\n`
 fn section<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
-    alt((
-        known_section,
-        preceded((".section", space1), (opt("."), alphanumeric1).recognize()),
-    ))
+    trace(
+        "generic section",
+        alt((
+            known_section,
+            preceded(
+                (multispace0, ".section", space1),
+                (opt("."), alphanumeric1).recognize(),
+            ),
+        )),
+    )
     .map(AsmToken::Section)
     .parse_next(input)
 }
 
 /// A basic block label in the format `<name>:`
 fn label<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
-    terminated((alpha1, alphanumeric0).recognize(), ':')
-        .map(AsmToken::Label)
-        .parse_next(input)
+    trace(
+        "basic block label",
+        terminated((alpha1, alphanumeric0).recognize(), ':'),
+    )
+    .map(AsmToken::Label)
+    .parse_next(input)
 }
 
 /// Any other identifier
 fn ident<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
-    (
-        alpha1,
-        take_while(0.., |c: char| c.is_alphanumeric() || c == '.' || c == '_'),
+    trace(
+        "generic identifier",
+        (
+            alpha1,
+            take_while(0.., |c: char| c.is_alphanumeric() || c == '.' || c == '_'),
+        ),
     )
-        .recognize()
-        .map(AsmToken::Ident)
-        .parse_next(input)
+    .recognize()
+    .map(AsmToken::Ident)
+    .parse_next(input)
 }
 
 /// Punctuation sign, currently only `,`
@@ -235,18 +251,26 @@ fn punct<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
 }
 
 fn single_comment(input: &mut Located<&str>) -> PResult<()> {
-    (
-        one_of([';', '#']),
-        take_till(1.., ['\n', '\r']),
-        line_ending,
+    trace(
+        "single comment",
+        (
+            one_of([';', '#']),
+            take_till(1.., ['\n', '\r']),
+            line_ending,
+        ),
     )
-        .void()
-        .parse_next(input)
+    .void()
+    .parse_next(input)
 }
 
 /// Parse assembly single-line comment starting with `;` or `#`
 pub fn comment(input: &mut Located<&str>) -> PResult<()> {
-    repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
+    trace(
+        "multi comment",
+        repeat(0.., delimited(multispace0, single_comment, multispace0)),
+    )
+    .parse_next(input)?;
+    Ok(())
 }
 
 /// Common parser for any token kind
@@ -262,7 +286,7 @@ pub fn lex_asm(
 ) -> Result<Vec<Spanned<'_>>, winnow::error::ParseError<Located<&str>, ContextError>> {
     let input = Located::new(input);
 
-    repeat(0.., token).parse(input)
+    terminated(repeat(0.., token), comment).parse(input)
 }
 
 #[cfg(test)]

@@ -44,10 +44,12 @@ pub fn section(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
         section
     } else {
         let body = Region::empty(&context);
-        SectionOp::builder(&context)
+        let section = SectionOp::builder(&context)
             .name(name.to_string().into())
             .body(body)
-            .build()
+            .build();
+        builder.insert(&section);
+        section
     };
 
     input.set_active_section(section);

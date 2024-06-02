@@ -8,14 +8,19 @@ use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 use winnow::combinator::{alt, repeat};
 use winnow::Parser;
 
-use crate::{RVExt};
+use crate::RVExt;
 
 fn asm_instr(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     let builder = input.get_builder();
     let context = builder.get_context();
     let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
 
-    let mut parsers = dialect.get_dialect_extension().unwrap().downcast_ref::<RVExt>().unwrap().get_asm_parsers();
+    let mut parsers = dialect
+        .get_dialect_extension()
+        .unwrap()
+        .downcast_ref::<RVExt>()
+        .unwrap()
+        .get_asm_parsers();
 
     for p in &mut parsers {
         if p.parse_next(input).is_ok() {
@@ -33,18 +38,16 @@ pub fn parse_asm<'a>(
     let module = ModuleOp::builder(context).build();
     let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
-    let tokens = lex_asm(input).expect("todo err handling");
+    let tokens = lex_asm(input);
+    if let Err(ref err) = tokens {
+        panic!("lexer failed: {}", err);
+    }
+    let tokens = tokens.unwrap();
     let stream = TokenStream::new(&builder, &tokens);
 
-    let _: Vec<()> = repeat(
-        0..,
-        alt((
-            section,
-            label,
-            asm_instr,
-        ))
-    )
-    .parse(stream).expect("todo err handling");
+    let _: Vec<()> = repeat(0.., alt((section, label, asm_instr)))
+        .parse(stream)
+        .expect("todo err handling");
 
     Ok(module)
 }

@@ -415,9 +415,9 @@ fn build_op_builder(
 
             pub fn build(self) -> std::rc::Rc<std::cell::RefCell<#op>> {
                 let context = self.context.clone();
-                let dialect = context.get_dialect_by_name(DIALECT_NAME).unwrap();
+                let dialect = context.get_dialect_by_name(DIALECT_NAME).expect("Did you forget to register the dialect?");
                 let dialect_id = dialect.get_id();
-                let operation_id = dialect.get_operation_id(#op_name).expect("We just registered the operation");
+                let operation_id = dialect.get_operation_id(#op_name).expect("Did you forget to register operation?");
                 let mut attrs = std::collections::HashMap::new();
 
                 #(#attr_setters)*
