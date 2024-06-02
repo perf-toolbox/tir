@@ -1,15 +1,30 @@
 use crate::Printable;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use std::collections::HashMap;
-use tir_macros::dialect_type;
+use tir_macros::{dialect_type, dialect_type_with_extensions};
 
 use crate as tir_core;
 
 use crate::builtin::DIALECT_NAME;
 
-dialect_type!(FuncType);
+dialect_type_with_extensions!(FuncType);
 dialect_type!(VoidType);
 dialect_type!(IntType);
+
+impl TyAssembly for VoidType {
+    fn print_assembly(
+        _attrs: &HashMap<String, tir_core::Attr>,
+        fmt: &mut dyn tir_core::IRFormatter,
+    ) {
+        fmt.write_direct("void");
+    }
+
+    fn parse_assembly(
+        input: &mut tir_core::parser::ParseStream<'_>,
+    ) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
+        tir_core::parser::skip_attrs(input)
+    }
+}
 
 impl FuncType {
     fn get_inputs_attr_name() -> &'static str {
@@ -110,6 +125,29 @@ impl IntType {
     }
 }
 
+impl TyAssembly for IntType {
+    fn print_assembly(
+        attrs: &HashMap<String, tir_core::Attr>,
+        fmt: &mut dyn tir_core::IRFormatter,
+    ) {
+        fmt.write_direct("int<");
+        if let Some(bits) = attrs.get("bits") {
+            let bits_int: u32 = (bits.clone()).try_into().unwrap();
+            fmt.write_direct(&bits_int.to_string());
+        }
+        fmt.write_direct(">");
+    }
+
+    fn parse_assembly(
+        input: &mut tir_core::parser::ParseStream<'_>,
+    ) -> tir_core::parser::AsmPResult<HashMap<String, Attr>>
+    where
+        Self: Sized,
+    {
+        tir_core::parser::parse_int_bits(input)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{Context, Printable, StringPrinter, Type};
@@ -123,7 +161,7 @@ mod tests {
         let ty = VoidType::build(context.clone());
         let mut printer = StringPrinter::new();
         ty.print(&mut printer);
-        assert_eq!("!void attrs = {}", &printer.get());
+        assert_eq!("!void", &printer.get());
         let ty: Type = ty.into();
         assert!(ty.isa::<VoidType>());
         assert!(VoidType::try_from(ty.clone()).is_ok());
