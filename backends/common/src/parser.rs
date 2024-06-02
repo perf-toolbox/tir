@@ -2,8 +2,8 @@ use tir_core::parser::AsmPResult;
 use tir_core::{Block, Region};
 use winnow::combinator::peek;
 use winnow::error::StrContext;
+use winnow::token::one_of;
 use winnow::Parser;
-use winnow::{token::one_of};
 
 use crate::target::SectionOp;
 use crate::{AsmToken, TokenStream};
@@ -31,6 +31,7 @@ pub fn section(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
             .body(body)
             .build();
         builder.insert(&section);
+        input.add_section(name, &section);
         section
     };
 

@@ -69,6 +69,10 @@ impl<'tok, 'src> TokenStream<'tok, 'src> {
         self.sections.get(name).cloned()
     }
 
+    pub fn add_section(&mut self, name: &str, section: &Rc<RefCell<SectionOp>>) {
+        self.sections.insert(name.to_owned(), section.clone());
+    }
+
     pub fn get_active_section(&self) -> Option<Rc<RefCell<SectionOp>>> {
         self.active_section.clone()
     }

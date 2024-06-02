@@ -26,9 +26,7 @@ fn main() {
         }
         Err(_err) => {
             // FIXME figure out how to tie syntax errors with tokens
-            // eprintln!("{}", err);
-            eprintln!("ASM syntax error");
-            std::process::exit(1);
+            panic!("ASM syntax error");
         }
     }
 }
