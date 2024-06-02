@@ -1,30 +1,12 @@
 use tir_core::parser::AsmPResult;
-use tir_core::{Block, OpBuilder, Region};
+use tir_core::{Block, Region};
 use winnow::combinator::peek;
 use winnow::error::StrContext;
 use winnow::Parser;
-use winnow::{token::one_of, Stateful};
+use winnow::{token::one_of};
 
 use crate::target::SectionOp;
 use crate::{AsmToken, TokenStream};
-
-// use crate::target::SectionOp;
-
-#[derive(Debug, Clone)]
-pub struct AsmParserState {
-    builder: OpBuilder,
-}
-
-impl AsmParserState {
-    pub fn new(builder: OpBuilder) -> Self {
-        Self { builder }
-    }
-    pub fn get_builder(&self) -> OpBuilder {
-        self.builder.clone()
-    }
-}
-
-pub type AsmStream<'a> = Stateful<&'a str, AsmParserState>;
 
 pub fn section(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     let s: AsmToken = one_of(|t| matches!(t, AsmToken::Section(_))).parse_next(input)?;

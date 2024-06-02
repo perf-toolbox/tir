@@ -1,0 +1,18 @@
+; RUN: tir-opt %s
+
+; TODO add a more meaningful check?
+
+module {
+  target.section ".text" {
+    ^example:
+    riscv.add rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.sub rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.sll rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.slt rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.sltu rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.srl rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.sra rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.or rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+    riscv.and rs1 = t3, rs2 = t1, rd = t2, attrs = {}
+  }
+}

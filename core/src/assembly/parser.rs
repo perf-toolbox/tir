@@ -337,7 +337,7 @@ pub fn parse_int_bits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<HashMap<Str
         terminated(preceded("<", parse_digits), ">").parse_next(input)
     };
     let bits_str = parse_int_bits_impl(input)?;
-    let maybe_bits_num: AsmPResult<u32> = match str::parse(&bits_str) {
+    let maybe_bits_num: AsmPResult<u32> = match str::parse(bits_str) {
         Ok(n) => Ok(n),
         Err(..) => Err(winnow::error::ErrMode::Cut(PError::ExpectedNotFound(
             String::from("integer"),
