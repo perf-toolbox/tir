@@ -1,9 +1,11 @@
 extern crate proc_macro;
 
 mod assembly;
+mod helpers;
 mod op_impl;
 
 pub(crate) use assembly::*;
+pub(crate) use helpers::*;
 pub(crate) use op_impl::*;
 
 use case_converter::camel_to_snake;
@@ -611,4 +613,9 @@ pub fn uppercase(input: TokenStream) -> TokenStream {
         #res
     }
     .into()
+}
+
+#[proc_macro]
+pub fn match_op(input: TokenStream) -> TokenStream {
+    op_matcher(input)
 }
