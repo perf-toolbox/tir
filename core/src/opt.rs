@@ -5,14 +5,26 @@ use crate::{parse_ir, parser::print_parser_diag, Context, StdoutPrinter};
 pub fn opt_main() {
     let args: Vec<String> = env::args().collect();
 
-    let path = &args[1];
+    let path: String = if args.len() > 1 {
+        String::from(&args[1])
+    } else {
+        String::from("-")
+    };
 
     let context = Context::new();
 
-    let ir = if let Ok(i) = std::fs::read_to_string(path) {
-        i
+    let ir = if path == "-" {
+        if let Ok(i) = std::io::read_to_string(std::io::stdin()) {
+            i
+        } else {
+            panic!("Could not stdin")
+        }
     } else {
-        panic!("Could not read file")
+        if let Ok(i) = std::fs::read_to_string(path) {
+            i
+        } else {
+            panic!("Could not read file")
+        }
     };
 
     let module = parse_ir(context.clone(), &ir);
