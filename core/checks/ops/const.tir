@@ -1,5 +1,5 @@
-; RUN: tir-opt %s | filecheck %s
-; RUN: tir-opt %s | tir-opt - | filecheck %s
+; RUN: tir opt %s | filecheck %s
+; RUN: tir opt %s | tir opt - | filecheck %s
 
 ; test
 module {

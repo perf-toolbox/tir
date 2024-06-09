@@ -1,3 +1,3 @@
-; RUN: not tir-opt %s
+; RUN: not tir opt %s
 
 mod {}

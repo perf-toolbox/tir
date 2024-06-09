@@ -1,4 +1,4 @@
-; RUN: tir-opt %s
+; RUN: tir opt %s
 
 ; TODO add a more meaningful check?
 

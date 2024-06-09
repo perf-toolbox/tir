@@ -1,4 +1,4 @@
-# RUN: tir-asm %s | filecheck %s
+# RUN: tir asm %s | filecheck %s
 
 .text
 example:
