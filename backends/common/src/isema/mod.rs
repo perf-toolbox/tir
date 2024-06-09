@@ -29,5 +29,5 @@ pub use ops::*;
 use tir_macros::{dialect, populate_dialect_ops, populate_dialect_types};
 
 dialect!(isema);
-populate_dialect_ops!(AddOp, SubOp, AndOp, OrOp, SllOp, SrlOp, SraOp);
+populate_dialect_ops!(AddOp, SubOp, AndOp, OrOp, XorOp, SllOp, SrlOp, SraOp, CompInstrOp, CompInstrEndOp);
 populate_dialect_types!();

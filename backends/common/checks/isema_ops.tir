@@ -1,16 +1,16 @@
-; RUN: tir-opt %s | tir-opt -
+; RUN: tir opt %s | tir opt -
 module {
-  isema.add attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.sub attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.and attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.or attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.xor attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.sll attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.srl attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-  isema.sra attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
+  isema.add attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.sub attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.and attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.or attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.xor attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.sll attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.srl attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+  isema.sra attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
 
   isema.comp_instr {
-    isema.add attrs = { rs1 = "x0", rs2 = "x1", rd = "x2" }
-    isema.comp_instr_end
+    isema.add attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
+    isema.comp_instr_end attrs = {}
   }
 }
