@@ -7,7 +7,6 @@ use ariadne::Report;
 use ariadne::ReportKind;
 use thiserror::Error;
 use winnow::ascii::alpha1;
-use winnow::ascii::alphanumeric0;
 use winnow::ascii::line_ending;
 use winnow::ascii::multispace0;
 use winnow::ascii::space0;
@@ -29,7 +28,9 @@ use winnow::error::StrContext;
 use winnow::error::StrContextValue;
 use winnow::stream::Stateful;
 use winnow::stream::Stream;
+use winnow::stream::AsChar;
 use winnow::token::take_till;
+use winnow::token::take_while;
 use winnow::Parser;
 
 use crate::Attr;
@@ -151,7 +152,8 @@ pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> AsmPR
 }
 
 pub fn identifier<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
-    (alpha1, alphanumeric0).recognize().parse_next(input)
+    let ident_sign = take_while(0.., |c: char| c.is_alphanum() || c.as_char() == '_');
+    (alpha1, ident_sign).recognize().parse_next(input)
 }
 
 fn dialect_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {

@@ -95,14 +95,22 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
     quote! {
       impl tir_core::OpAssembly for #op_name {
           fn print_assembly(&self, fmt: &mut dyn tir_core::IRFormatter) {
+            use tir_core::IRFormatter;
             #operand_printer
 
             fmt.write_direct("attrs = {");
-            for (name, attr) in &self.r#impl.attrs {
-                fmt.write_direct(name);
-                fmt.write_direct(" = ");
-                attr.print(fmt);
-            }
+            let attrs: Vec<_> = self
+                .r#impl
+                .attrs
+                .iter()
+                .map(|(name, attr)| {
+                    let mut printer = tir_core::StringPrinter::new();
+                    printer.write_direct(&format!("{} = ", name));
+                    attr.print(&mut printer);
+                    printer.get()
+                })
+                .collect();
+            tir_core::print_comma_separated(fmt, &attrs);
             fmt.write_direct("}");
 
             #return_printer
