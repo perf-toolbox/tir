@@ -5,7 +5,7 @@ use std::{
     sync::Arc,
 };
 
-use crate::{AllocId, ContextRef, ContextWRef, OpRef, Type, Value};
+use crate::{AllocId, ContextRef, ContextWRef, OpRef, Type, Validate, ValidateErr, Value};
 
 pub type RegionRef = Rc<Region>;
 pub type RegionWRef = Weak<Region>;
@@ -74,6 +74,11 @@ impl BlockImpl {
     fn first(&self) -> Option<OpRef> {
         let context = self.get_context();
         self.operations.first().map(|id| context.get_op(*id))?
+    }
+
+    fn last(&self) -> Option<OpRef> {
+        let context = self.get_context();
+        self.operations.last().map(|id| context.get_op(*id))?
     }
 
     fn add_argument(&mut self, ty: Type, name: &str, this: BlockWRef) {
@@ -172,6 +177,10 @@ impl Block {
         self.0.borrow().first()
     }
 
+    pub fn last(&self) -> Option<OpRef> {
+        self.0.borrow().last()
+    }
+
     pub fn get_context(&self) -> ContextRef {
         self.0.borrow().get_context()
     }
@@ -205,6 +214,30 @@ impl Block {
 
     pub fn get_name(&self) -> String {
         self.0.borrow().get_name()
+    }
+}
+
+impl Validate for Block {
+    fn validate(&self) -> Result<(), ValidateErr> {
+        let region = self.get_parent_region();
+        let self_ref = if let Some(blk) = region.get_block_by_name(&self.get_name()) {
+            blk
+        } else {
+            return Err(ValidateErr::BlockNotRegisteredWithRegion(self.get_name()));
+        };
+
+        if let None = self.last() {
+            // FIXME(alexbatashev): need to find a smart way to verify traits
+            return Err(ValidateErr::BlockMissingTerminator(self_ref));
+        }
+
+        for op in self.iter() {
+            if let Err(err) = op.borrow().validate() {
+                return Err(err);
+            }
+        }
+
+        Ok(())
     }
 }
 
@@ -284,5 +317,26 @@ impl Region {
             data: self.0.borrow().blocks.clone(),
             index: 0,
         }
+    }
+
+    pub fn get_block_by_name(&self, name: &str) -> Option<BlockRef> {
+        for blk in self.iter() {
+            if blk.get_name() == name {
+                return Some(blk);
+            }
+        }
+
+        None
+    }
+}
+
+impl Validate for Region {
+    fn validate(&self) -> Result<(), ValidateErr> {
+        for blk in self.iter() {
+            if let Err(err) = blk.validate() {
+                return Err(err);
+            }
+        }
+        Ok(())
     }
 }

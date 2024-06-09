@@ -1,5 +1,8 @@
 use winnow::{
-    ascii::space0, combinator::{delimited, separated_pair}, token::take_till, Parser
+    ascii::space0,
+    combinator::{delimited, separated_pair},
+    token::take_till,
+    Parser,
 };
 
 use crate::{
@@ -80,7 +83,14 @@ impl Parsable<Attr> for Attr {
 
         // TODO error handling for String attrs
         match ty {
-            "str" => Ok(Attr::String(value.strip_prefix("\"").unwrap().strip_suffix("\"").unwrap().to_string())),
+            "str" => Ok(Attr::String(
+                value
+                    .strip_prefix("\"")
+                    .unwrap()
+                    .strip_suffix("\"")
+                    .unwrap()
+                    .to_string(),
+            )),
             "i8" => Ok(Attr::I8(value.parse::<i8>().unwrap())),
             "u8" => Ok(Attr::U8(value.parse::<u8>().unwrap())),
             "i16" => Ok(Attr::I16(value.parse::<i16>().unwrap())),

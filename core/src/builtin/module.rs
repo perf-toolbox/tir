@@ -1,18 +1,26 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{single_block_region, AsmPResult, ParseStream};
-use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, RegionRef};
-use tir_macros::Op;
+use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator};
+use tir_macros::{Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate as tir_core;
 
-#[derive(Op, Debug)]
+#[derive(Op, Debug, OpValidator)]
 #[operation(name = "module")]
 pub struct ModuleOp {
     #[region(single_block, no_args)]
     body: RegionRef,
     r#impl: OpImpl,
 }
+
+#[derive(Op, Debug, OpValidator, OpAssembly)]
+#[operation(name = "module_end")]
+pub struct ModuleEndOp {
+    r#impl: OpImpl,
+}
+
+impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {
     fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>

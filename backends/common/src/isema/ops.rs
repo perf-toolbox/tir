@@ -2,7 +2,7 @@ use tir_core::{
     parser::{single_block_region, AsmPResult, ParseStream},
     IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef,
 };
-use tir_macros::{Op, OpAssembly};
+use tir_macros::{Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate::isema::DIALECT_NAME;
@@ -12,7 +12,7 @@ use crate::isema::DIALECT_NAME;
 /// Sometimes operations can do multiple things at once. To allow one model complex instructions
 /// and still preserve operation atomicity, introduce a container operation, that can represent
 /// instructions as a combination of simpler operations.
-#[derive(Op, Debug, Clone)]
+#[derive(Op, Debug, Clone, OpValidator)]
 #[operation(name = "comp_instr", known_attrs(asm: String))]
 pub struct CompInstrOp {
     #[region(single_block, no_args)]
@@ -21,7 +21,7 @@ pub struct CompInstrOp {
 }
 
 /// Terminator for compound instructions
-#[derive(Op, Debug, Clone, OpAssembly)]
+#[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
 #[operation(name = "comp_instr_end")]
 pub struct CompInstrEndOp {
     r#impl: OpImpl,
@@ -57,7 +57,7 @@ macro_rules! three_reg_ops {
     ($($struct_name:ident => { name = $op_name:literal, doc = $doc:literal })*) => {
         $(
             #[doc = $doc]
-            #[derive(Op, Debug, Clone, OpAssembly)]
+            #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
             #[operation(name = $op_name, known_attrs(rs1: String, rs2: String, rd: String))]
             pub struct $struct_name {
                 r#impl: OpImpl,

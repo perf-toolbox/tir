@@ -1,13 +1,13 @@
 use crate::{
-    AllocId, Attr, ContextRef, ContextWRef, OpAssembly, Printable, RegionRef, RegionWRef, Type,
-    Value,
+    AllocId, Attr, ContextRef, ContextWRef, OpAssembly, OpValidator, Printable, RegionRef,
+    RegionWRef, Type, Validate, Value,
 };
 use std::any::Any;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 pub type OpRef = Rc<RefCell<dyn Op>>;
 
-pub trait Op: Any + OpAssembly + Printable {
+pub trait Op: Any + OpAssembly + Printable + Validate + OpValidator {
     fn get_operation_name(&self) -> &'static str;
     fn get_attrs(&self) -> &HashMap<String, Attr>;
     fn add_attrs(&mut self, attrs: &HashMap<String, Attr>);

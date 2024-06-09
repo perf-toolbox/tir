@@ -1,7 +1,7 @@
+pub mod isema;
 mod lexer;
 pub mod parser;
 pub mod target;
-pub mod isema;
 mod target_options;
 
 pub use lexer::*;
