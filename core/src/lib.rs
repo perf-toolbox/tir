@@ -6,7 +6,6 @@ mod context;
 mod dialect;
 mod error;
 mod operation;
-pub mod opt;
 mod region;
 mod r#type;
 pub mod utils;
