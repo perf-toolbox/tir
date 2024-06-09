@@ -1,7 +1,7 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{region_with_blocks, sym_name, AsmPResult, Parsable, ParseStream};
 use crate::*;
-use tir_macros::Op;
+use tir_macros::{Op, OpValidator};
 use winnow::ascii::space0;
 use winnow::combinator::{delimited, preceded, separated, trace};
 use winnow::Parser;
@@ -12,7 +12,7 @@ use self::parser::identifier;
 
 use super::FuncType;
 
-#[derive(Op)]
+#[derive(Op, OpValidator)]
 #[operation(name = "func", known_attrs(sym_name: String, func_type: Type))]
 pub struct FuncOp {
     #[region]

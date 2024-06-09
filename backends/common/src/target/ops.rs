@@ -1,6 +1,6 @@
 use tir_core::parser::{AsmPResult, ParseStream};
 use tir_core::{parser::region_with_blocks, *};
-use tir_macros::Op;
+use tir_macros::{Op, OpValidator};
 use winnow::{
     ascii::{alphanumeric1, multispace0},
     combinator::delimited,
@@ -9,7 +9,7 @@ use winnow::{
 
 use crate::target::DIALECT_NAME;
 
-#[derive(Op, Debug, Clone)]
+#[derive(Op, Debug, Clone, OpValidator)]
 #[operation(name = "section", known_attrs(name: String))]
 pub struct SectionOp {
     #[region]

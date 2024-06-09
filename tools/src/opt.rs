@@ -27,6 +27,7 @@ pub fn main(
 
     match module {
         Ok(module) => {
+            module.borrow().validate()?;
             let mut printer = StdoutPrinter::new();
             module.borrow().print(&mut printer);
         }

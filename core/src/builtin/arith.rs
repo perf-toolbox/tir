@@ -4,12 +4,12 @@ use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
 use crate::{Op, OpImpl, OpRef, Type};
-use tir_macros::{Op, OpAssembly};
+use tir_macros::{Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate as tir_core;
 
-#[derive(Op, OpAssembly, Clone)]
+#[derive(Op, OpAssembly, Clone, OpValidator)]
 #[operation(name = "const", known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
     #[ret_type]

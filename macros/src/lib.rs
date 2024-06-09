@@ -501,6 +501,11 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         quote! {}
     };
 
+    let region_names = fields.iter().filter_map(|f| match f.attrs {
+        OpFieldAttrs::Region(_) => f.ident.as_ref().map(|i| format_ident!("get_{}_region", i)),
+        _ => None,
+    });
+
     quote! {
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
@@ -515,6 +520,19 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 
                 self.print_assembly(fmt);
                 fmt.write_direct("\n");
+            }
+        }
+
+        impl tir_core::Validate for #op_ident {
+            fn validate(&self) -> std::result::Result<(), tir_core::ValidateErr> {
+                use tir_core::OpValidator;
+                self.validate_op()?;
+
+                #(
+                    self.#region_names().validate()?;
+                )*
+
+                Ok(())
             }
         }
 
@@ -579,6 +597,21 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 pub fn derive_op_assembly(input: TokenStream) -> TokenStream {
     let op = parse_macro_input!(input as syn::DeriveInput);
     make_generic_ir_printer_parser(op).into()
+}
+
+#[proc_macro_derive(OpValidator)]
+pub fn derive_op_validator(input: TokenStream) -> TokenStream {
+    let op = parse_macro_input!(input as syn::DeriveInput);
+    let struct_name = op.ident;
+
+    quote! {
+        impl tir_core::OpValidator for #struct_name {
+            fn validate_op(&self) -> std::result::Result<(), tir_core::ValidateErr> {
+                Ok(())
+            }
+        }
+    }
+    .into()
 }
 
 #[proc_macro]

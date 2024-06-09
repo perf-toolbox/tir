@@ -9,7 +9,7 @@ use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{lowercase, uppercase};
-use tir_macros::{Op, OpAssembly};
+use tir_macros::{Op, OpAssembly, OpValidator};
 use winnow::combinator::{preceded, separated};
 use winnow::token::one_of;
 use winnow::Parser;
@@ -20,7 +20,7 @@ const ALU_OPCODE: u8 = 0b110011;
 
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
-        #[derive(Op, OpAssembly)]
+        #[derive(Op, OpAssembly, OpValidator)]
         #[operation(name = $op_name)]
         pub struct $struct_name {
             #[operand]

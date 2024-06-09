@@ -1,7 +1,8 @@
 ; RUN: tir opt %s | filecheck %s
 
 ; CHECK: module {
+; CHECK-NEXT: module_end
 ; CHECK-NEXT: }
 module {
-
+  module_end attrs = {}
 }
