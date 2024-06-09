@@ -1,4 +1,4 @@
-; RUN: not tir-opt %s
+; RUN: not tir opt %s
 
 module {
   func @foo(%arg0: !void) -> !void {

@@ -1,3 +1,3 @@
-; RUN: not tir-asm %s
+; RUN: not tir asm %s
 
 unknown_instr

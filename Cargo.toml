@@ -7,6 +7,7 @@ members = [
     "backends/common",
     "backends/riscv",
     "fuzz",
-    "tools/opt",
-    "utils/check-runner", "utils/filecheck", "utils/not", "tools/asm",
+    "utils/check-runner",
+    "utils/filecheck",
+    "utils/not", "tools",
 ]

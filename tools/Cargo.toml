@@ -1,0 +1,14 @@
+[package]
+name = "tir-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tir-core = { path = "../core/" }
+tir-riscv = { path = "../backends/riscv/" }
+tir-backend = { path = "../backends/common/" }
+clap = { version = "4.5.6", features = ["derive"] }
+
+[[bin]]
+path = "main.rs"
+name = "tir"
