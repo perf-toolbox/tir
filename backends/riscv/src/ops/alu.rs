@@ -24,11 +24,11 @@ macro_rules! alu_op_base {
         #[operation(name = $op_name)]
         pub struct $struct_name {
             #[operand]
+            rd: Register,
+            #[operand]
             rs1: Register,
             #[operand]
             rs2: Register,
-            #[operand]
-            rd: Register,
             r#impl: OpImpl,
         }
     };
@@ -78,7 +78,7 @@ macro_rules! alu_ops {
                 let comma = one_of(|t| t == AsmToken::Comma).void();
 
                 let regs: Vec<Register> = preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
-                let (rs1, rs2, rd) = (regs[0], regs[1], regs[2]);
+                let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
 
                 let builder = input.get_builder();
                 let context = builder.get_context();
