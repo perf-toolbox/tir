@@ -230,7 +230,6 @@ impl Validate for Block {
         };
 
         if let Some(op) = self.last() {
-            // FIXME(alexbatashev): need to find a smart way to verify traits
             if !op_has_trait::<dyn Terminator>(op) {
                 return Err(ValidateErr::BlockMissingTerminator(self_ref));
             }
