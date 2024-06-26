@@ -8,5 +8,7 @@ module {
     ; CHECK-NEXT: const
     ; CHECK-SAME: value = <i8: 0>
     const attrs = {value = <i8: 0>} -> !void
+    ; CHECK-NEXT: return attrs = {}
+    return attrs = {}
   }
 }

@@ -1,7 +1,7 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{region_with_blocks, sym_name, AsmPResult, Parsable, ParseStream};
 use crate::*;
-use tir_macros::{Op, OpValidator};
+use tir_macros::{Op, OpAssembly, OpValidator};
 use winnow::ascii::space0;
 use winnow::combinator::{delimited, preceded, separated, trace};
 use winnow::Parser;
@@ -19,6 +19,16 @@ pub struct FuncOp {
     body: RegionRef,
     r#impl: OpImpl,
 }
+
+/// Return from a function
+#[derive(Op, OpValidator, OpAssembly)]
+#[operation(name = "return")]
+pub struct ReturnOp {
+    // TODO add an optional return value
+    r#impl: OpImpl,
+}
+
+impl Terminator for ReturnOp {}
 
 fn single_arg<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, Type)> {
     (
