@@ -13,4 +13,6 @@ module {
     isema.add attrs = {rs1 = <str: "x0">, rs2 = <str: "x1">, rd = <str: "x2">}
     isema.comp_instr_end attrs = {}
   }
+
+  module_end attrs = {}
 }

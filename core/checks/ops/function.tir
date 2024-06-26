@@ -11,4 +11,6 @@ module {
     ; CHECK-NEXT: return attrs = {}
     return attrs = {}
   }
+
+  module_end attrs = {}
 }
