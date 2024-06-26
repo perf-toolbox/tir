@@ -34,7 +34,7 @@ pub fn op_cast<T: Op>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 /// # pub struct TestOp {
 /// #   r#impl: OpImpl,
 /// # }
-///
+/// #
 /// use tir_core::Terminator;
 ///
 /// #[tir_macros::op_implements]
@@ -44,7 +44,7 @@ pub fn op_cast<T: Op>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 /// And later users can dynamically query known traits and perform generic
 /// transformations or analysis on operations.
 ///
-/// Example:
+/// **Example:**
 /// ```
 /// use tir_core::{OpRef, utils::op_dyn_cast, Terminator};
 ///
@@ -73,9 +73,9 @@ pub fn op_dyn_cast<T: ?Sized + 'static>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 
 /// Check if an operation was registered to implement trait T
 ///
-/// See [tir_core::utils::op_dyn_cast] for more info on registering traits.
+/// See [`op_dyn_cast`] for more info on registering traits.
 ///
-/// Example:
+/// **Example:**
 /// ```
 /// use tir_core::{OpRef, utils::op_has_trait, Terminator};
 ///
