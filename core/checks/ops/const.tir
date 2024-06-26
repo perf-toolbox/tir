@@ -9,4 +9,5 @@ module {
     const attrs = {value = <i8: 0>} -> !int<8>
     return attrs = {}
   }
+  module_end attrs = {}
 }

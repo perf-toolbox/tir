@@ -1,7 +1,7 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{single_block_region, AsmPResult, ParseStream};
 use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator};
-use tir_macros::{Op, OpAssembly, OpValidator};
+use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate as tir_core;
@@ -20,6 +20,7 @@ pub struct ModuleEndOp {
     r#impl: OpImpl,
 }
 
+#[op_implements]
 impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {
@@ -51,7 +52,11 @@ mod test {
     use std::any::TypeId;
 
     use super::*;
-    use crate::{parse_ir, Context, Printable, StringPrinter};
+    use crate::{
+        parse_ir,
+        utils::{op_dyn_cast, op_has_trait},
+        Context, Printable, StringPrinter,
+    };
 
     #[test]
     fn test_module() {
@@ -62,6 +67,19 @@ mod test {
         module.borrow().get_body_region();
         module.borrow().get_body();
         module.borrow().get_context();
+        assert!(!op_has_trait::<dyn Terminator>(module.clone()));
+        assert!(op_dyn_cast::<dyn Terminator>(module).is_none());
+    }
+
+    #[test]
+    fn test_module_end() {
+        assert!(ModuleEndOp::get_operation_name() == "module_end");
+
+        let context = Context::new();
+
+        let module_end = ModuleEndOp::builder(&context).build();
+        assert!(op_has_trait::<dyn Terminator>(module_end.clone()));
+        assert!(op_dyn_cast::<dyn Terminator>(module_end).is_some());
     }
 
     // TODO replace this test with a snapshot test

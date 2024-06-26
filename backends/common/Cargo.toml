@@ -10,3 +10,4 @@ tir-core = { path = "../../core/" }
 tir-macros = { path = "../../macros" }
 thiserror = "1.0.59"
 winnow = "0.6.7"
+linkme = "0.3.27"

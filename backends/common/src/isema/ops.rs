@@ -1,8 +1,8 @@
 use tir_core::{
     parser::{single_block_region, AsmPResult, ParseStream},
-    IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef,
+    IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
 };
-use tir_macros::{Op, OpAssembly, OpValidator};
+use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate::isema::DIALECT_NAME;
@@ -26,6 +26,9 @@ pub struct CompInstrOp {
 pub struct CompInstrEndOp {
     r#impl: OpImpl,
 }
+
+#[op_implements]
+impl Terminator for CompInstrEndOp {}
 
 impl OpAssembly for CompInstrOp {
     fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>

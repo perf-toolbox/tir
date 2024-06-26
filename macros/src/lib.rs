@@ -506,7 +506,12 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         _ => None,
     });
 
+    let op_ident_const = format_ident!("{}_METADATA", &op_ident.to_string().to_uppercase());
+
     quote! {
+        #[linkme::distributed_slice]
+        pub static #op_ident_const: [fn() -> tir_core::utils::CastableMeta];
+
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
                 fmt.indent();
@@ -573,6 +578,22 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 
             fn get_dialect_id(&self) -> u32 {
                 self.r#impl.dialect_id
+            }
+
+            fn has_trait(&self, type_id: std::any::TypeId) -> bool {
+                let entry = #op_ident_const.iter().find_map(|func| {
+                    let entry = func();
+                    if entry.type_id == type_id {
+                        Some(entry)
+                    } else {
+                        None
+                    }
+                });
+                entry.is_some()
+            }
+
+            fn get_meta(&self) -> &'static linkme::DistributedSlice<[fn() -> tir_core::utils::CastableMeta]> {
+                &#op_ident_const
             }
 
             #return_type
@@ -651,4 +672,51 @@ pub fn uppercase(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn match_op(input: TokenStream) -> TokenStream {
     op_matcher(input)
+}
+
+#[proc_macro_attribute]
+pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let orig: proc_macro2::TokenStream = item.clone().into();
+    let impl_ = parse_macro_input!(item as syn::ItemImpl);
+    let self_ty = match *impl_.self_ty {
+        // todo any path
+        syn::Type::Path(path) => path.path.get_ident().cloned().unwrap(),
+        _ => panic!("not a path"),
+    };
+    let trait_ = impl_.trait_.unwrap().1.get_ident().cloned().unwrap();
+    let caster_func = format_ident!(
+        "{}_to_{}_caster_",
+        self_ty.to_string().to_lowercase(),
+        trait_.to_string().to_lowercase()
+    );
+    let caster_wrapper = format_ident!(
+        "{}_to_{}_caster_wrapper_",
+        self_ty.to_string().to_lowercase(),
+        trait_.to_string().to_lowercase()
+    );
+    let caster_const = format_ident!(
+        "{}_TO_{}_CASTER",
+        self_ty.to_string().to_uppercase(),
+        trait_.to_string().to_uppercase()
+    );
+    let meta_ident = format_ident!("{}_METADATA", &self_ty.to_string().to_uppercase());
+
+    quote!{
+        #[linkme::distributed_slice(#meta_ident)]
+        static #caster_const: fn() -> tir_core::utils::CastableMeta = #caster_wrapper;
+
+        fn #caster_wrapper() -> tir_core::utils::CastableMeta {
+            tir_core::utils::CastableMeta {
+                type_id: std::any::TypeId::of::<std::cell::RefCell<dyn #trait_>>(),
+                caster: #caster_func as *const (),
+            }
+        }
+
+        fn #caster_func(ref_: tir_core::OpRef) -> std::rc::Rc<std::cell::RefCell<dyn #trait_ + 'static>> {
+            let self_ = tir_core::utils::op_cast::<#self_ty>(ref_).expect("ill formed");
+            self_
+        }
+
+        #orig
+    }.into()
 }

@@ -1,3 +1,4 @@
+use crate::utils::CastableMeta;
 use crate::{
     AllocId, Attr, ContextRef, ContextWRef, OpAssembly, OpValidator, Printable, RegionRef,
     RegionWRef, Type, Validate, Value,
@@ -20,6 +21,11 @@ pub trait Op: Any + OpAssembly + Printable + Validate + OpValidator {
     fn get_alloc_id(&self) -> AllocId;
 
     fn get_dialect_id(&self) -> u32;
+
+    #[doc(hidden)]
+    fn has_trait(&self, type_id: std::any::TypeId) -> bool;
+    #[doc(hidden)]
+    fn get_meta(&self) -> &'static linkme::DistributedSlice<[fn() -> CastableMeta]>;
 }
 
 #[derive(Debug, Clone)]
