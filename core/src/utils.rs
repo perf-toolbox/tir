@@ -20,7 +20,7 @@ pub fn op_cast<T: Op>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 }
 
 /// Cast an operation to a registered trait
-/// 
+///
 /// Rust does not allow trait upcasting (at least for now). To be able to cast
 /// from `dyn Op` to user-defined trait, the trait must be globally registered.
 /// That is easily done with `tir_macros::op_implements` attribute:
@@ -34,16 +34,16 @@ pub fn op_cast<T: Op>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 /// # pub struct TestOp {
 /// #   r#impl: OpImpl,
 /// # }
-/// 
+///
 /// use tir_core::Terminator;
-/// 
+///
 /// #[tir_macros::op_implements]
 /// impl Terminator for TestOp {}
 /// ```
-/// 
+///
 /// And later users can dynamically query known traits and perform generic
 /// transformations or analysis on operations.
-/// 
+///
 /// Example:
 /// ```
 /// use tir_core::{OpRef, utils::op_dyn_cast, Terminator};
@@ -66,18 +66,15 @@ pub fn op_dyn_cast<T: ?Sized + 'static>(op: OpRef) -> Option<Rc<RefCell<T>>> {
     })?;
     let context = op.borrow().get_context();
     let op_ref = context.get_op(op.borrow().get_alloc_id())?;
-    let caster = unsafe {
-        std::mem::transmute::<*const (), fn(OpRef) -> Rc<RefCell<T>>>(
-            entry.caster,
-        )
-    };
+    let caster =
+        unsafe { std::mem::transmute::<*const (), fn(OpRef) -> Rc<RefCell<T>>>(entry.caster) };
     Some(caster(op_ref))
 }
 
 /// Check if an operation was registered to implement trait T
-/// 
+///
 /// See [tir_core::utils::op_dyn_cast] for more info on registering traits.
-/// 
+///
 /// Example:
 /// ```
 /// use tir_core::{OpRef, utils::op_has_trait, Terminator};
