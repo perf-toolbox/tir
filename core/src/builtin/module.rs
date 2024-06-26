@@ -1,7 +1,7 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::{single_block_region, AsmPResult, ParseStream};
 use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator};
-use tir_macros::{Op, OpAssembly, OpValidator};
+use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 use winnow::Parser;
 
 use crate as tir_core;
@@ -20,6 +20,7 @@ pub struct ModuleEndOp {
     r#impl: OpImpl,
 }
 
+#[op_implements]
 impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {

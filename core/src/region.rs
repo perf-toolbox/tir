@@ -5,7 +5,10 @@ use std::{
     sync::Arc,
 };
 
-use crate::{AllocId, ContextRef, ContextWRef, OpRef, Type, Validate, ValidateErr, Value};
+use crate::{
+    utils::op_has_trait, AllocId, ContextRef, ContextWRef, OpRef, Terminator, Type, Validate,
+    ValidateErr, Value,
+};
 
 pub type RegionRef = Rc<Region>;
 pub type RegionWRef = Weak<Region>;
@@ -226,8 +229,12 @@ impl Validate for Block {
             return Err(ValidateErr::BlockNotRegisteredWithRegion(self.get_name()));
         };
 
-        if let None = self.last() {
+        if let Some(op) = self.last() {
             // FIXME(alexbatashev): need to find a smart way to verify traits
+            if !op_has_trait::<dyn Terminator>(op) {
+                return Err(ValidateErr::BlockMissingTerminator(self_ref));
+            }
+        } else {
             return Err(ValidateErr::BlockMissingTerminator(self_ref));
         }
 
