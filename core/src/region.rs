@@ -102,6 +102,15 @@ impl BlockImpl {
     fn get_name(&self) -> String {
         self.name.clone()
     }
+
+    fn find(&self, op_id: AllocId) -> Option<usize> {
+        for idx in 0..self.operations.len() {
+            if self.operations[idx] == op_id {
+                return Some(idx);
+            }
+        }
+        None
+    }
 }
 
 #[derive(Debug)]
@@ -213,6 +222,10 @@ impl Block {
                 .borrow_mut()
                 .add_argument(ty.clone(), name.as_ref(), this.clone());
         }
+    }
+
+    pub fn find(&self, op_id: AllocId) -> Option<usize> {
+        self.0.borrow().find(op_id)
     }
 
     pub fn get_name(&self) -> String {

@@ -23,7 +23,9 @@
 use tir_core::Dialect;
 use tir_core::OpAssembly;
 
+mod conversion;
 mod ops;
+pub use conversion::*;
 pub use ops::*;
 
 use tir_macros::{dialect, populate_dialect_ops, populate_dialect_types};
@@ -42,3 +44,19 @@ populate_dialect_ops!(
     CompInstrEndOp
 );
 populate_dialect_types!();
+
+#[macro_export]
+macro_rules! def{
+    ($op_name:ident => $isema:ty{$($to:ident = $from:ident $(,)?)*}) => {
+        #[tir_macros::op_implements]
+        impl WithISema for $op_name {
+            fn convert(&self, builder: &tir_core::OpBuilder) {
+                let context = self.get_context();
+                <$isema>::builder(&context)
+                    $(.$to(self.$from().into()))*;
+            }
+        }
+    };
+}
+
+pub use def;
