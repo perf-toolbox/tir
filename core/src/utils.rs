@@ -30,14 +30,14 @@ pub fn op_cast<T: Op>(op: OpRef) -> Option<Rc<RefCell<T>>> {
 /// # use tir_core::{Op, OpAssembly, OpRef, OpImpl, Printable};
 /// # use tir_core::builtin::DIALECT_NAME;
 /// # #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
-/// # #[operation(name = "test")]
+/// # #[operation(name = "test", dialect = test)]
 /// # pub struct TestOp {
 /// #   r#impl: OpImpl,
 /// # }
 /// #
 /// use tir_core::Terminator;
 ///
-/// #[tir_macros::op_implements]
+/// #[tir_macros::op_implements(dialect = test)]
 /// impl Terminator for TestOp {}
 /// ```
 ///
