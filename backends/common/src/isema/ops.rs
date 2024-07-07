@@ -13,7 +13,7 @@ use crate::isema::DIALECT_NAME;
 /// and still preserve operation atomicity, introduce a container operation, that can represent
 /// instructions as a combination of simpler operations.
 #[derive(Op, Debug, Clone, OpValidator)]
-#[operation(name = "comp_instr", known_attrs(asm: String))]
+#[operation(name = "comp_instr", dialect = isema, known_attrs(asm: String))]
 pub struct CompInstrOp {
     #[region(single_block, no_args)]
     body: RegionRef,
@@ -22,12 +22,12 @@ pub struct CompInstrOp {
 
 /// Terminator for compound instructions
 #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
-#[operation(name = "comp_instr_end")]
+#[operation(name = "comp_instr_end", dialect = isema)]
 pub struct CompInstrEndOp {
     r#impl: OpImpl,
 }
 
-#[op_implements]
+#[op_implements(dialect = isema)]
 impl Terminator for CompInstrEndOp {}
 
 impl OpAssembly for CompInstrOp {
@@ -61,7 +61,7 @@ macro_rules! three_reg_ops {
         $(
             #[doc = $doc]
             #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
-            #[operation(name = $op_name, known_attrs(rs1: String, rs2: String, rd: String))]
+            #[operation(name = $op_name, dialect = isema, known_attrs(rs1: String, rs2: String, rd: String))]
             pub struct $struct_name {
                 r#impl: OpImpl,
             }

@@ -7,7 +7,7 @@ use winnow::Parser;
 use crate as tir_core;
 
 #[derive(Op, Debug, OpValidator)]
-#[operation(name = "module")]
+#[operation(name = "module", dialect = builtin)]
 pub struct ModuleOp {
     #[region(single_block, no_args)]
     body: RegionRef,
@@ -15,12 +15,12 @@ pub struct ModuleOp {
 }
 
 #[derive(Op, Debug, OpValidator, OpAssembly)]
-#[operation(name = "module_end")]
+#[operation(name = "module_end", dialect = builtin)]
 pub struct ModuleEndOp {
     r#impl: OpImpl,
 }
 
-#[op_implements]
+#[op_implements(dialect = builtin)]
 impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {

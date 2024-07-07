@@ -9,7 +9,8 @@ pub(crate) use helpers::*;
 pub(crate) use op_impl::*;
 
 use case_converter::camel_to_snake;
-use darling::FromDeriveInput;
+use darling::ast::NestedMeta;
+use darling::{FromDeriveInput, FromMeta};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream, Parser};
@@ -60,11 +61,6 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     };
 
     TokenStream::from(quote! {
-        macro_rules! dialect_name {
-            () => {
-                #dialect_name
-            }
-        }
         pub const DIALECT_NAME: &str = #dialect_name;
 
         pub fn create_dialect() -> Dialect {
@@ -93,7 +89,8 @@ pub fn concat_idents(input: TokenStream) -> TokenStream {
 
     quote! {
         #(#idents)*
-    }.into()
+    }
+    .into()
 }
 
 fn dialect_type_extension(name_ident: syn::Ident) -> TokenStream {
@@ -525,11 +522,15 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         _ => None,
     });
 
-    let op_ident_const = format_ident!("_{}_METADATA", &op_ident.to_string().to_uppercase());
+    let op_ident_const = format_ident!(
+        "{}_{}_METADATA",
+        &op.dialect.to_string().to_uppercase(),
+        &op_ident.to_string().to_uppercase()
+    );
 
     quote! {
         #[linkme::distributed_slice]
-        pub static tir_macros::concat_idents!(test, #op_ident_const): [fn() -> tir_core::utils::CastableMeta];
+        pub static #op_ident_const: [fn() -> tir_core::utils::CastableMeta];
 
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
@@ -693,8 +694,27 @@ pub fn match_op(input: TokenStream) -> TokenStream {
     op_matcher(input)
 }
 
+#[derive(Debug, FromMeta)]
+struct OpImplInput {
+    dialect: syn::Ident,
+}
+
 #[proc_macro_attribute]
-pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn op_implements(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(darling::Error::from(e).write_errors());
+        }
+    };
+
+    let attr = match OpImplInput::from_list(&attr_args) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(e.write_errors());
+        }
+    };
+
     let orig: proc_macro2::TokenStream = item.clone().into();
     let impl_ = parse_macro_input!(item as syn::ItemImpl);
     let self_ty = match *impl_.self_ty {
@@ -718,10 +738,14 @@ pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
         self_ty.to_string().to_uppercase(),
         trait_.to_string().to_uppercase()
     );
-    let meta_ident = format_ident!("_{}_METADATA", &self_ty.to_string().to_uppercase());
+    let meta_ident = format_ident!(
+        "{}_{}_METADATA",
+        &attr.dialect.to_string().to_uppercase(),
+        &self_ty.to_string().to_uppercase()
+    );
 
     quote!{
-        #[linkme::distributed_slice(tir_macros::concat_idents!(test, #meta_ident))]
+        #[linkme::distributed_slice(#meta_ident)]
         static #caster_const: fn() -> tir_core::utils::CastableMeta = #caster_wrapper;
 
         fn #caster_wrapper() -> tir_core::utils::CastableMeta {
