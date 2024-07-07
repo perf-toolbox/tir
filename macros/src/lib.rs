@@ -12,7 +12,7 @@ use case_converter::camel_to_snake;
 use darling::FromDeriveInput;
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::parse::{Parse, ParseStream};
+use syn::parse::{Parse, ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::Token;
 use syn::{parse_macro_input, LitStr};
@@ -50,8 +50,6 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DialectInput);
 
     let dialect_name = input.name.to_string();
-    // let name_ident = parse_macro_input!(input as syn::Ident);
-    // let dialect_name = name_ident.to_string();
 
     let init = match input.init {
         Some(init) => quote! {
@@ -62,6 +60,11 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     };
 
     TokenStream::from(quote! {
+        macro_rules! dialect_name {
+            () => {
+                #dialect_name
+            }
+        }
         pub const DIALECT_NAME: &str = #dialect_name;
 
         pub fn create_dialect() -> Dialect {
@@ -75,6 +78,22 @@ pub fn dialect(input: TokenStream) -> TokenStream {
             dialect
         }
     })
+}
+
+#[proc_macro]
+pub fn concat_idents(input: TokenStream) -> TokenStream {
+    let parser = Punctuated::<syn::Ident, Token![,]>::parse_separated_nonempty;
+    let tokens = input.clone();
+    let idents = parser
+        .parse(tokens)
+        .unwrap()
+        .iter()
+        .cloned()
+        .collect::<Vec<_>>();
+
+    quote! {
+        #(#idents)*
+    }.into()
 }
 
 fn dialect_type_extension(name_ident: syn::Ident) -> TokenStream {
@@ -506,11 +525,11 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         _ => None,
     });
 
-    let op_ident_const = format_ident!("{}_METADATA", &op_ident.to_string().to_uppercase());
+    let op_ident_const = format_ident!("_{}_METADATA", &op_ident.to_string().to_uppercase());
 
     quote! {
         #[linkme::distributed_slice]
-        pub static #op_ident_const: [fn() -> tir_core::utils::CastableMeta];
+        pub static tir_macros::concat_idents!(test, #op_ident_const): [fn() -> tir_core::utils::CastableMeta];
 
         impl tir_core::Printable for #op_ident {
             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) where Self: tir_core::OpAssembly {
@@ -699,10 +718,10 @@ pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
         self_ty.to_string().to_uppercase(),
         trait_.to_string().to_uppercase()
     );
-    let meta_ident = format_ident!("{}_METADATA", &self_ty.to_string().to_uppercase());
+    let meta_ident = format_ident!("_{}_METADATA", &self_ty.to_string().to_uppercase());
 
     quote!{
-        #[linkme::distributed_slice(#meta_ident)]
+        #[linkme::distributed_slice(tir_macros::concat_idents!(test, #meta_ident))]
         static #caster_const: fn() -> tir_core::utils::CastableMeta = #caster_wrapper;
 
         fn #caster_wrapper() -> tir_core::utils::CastableMeta {
