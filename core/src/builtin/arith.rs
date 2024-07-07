@@ -10,7 +10,7 @@ use winnow::Parser;
 use crate as tir_core;
 
 #[derive(Op, OpAssembly, Clone, OpValidator)]
-#[operation(name = "const", known_attrs(value: IntegerAttr))]
+#[operation(name = "const", dialect = builtin, known_attrs(value: IntegerAttr))]
 pub struct ConstOp {
     #[ret_type]
     return_type: Type,

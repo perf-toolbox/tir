@@ -13,7 +13,7 @@ use self::parser::identifier;
 use super::FuncType;
 
 #[derive(Op, OpValidator)]
-#[operation(name = "func", known_attrs(sym_name: String, func_type: Type))]
+#[operation(name = "func", dialect = builtin, known_attrs(sym_name: String, func_type: Type))]
 pub struct FuncOp {
     #[region]
     body: RegionRef,
@@ -22,13 +22,13 @@ pub struct FuncOp {
 
 /// Return from a function
 #[derive(Op, OpValidator, OpAssembly)]
-#[operation(name = "return")]
+#[operation(name = "return", dialect = builtin)]
 pub struct ReturnOp {
     // TODO add an optional return value
     r#impl: OpImpl,
 }
 
-#[op_implements]
+#[op_implements(dialect = builtin)]
 impl Terminator for ReturnOp {}
 
 fn single_arg<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, Type)> {

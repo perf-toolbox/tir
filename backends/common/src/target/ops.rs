@@ -10,7 +10,7 @@ use winnow::{
 use crate::target::DIALECT_NAME;
 
 #[derive(Op, Debug, Clone, OpValidator)]
-#[operation(name = "section", known_attrs(name: String))]
+#[operation(name = "section", dialect = target, known_attrs(name: String))]
 pub struct SectionOp {
     #[region]
     body: RegionRef,

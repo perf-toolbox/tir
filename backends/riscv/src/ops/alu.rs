@@ -21,7 +21,7 @@ const ALU_OPCODE: u8 = 0b110011;
 macro_rules! alu_op_base {
     ($struct_name:ident, $op_name:literal) => {
         #[derive(Op, OpAssembly, OpValidator)]
-        #[operation(name = $op_name)]
+        #[operation(name = $op_name, dialect = riscv)]
         pub struct $struct_name {
             #[operand]
             rd: Register,

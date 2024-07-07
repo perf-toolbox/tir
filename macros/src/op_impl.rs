@@ -46,6 +46,7 @@ pub struct OpReceiver {
     pub ident: syn::Ident,
     pub data: darling::ast::Data<(), OpFieldReceiver>,
     pub name: String,
+    pub dialect: syn::Ident,
     #[darling(default)]
     pub known_attrs: Option<OpAttrs>,
 }

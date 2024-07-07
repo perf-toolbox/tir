@@ -9,10 +9,11 @@ pub(crate) use helpers::*;
 pub(crate) use op_impl::*;
 
 use case_converter::camel_to_snake;
-use darling::FromDeriveInput;
+use darling::ast::NestedMeta;
+use darling::{FromDeriveInput, FromMeta};
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::parse::{Parse, ParseStream};
+use syn::parse::{Parse, ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::Token;
 use syn::{parse_macro_input, LitStr};
@@ -50,8 +51,6 @@ pub fn dialect(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DialectInput);
 
     let dialect_name = input.name.to_string();
-    // let name_ident = parse_macro_input!(input as syn::Ident);
-    // let dialect_name = name_ident.to_string();
 
     let init = match input.init {
         Some(init) => quote! {
@@ -75,6 +74,23 @@ pub fn dialect(input: TokenStream) -> TokenStream {
             dialect
         }
     })
+}
+
+#[proc_macro]
+pub fn concat_idents(input: TokenStream) -> TokenStream {
+    let parser = Punctuated::<syn::Ident, Token![,]>::parse_separated_nonempty;
+    let tokens = input.clone();
+    let idents = parser
+        .parse(tokens)
+        .unwrap()
+        .iter()
+        .cloned()
+        .collect::<Vec<_>>();
+
+    quote! {
+        #(#idents)*
+    }
+    .into()
 }
 
 fn dialect_type_extension(name_ident: syn::Ident) -> TokenStream {
@@ -506,7 +522,11 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         _ => None,
     });
 
-    let op_ident_const = format_ident!("{}_METADATA", &op_ident.to_string().to_uppercase());
+    let op_ident_const = format_ident!(
+        "{}_{}_METADATA",
+        &op.dialect.to_string().to_uppercase(),
+        &op_ident.to_string().to_uppercase()
+    );
 
     quote! {
         #[linkme::distributed_slice]
@@ -674,8 +694,27 @@ pub fn match_op(input: TokenStream) -> TokenStream {
     op_matcher(input)
 }
 
+#[derive(Debug, FromMeta)]
+struct OpImplInput {
+    dialect: syn::Ident,
+}
+
 #[proc_macro_attribute]
-pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn op_implements(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(darling::Error::from(e).write_errors());
+        }
+    };
+
+    let attr = match OpImplInput::from_list(&attr_args) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(e.write_errors());
+        }
+    };
+
     let orig: proc_macro2::TokenStream = item.clone().into();
     let impl_ = parse_macro_input!(item as syn::ItemImpl);
     let self_ty = match *impl_.self_ty {
@@ -699,7 +738,11 @@ pub fn op_implements(_attr: TokenStream, item: TokenStream) -> TokenStream {
         self_ty.to_string().to_uppercase(),
         trait_.to_string().to_uppercase()
     );
-    let meta_ident = format_ident!("{}_METADATA", &self_ty.to_string().to_uppercase());
+    let meta_ident = format_ident!(
+        "{}_{}_METADATA",
+        &attr.dialect.to_string().to_uppercase(),
+        &self_ty.to_string().to_uppercase()
+    );
 
     quote!{
         #[linkme::distributed_slice(#meta_ident)]
