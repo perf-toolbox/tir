@@ -517,10 +517,14 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
         quote! {}
     };
 
-    let region_names = fields.iter().filter_map(|f| match f.attrs {
-        OpFieldAttrs::Region(_) => f.ident.as_ref().map(|i| format_ident!("get_{}_region", i)),
-        _ => None,
-    });
+    let region_names: Vec<_> = fields
+        .iter()
+        .filter_map(|f| match f.attrs {
+            OpFieldAttrs::Region(_) => f.ident.as_ref().map(|i| format_ident!("get_{}_region", i)),
+            _ => None,
+        })
+        .collect();
+    let has_regions = region_names.len() > 0;
 
     let op_ident_const = format_ident!(
         "{}_{}_METADATA",
@@ -585,6 +589,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
                 self.r#impl.parent_region.clone().map(|r| r.upgrade())?
             }
 
+            fn set_parent_region(&mut self, region: tir_core::RegionWRef) {
+                self.r#impl.parent_region = Some(region)
+            }
+
             fn set_alloc_id(&mut self, id: tir_core::AllocId) {
                 assert_eq!(self.r#impl.alloc_id, tir_core::AllocId::default());
                 assert_ne!(id, tir_core::AllocId::default());
@@ -614,6 +622,16 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
 
             fn get_meta(&self) -> &'static linkme::DistributedSlice<[fn() -> tir_core::utils::CastableMeta]> {
                 &#op_ident_const
+            }
+
+            fn get_regions(&self) -> tir_core::OpRegionIter {
+                tir_core::OpRegionIter::new(&[
+                    #(self.#region_names()),*
+                ])
+            }
+
+            fn has_regions(&self) -> bool {
+                #has_regions
             }
 
             #return_type

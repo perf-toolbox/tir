@@ -30,9 +30,28 @@ impl OpBuilderImpl {
         self.insertion_point.index += 1;
     }
 
+    fn erase(&mut self, op: &OpRef) {
+        if let Some(region) = op.borrow().get_parent_region() {
+            if let Some(blk) = region.find_op_block(op) {
+                blk.erase(op);
+            }
+        }
+    }
+
     fn set_insertion_point_to_start(&mut self, block: BlockRef) {
         self.insertion_point.block = block;
         self.insertion_point.index = 0;
+    }
+
+    fn set_insertion_point_after<T: Op + ?Sized>(&mut self, op: &Rc<RefCell<T>>) {
+        let parent = op.borrow().get_parent_region().unwrap();
+        let (block, id) = parent
+            .iter()
+            .find_map(|b| b.find(op.borrow().get_alloc_id()).map(|id| (b, id)))
+            .unwrap();
+
+        self.insertion_point.block = block;
+        self.insertion_point.index = id + 1;
     }
 }
 
@@ -52,6 +71,10 @@ impl OpBuilder {
         self.0.borrow_mut().insert(&op);
     }
 
+    pub fn erase(&self, op: &OpRef) {
+        self.0.borrow_mut().erase(&op);
+    }
+
     pub fn insert_generic(&self, op: &OpRef) {
         self.0.borrow_mut().insert(op);
     }
@@ -62,5 +85,9 @@ impl OpBuilder {
 
     pub fn set_insertion_point_to_start(&self, block: BlockRef) {
         self.0.borrow_mut().set_insertion_point_to_start(block);
+    }
+
+    pub fn set_insertion_point_after<T: Op + ?Sized>(&self, op: &Rc<RefCell<T>>) {
+        self.0.borrow_mut().set_insertion_point_after(op);
     }
 }

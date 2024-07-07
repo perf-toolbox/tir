@@ -19,6 +19,12 @@ macro_rules! register {
             $($case_name,)*
         }
 
+        impl Into<tir_core::Attr> for Register {
+            fn into(self) -> tir_core::Attr {
+                tir_core::Attr::String(get_reg_name(&self).to_string())
+            }
+        }
+
         pub fn get_reg_name(reg: &Register) -> &str {
             match reg {
             $(
@@ -70,7 +76,6 @@ macro_rules! register {
                 }
             }).parse_next(input)
         }
-
     };
 }
 

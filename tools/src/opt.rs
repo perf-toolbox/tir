@@ -1,11 +1,13 @@
 use clap::{ArgMatches, FromArgMatches, Parser};
-use tir_core::{parse_ir, parser::print_parser_diag, ContextRef, StdoutPrinter};
+use tir_core::{parse_ir, parser::print_parser_diag, ContextRef, PassManager, StdoutPrinter};
 
 #[derive(Debug, Parser)]
 #[command(name = "opt")]
 pub struct Cli {
     #[arg(default_value = "-")]
     input: String,
+    #[arg(long)]
+    pass: Vec<String>,
 }
 
 pub fn main(
@@ -29,6 +31,11 @@ pub fn main(
         Ok(module) => {
             module.borrow().validate()?;
             let mut printer = StdoutPrinter::new();
+            let pm = PassManager::new_from_list(&args.pass)?;
+            if let Err(e) = pm.run(&module) {
+                eprintln!("{:?}", e);
+                std::process::exit(0);
+            }
             module.borrow().print(&mut printer);
         }
         Err(err) => {
