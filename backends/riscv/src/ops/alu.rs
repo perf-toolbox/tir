@@ -135,13 +135,13 @@ alu_ops! {
     AndOp => { name = "and", funct7 = 0b0000000, funct3 = 0b111 }
 }
 
-isema::def! {AddOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {SubOp => tir_backend::isema::SubOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {AndOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {OrOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {SllOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {SrlOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {SraOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, AddOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, SubOp => tir_backend::isema::SubOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, AndOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, OrOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, SllOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, SrlOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, SraOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
 
 #[cfg(test)]
 mod tests {

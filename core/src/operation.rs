@@ -14,6 +14,7 @@ pub trait Op: Any + OpAssembly + Printable + Validate + OpValidator {
     fn add_attrs(&mut self, attrs: &HashMap<String, Attr>);
     fn get_context(&self) -> ContextRef;
     fn get_parent_region(&self) -> Option<RegionRef>;
+    fn set_parent_region(&mut self, region: RegionWRef);
     fn get_return_type(&self) -> Option<Type>;
     fn get_return_value(&self) -> Option<Value>;
 

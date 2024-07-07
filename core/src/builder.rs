@@ -28,6 +28,9 @@ impl OpBuilderImpl {
             .block
             .insert(self.insertion_point.index, op);
         self.insertion_point.index += 1;
+        op.borrow_mut().set_parent_region(Rc::downgrade(
+            &self.insertion_point.block.get_parent_region(),
+        ));
     }
 
     fn set_insertion_point_to_start(&mut self, block: BlockRef) {

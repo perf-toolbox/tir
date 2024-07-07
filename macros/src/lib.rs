@@ -589,6 +589,10 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
                 self.r#impl.parent_region.clone().map(|r| r.upgrade())?
             }
 
+            fn set_parent_region(&mut self, region: tir_core::RegionWRef) {
+                self.r#impl.parent_region = Some(region)
+            }
+
             fn set_alloc_id(&mut self, id: tir_core::AllocId) {
                 assert_eq!(self.r#impl.alloc_id, tir_core::AllocId::default());
                 assert_ne!(id, tir_core::AllocId::default());

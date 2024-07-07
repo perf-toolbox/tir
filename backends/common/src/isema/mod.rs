@@ -47,8 +47,8 @@ populate_dialect_types!();
 
 #[macro_export]
 macro_rules! def{
-    ($op_name:ident => $isema:ty{$($to:ident = $from:ident $(,)?)*}) => {
-        #[tir_macros::op_implements]
+    (dialect = $dialect:ident, $op_name:ident => $isema:ty{$($to:ident = $from:ident $(,)?)*}) => {
+        #[tir_macros::op_implements(dialect = $dialect)]
         impl WithISema for $op_name {
             fn convert(&self, builder: &tir_core::OpBuilder) {
                 let context = self.get_context();
