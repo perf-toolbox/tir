@@ -161,6 +161,7 @@ mod tests {
     fn passes_can_be_added() {
         let mut pm = PassManager::new();
         pm.add_pass("test-pass").expect("failed to add pass");
+        assert!(pm.add_pass("unkn-pass").is_err());
 
         let passes = format!("{:?}", pm);
 
@@ -179,5 +180,12 @@ mod tests {
             .build();
 
         assert!(pm.run(&constant).is_err());
+    }
+
+    #[test]
+    fn passes_from_list() {
+        let pm = PassManager::new_from_list(&["test-pass"]).expect("failed to create PM");
+        let passes = format!("{:?}", pm);
+        assert!(passes.find("test-pass").is_some());
     }
 }
