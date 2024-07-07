@@ -763,3 +763,44 @@ pub fn op_implements(attr: TokenStream, item: TokenStream) -> TokenStream {
         #orig
     }.into()
 }
+
+#[derive(Debug, FromMeta)]
+struct PassImplInput {
+    name: String,
+    wrapper: syn::Path,
+}
+
+#[proc_macro_attribute]
+pub fn pass(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr_args = match NestedMeta::parse_meta_list(attr.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(darling::Error::from(e).write_errors());
+        }
+    };
+
+    let attr = match PassImplInput::from_list(&attr_args) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(e.write_errors());
+        }
+    };
+
+    let impl_ = parse_macro_input!(item as syn::ItemFn);
+
+    let name = attr.name.clone();
+    let ident_name = format_ident!("{}", attr.name.to_uppercase().replace("-", "_"));
+    let wrapper = attr.wrapper;
+    let fn_name = impl_.sig.ident.clone();
+
+    quote! {
+        #[linkme::distributed_slice(tir_core::TIR_PASS_REGISTRY)]
+        pub static #ident_name: once_cell::sync::Lazy<tir_core::PassRegistryEntry> = once_cell::sync::Lazy::new(|| {
+            tir_core::PassRegistryEntry::new(
+                Box::new(#wrapper::new(#name, #fn_name))
+            )
+        });
+
+        #impl_
+    }.into()
+}
