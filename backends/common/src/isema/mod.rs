@@ -52,8 +52,9 @@ macro_rules! def{
         impl WithISema for $op_name {
             fn convert(&self, builder: &tir_core::OpBuilder) {
                 let context = self.get_context();
-                <$isema>::builder(&context)
-                    $(.$to(self.$from().into()))*;
+                let op = <$isema>::builder(&context)
+                    $(.$to(self.$from().into()))*.build();
+                builder.insert(&op);
             }
         }
     };

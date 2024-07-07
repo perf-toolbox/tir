@@ -150,7 +150,7 @@ mod tests {
     use std::any::TypeId;
 
     use tir_backend::isema::convert_to_isema;
-    use tir_core::{builtin::ModuleOp, utils::op_cast, Context};
+    use tir_core::{builtin::ModuleOp, Context};
 
     #[test]
     fn test_alu_disassembler() {
@@ -222,19 +222,6 @@ mod tests {
 
     #[test]
     fn test_sema() {
-        let input = "
-module {
-  target.section \".text\" {
-    ^example:
-    riscv.add rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.sub rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.sll rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.srl rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.sra rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.or rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-    riscv.and rs1 = t3, rs2 = t1, rd = t2, attrs = {}
-  }
-}";
         let context = Context::new();
         context.add_dialect(crate::create_dialect());
         context.add_dialect(tir_backend::target::create_dialect());
@@ -251,6 +238,6 @@ module {
             .build();
         builder.insert(&add);
 
-        convert_to_isema(module);
+        assert!(convert_to_isema(&module).is_ok());
     }
 }

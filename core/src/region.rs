@@ -57,12 +57,27 @@ impl BlockImpl {
         }
     }
 
-    fn push(&mut self, op: AllocId) {
-        self.operations.push(op);
+    fn push(&mut self, op: &OpRef) {
+        self.operations.push(op.borrow().get_alloc_id());
+
+        op.borrow_mut()
+            .set_parent_region(self.parent_region.clone());
     }
 
-    fn insert(&mut self, index: usize, op: AllocId) {
-        self.operations.insert(index, op);
+    fn insert(&mut self, index: usize, op: &OpRef) {
+        self.operations.insert(index, op.borrow().get_alloc_id());
+
+        op.borrow_mut()
+            .set_parent_region(self.parent_region.clone());
+    }
+
+    fn erase(&mut self, op: &OpRef) {
+        let index = self
+            .operations
+            .iter()
+            .position(|x| *x == op.borrow().get_alloc_id())
+            .unwrap();
+        self.operations.remove(index);
     }
 
     fn get_parent_region(&self) -> RegionRef {
@@ -172,13 +187,15 @@ impl Block {
     }
 
     pub fn push(&self, op: &OpRef) {
-        self.0.borrow_mut().push(op.borrow().get_alloc_id());
+        self.0.borrow_mut().push(op);
     }
 
     pub fn insert(&self, index: usize, op: &OpRef) {
-        self.0
-            .borrow_mut()
-            .insert(index, op.borrow().get_alloc_id());
+        self.0.borrow_mut().insert(index, op);
+    }
+
+    pub fn erase(&self, op: &OpRef) {
+        self.0.borrow_mut().erase(op);
     }
 
     pub fn get_parent_region(&self) -> RegionRef {
@@ -341,6 +358,16 @@ impl Region {
     pub fn get_block_by_name(&self, name: &str) -> Option<BlockRef> {
         for blk in self.iter() {
             if blk.get_name() == name {
+                return Some(blk);
+            }
+        }
+
+        None
+    }
+
+    pub fn find_op_block(&self, op: &OpRef) -> Option<BlockRef> {
+        for blk in self.iter() {
+            if blk.find(op.borrow().get_alloc_id()).is_some() {
                 return Some(blk);
             }
         }

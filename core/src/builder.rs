@@ -28,9 +28,14 @@ impl OpBuilderImpl {
             .block
             .insert(self.insertion_point.index, op);
         self.insertion_point.index += 1;
-        op.borrow_mut().set_parent_region(Rc::downgrade(
-            &self.insertion_point.block.get_parent_region(),
-        ));
+    }
+
+    fn erase(&mut self, op: &OpRef) {
+        if let Some(region) = op.borrow().get_parent_region() {
+            if let Some(blk) = region.find_op_block(op) {
+                blk.erase(op);
+            }
+        }
     }
 
     fn set_insertion_point_to_start(&mut self, block: BlockRef) {
@@ -64,6 +69,10 @@ impl OpBuilder {
     {
         let op: OpRef = op.clone();
         self.0.borrow_mut().insert(&op);
+    }
+
+    pub fn erase(&self, op: &OpRef) {
+        self.0.borrow_mut().erase(&op);
     }
 
     pub fn insert_generic(&self, op: &OpRef) {

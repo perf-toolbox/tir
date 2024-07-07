@@ -2,7 +2,7 @@ use crate::{OpRef, OpRegionIter};
 
 pub fn dfs_walk<F>(op: OpRef, apply: F)
 where
-    F: Fn(OpRef) -> (),
+    F: Fn(&OpRef) -> (),
 {
     let regions = op.borrow().get_regions();
     let mut stack: Vec<(OpRegionIter, OpRef)> = vec![(regions, op)];
@@ -23,6 +23,6 @@ where
         }
 
         let cur_op = stack.pop().unwrap();
-        apply(cur_op.1);
+        apply(&cur_op.1);
     }
 }

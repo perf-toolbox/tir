@@ -1,0 +1,32 @@
+; RUN: tir opt --pass="convert-asm-to-isema" %s | filecheck %s --check-prefix=ISEMA
+
+; ISEMA: module {
+; ISEMA-NEXT:   target.section "text" {
+; ISEMA-NEXT:    ^example:
+; ISEMA-NEXT:    isema.add
+; ISEMA-NEXT:    isema.sub
+; ISEMA-NEXT:    isema.sll
+; ISEMA-NEXT:    isema.srl
+; ISEMA-NEXT:    isema.sra
+; ISEMA-NEXT:    isema.or
+; ISEMA-NEXT:    isema.and
+; ISEMA-NEXT:    target.section_end attrs = {}
+; ISEMA-NEXT:  }
+; ISEMA-NEXT:  module_end attrs = {}
+; ISEMA-NEXT:}
+
+module {
+  target.section "text" {
+    ^example:
+    riscv.add rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.sub rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.sll rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.srl rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.sra rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.or rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    riscv.and rd = t2, rs1 = t3, rs2 = t1, attrs = {}
+    target.section_end attrs = {}
+  }
+  module_end attrs = {}
+}
+

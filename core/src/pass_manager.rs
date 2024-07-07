@@ -38,11 +38,12 @@ impl PassManager {
 
     /// Creates a pass manager with pre-populated passes
     /// from a Pass Registry
-    pub fn new_from_list(passes: &[&str]) -> Result<Self, PassError> {
+    pub fn new_from_list<S: AsRef<str> + ToString>(passes: &[S]) -> Result<Self, PassError> {
         let mut pm = Self::new();
 
         for p in passes {
-            let wrapper = find_pass_by_name(p).ok_or(PassError::UnknownPass(p.to_string()))?;
+            let wrapper =
+                find_pass_by_name(p.as_ref()).ok_or(PassError::UnknownPass(p.to_string()))?;
             pm.add_any_pass(wrapper);
         }
 
@@ -136,7 +137,7 @@ pub static TIR_PASS_REGISTRY: [once_cell::sync::Lazy<PassRegistryEntry>];
 
 fn find_pass_by_name(name: &str) -> Option<Box<dyn PassWrapper>> {
     TIR_PASS_REGISTRY.iter().find_map(|pe| {
-        if pe.wrapper.get_pass_name() == name {
+        if name == pe.wrapper.get_pass_name() {
             Some(dyn_clone::clone_box(&*pe.wrapper))
         } else {
             None

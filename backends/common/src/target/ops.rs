@@ -1,6 +1,6 @@
 use tir_core::parser::{AsmPResult, ParseStream};
 use tir_core::{parser::region_with_blocks, *};
-use tir_macros::{Op, OpValidator};
+use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 use winnow::{
     ascii::{alphanumeric1, multispace0},
     combinator::delimited,
@@ -48,3 +48,12 @@ impl OpAssembly for SectionOp {
         print_region(fmt, &body);
     }
 }
+
+#[derive(Op, Debug, OpValidator, OpAssembly)]
+#[operation(name = "section_end", dialect = target)]
+pub struct SectionEndOp {
+    r#impl: OpImpl,
+}
+
+#[op_implements(dialect = target)]
+impl Terminator for SectionEndOp {}

@@ -61,11 +61,11 @@ fn make_operand_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
             let operand = f.ident.as_ref().unwrap();
             let ty = &f.ty;
             parsers.push(quote! {
-                let (_, value) = winnow::combinator::separated_pair(
+                let (_, value) = winnow::combinator::preceded(winnow::ascii::space0, winnow::combinator::terminated(winnow::combinator::separated_pair(
                     #operand_str,
                     (winnow::ascii::space0, "=", winnow::ascii::space0).recognize(),
                     #ty::parse
-                ).parse_next(input)?;
+                ), ",")).parse_next(input)?;
                 builder = builder.#operand(value);
             });
         }
