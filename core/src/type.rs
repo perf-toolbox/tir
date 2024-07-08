@@ -84,7 +84,9 @@ impl Parsable<Type> for Type {
         let (dialect, ty) = preceded("!", op_tuple).parse_next(input)?;
 
         let context = input.state.get_context();
-        let dialect = context.get_dialect_by_name(dialect).unwrap();
+        let dialect = context
+            .get_dialect_by_name(dialect)
+            .ok_or(ErrMode::Cut(PError::UnknownDialect(dialect.to_string())))?;
         let id = dialect
             .get_type_id(ty)
             .ok_or(ErrMode::Cut(PError::UnknownType(ty.to_string())))?;

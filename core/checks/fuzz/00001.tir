@@ -1,0 +1,5 @@
+; RUN: not tir opt %s 2>&1 | filecheck %s
+
+; CHECK: unknown dialect 'fu'
+
+func@x(%t:!fu.c@\012-\012
