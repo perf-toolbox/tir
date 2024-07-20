@@ -41,6 +41,14 @@ macro_rules! register {
             }
         }
 
+        pub fn get_reg_num(reg: &Register) -> usize {
+            match reg {
+            $(
+                Register::$case_name => $num,
+            )*
+            }
+        }
+
         pub fn assemble_reg<T>(reg: T) -> tir_core::Result<u8> where Register: TryFrom<T> {
             let reg = Register::try_from(reg).map_err(|_| tir_core::Error::Unknown)?;
             match reg {

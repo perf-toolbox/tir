@@ -1,7 +1,7 @@
 use clap::{ArgMatches, FromArgMatches, Parser};
 use std::cell::RefCell;
 use std::rc::Rc;
-use tir_core::{Context, ContextRef};
+use tir_core::{builtin::ModuleOp, Context, ContextRef, OpRef, PassManager};
 
 mod options;
 mod regfile;
@@ -42,9 +42,18 @@ pub fn sim_main(
     }
 
     let asm = std::fs::read_to_string(args.input)?;
-    let asm = tir_riscv::parse_asm(&context, &asm).unwrap();
+    let asm: OpRef = tir_riscv::parse_asm(&context, &asm).unwrap();
+
+    let pm = PassManager::new_from_list(&["convert-asm-to-isema"])?;
+    if let Err(e) = pm.run(&asm) {
+        eprintln!("{:?}", e);
+        std::process::exit(0);
+    }
+
+    let asm = tir_core::utils::op_cast::<ModuleOp>(asm).unwrap();
 
     let simulator = Simulator::new(asm);
+    simulator.run(&reg_file);
 
     Ok(())
 }

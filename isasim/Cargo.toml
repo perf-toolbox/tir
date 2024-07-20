@@ -7,9 +7,11 @@ edition = "2021"
 tir-core = { path = "../core" }
 tir-backend = { path = "../backends/common/" }
 tir-riscv = { path = "../backends/riscv/" }
+tir-macros = { path = "../macros/" }
 serde = "1.0.204"
 serde_yml = "0.0.10"
 clap = "4.5.9"
+winnow = "0.6.7"
 
 [[bin]]
 name = "isasim"
