@@ -13,7 +13,7 @@ macro_rules! value_from_impl {
         impl From<$ty> for Value {
             fn from(value: $ty) -> Self {
                 let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
-                let value_bytes = value.to_le_bytes();
+                let value_bytes = value.to_be_bytes();
                 let offset = MAX_REG_SIZE - std::mem::size_of::<$vty>();
 
                 for i in 0..std::mem::size_of::<$vty>() {
@@ -35,7 +35,7 @@ macro_rules! value_from {
 
 impl Value {
     pub fn get_lower(&self) -> u32 {
-        u32::from_le_bytes(
+        u32::from_be_bytes(
             self.data[MAX_REG_SIZE - 4..MAX_REG_SIZE]
                 .try_into()
                 .unwrap(),
@@ -62,8 +62,10 @@ value_from!(i8);
 pub trait RegFile {
     fn read_register(&self, reg_name: &str) -> Value;
     fn write_register(&mut self, reg_name: &str, value: &Value);
+    fn dump(&self) -> String;
 }
 
+#[derive(Debug)]
 pub struct RISCVRegFile {
     registers: Vec<Value>,
 }
@@ -92,5 +94,41 @@ impl RegFile for RISCVRegFile {
         }
 
         self.registers[tir_riscv::get_reg_num(&reg)] = value.clone();
+    }
+
+    fn dump(&self) -> String {
+        let mut strings = vec![];
+        strings.push("{".to_string());
+
+        for id in 0..self.registers.len() {
+            let reg: tir_riscv::Register = TryFrom::try_from(id).expect("A valid register");
+            strings.push(format!(
+                "    \"{}\": {},",
+                tir_riscv::get_reg_name(&reg),
+                self.registers[id].get_lower()
+            ));
+        }
+
+        strings.push("}".to_string());
+
+        strings.join("\n")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{cell::RefCell, rc::Rc};
+
+    use crate::{RISCVRegFile, RegFile};
+
+    #[test]
+    fn riscv_regfile() {
+        let reg_file: Rc<RefCell<dyn RegFile>> = RISCVRegFile::new();
+
+        let value = 42;
+        reg_file.borrow_mut().write_register("x1", &value.into());
+        let other_value = reg_file.borrow().read_register("x1").get_lower();
+
+        assert_eq!(value, other_value);
     }
 }

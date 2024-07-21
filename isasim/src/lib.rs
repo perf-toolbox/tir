@@ -55,5 +55,7 @@ pub fn sim_main(
     let simulator = Simulator::new(asm);
     simulator.run(&reg_file);
 
+    println!("{}", reg_file.borrow().dump());
+
     Ok(())
 }
