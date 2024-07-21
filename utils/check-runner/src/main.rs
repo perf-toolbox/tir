@@ -32,9 +32,14 @@ fn run_command(command: &str, test_path: &PathBuf) -> Result<Output, std::io::Er
     let words = shlex::split(command)
         .unwrap()
         .iter()
-        .map(|term| match term.as_str() {
-            "%s" => test_path.to_str().unwrap().to_string(),
-            _ => term.to_string(),
+        .map(|term| {
+            let term = term.to_string();
+            let term = term.replace("%s", &test_path.to_str().unwrap().to_string());
+            let term = term.replace(
+                "%S",
+                &test_path.parent().unwrap().to_str().unwrap().to_string(),
+            );
+            term
         })
         .collect::<Vec<String>>();
 

@@ -25,6 +25,18 @@ macro_rules! register {
             }
         }
 
+        impl TryFrom<usize> for Register {
+            type Error = ();
+            fn try_from(value: usize) -> Result<Self, Self::Error> {
+                match value {
+                $(
+                    $num => Ok(Register::$case_name),
+                )*
+                    _ => Err(())
+                }
+            }
+        }
+
         pub fn get_reg_name(reg: &Register) -> &str {
             match reg {
             $(
@@ -37,6 +49,14 @@ macro_rules! register {
             match reg {
             $(
                 Register::$case_name => $abi_name,
+            )*
+            }
+        }
+
+        pub fn get_reg_num(reg: &Register) -> usize {
+            match reg {
+            $(
+                Register::$case_name => $num,
             )*
             }
         }

@@ -1,0 +1,3 @@
+register_state:
+  x1: 42
+  x2: 31
