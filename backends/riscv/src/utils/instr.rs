@@ -98,6 +98,92 @@ impl Debug for RTypeInstr {
     }
 }
 
+pub struct ITypeInstr {
+    instr: u32,
+}
+
+impl ITypeInstr {
+    pub fn from_bytes(bytes: &[u8; 4]) -> Self {
+        ITypeInstr {
+            instr: u32::from_le_bytes(*bytes),
+        }
+    }
+
+    pub fn builder() -> ITypeBuilder {
+        ITypeBuilder::default()
+    }
+
+    pub fn to_bytes(&self) -> [u8; 4] {
+        self.instr.to_le_bytes()
+    }
+
+    pub fn opcode(&self) -> u8 {
+        (self.instr & 0b1111111) as u8
+    }
+
+    pub fn rd(&self) -> u8 {
+        ((self.instr & (0b11111 << 7)) >> 7) as u8
+    }
+
+    pub fn funct3(&self) -> u8 {
+        ((self.instr & (0b111 << 12)) >> 12) as u8
+    }
+
+    pub fn rs1(&self) -> u8 {
+        ((self.instr & (0b11111 << 15)) >> 15) as u8
+    }
+
+    pub fn imm(&self) -> i16 {
+        ((self.instr & (0b111111111111 << 19)) >> 19) as i16
+    }
+}
+
+#[derive(Default)]
+pub struct ITypeBuilder {
+    instr: u32,
+}
+
+impl ITypeBuilder {
+    pub fn opcode(mut self, opcode: u8) -> Self {
+        assert!(opcode <= 0b1111111);
+        self.instr += opcode as u32;
+        self
+    }
+
+    pub fn rd(mut self, rd: u8) -> Self {
+        assert!(rd <= 0b11111);
+        self.instr += (rd as u32) << 7;
+        self
+    }
+
+    pub fn funct3(mut self, funct3: u8) -> Self {
+        assert!(funct3 <= 0b111);
+        self.instr += (funct3 as u32) << 12;
+        self
+    }
+
+    pub fn rs1(mut self, rs1: u8) -> Self {
+        assert!(rs1 <= 0b11111);
+        self.instr += (rs1 as u32) << 15;
+        self
+    }
+
+    pub fn imm(mut self, imm: i16) -> Self {
+        todo!()
+    }
+
+    pub fn build(self) -> ITypeInstr {
+        ITypeInstr { instr: self.instr }
+    }
+}
+
+impl Debug for ITypeInstr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = format!("{:#032b}: opcode = {:#07b}, rd = {:#05b}, funct3 = {:#03b}, rs1 = {:#05b}, imm = {:#12b}", self.instr, self.opcode(), self.rd(), self.funct3(), self.rs1(), self.imm());
+        f.write_str(&string)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::RTypeInstr;
