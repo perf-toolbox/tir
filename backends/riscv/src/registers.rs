@@ -84,7 +84,7 @@ macro_rules! register {
         where
             Input: StreamIsPartial + Stream<Slice = &'a str> + Clone + Compare<&'a str>,
             <Input as Stream>::Token: AsChar, {
-            (alpha1, alphanumeric0).recognize().verify_map(|reg| {
+            (alpha1, alphanumeric0).take().verify_map(|reg| {
                 match reg {
                 $(
                     $abi_name => Some(Register::$case_name),

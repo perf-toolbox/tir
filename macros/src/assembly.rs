@@ -63,7 +63,7 @@ fn make_operand_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
             parsers.push(quote! {
                 let (_, value) = winnow::combinator::preceded(winnow::ascii::space0, winnow::combinator::terminated(winnow::combinator::separated_pair(
                     #operand_str,
-                    (winnow::ascii::space0, "=", winnow::ascii::space0).recognize(),
+                    (winnow::ascii::space0, "=", winnow::ascii::space0).take(),
                     #ty::parse
                 ), ",")).parse_next(input)?;
                 builder = builder.#operand(value);

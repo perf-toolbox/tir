@@ -214,7 +214,7 @@ fn section<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
             known_section,
             preceded(
                 (multispace0, ".section", space1),
-                (opt("."), alphanumeric1).recognize(),
+                (opt("."), alphanumeric1).take(),
             ),
         )),
     )
@@ -226,7 +226,7 @@ fn section<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
 fn label<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
     trace(
         "basic block label",
-        terminated((alpha1, alphanumeric0).recognize(), ':'),
+        terminated((alpha1, alphanumeric0).take(), ':'),
     )
     .map(AsmToken::Label)
     .parse_next(input)
@@ -241,7 +241,7 @@ fn ident<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
             take_while(0.., |c: char| c.is_alphanumeric() || c == '.' || c == '_'),
         ),
     )
-    .recognize()
+    .take()
     .map(AsmToken::Ident)
     .parse_next(input)
 }
