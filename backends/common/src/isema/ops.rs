@@ -54,6 +54,28 @@ impl OpAssembly for CompInstrOp {
     }
 }
 
+/// Load data from memory to register
+#[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
+#[operation(
+    name = "load",
+    dialect = isema,
+    known_attrs(dst: String, base_addr: String, offset: i16, width: u8, sign_extend: bool)
+)]
+pub struct LoadOp {
+    r#impl: OpImpl,
+}
+
+/// Store data from register to memory 
+#[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
+#[operation(
+    name = "store",
+    dialect = isema,
+    known_attrs(src: String, base_addr: String, offset: i16, width: u8)
+)]
+pub struct StoreOp {
+    r#impl: OpImpl,
+}
+
 // Three-register operations
 
 macro_rules! three_reg_ops {
