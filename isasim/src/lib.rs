@@ -3,10 +3,12 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use tir_core::{builtin::ModuleOp, Context, ContextRef, OpRef, PassManager};
 
+mod memory;
 mod options;
 mod regfile;
 mod simulator;
 
+pub use memory::*;
 pub use options::*;
 pub use regfile::*;
 pub use simulator::*;

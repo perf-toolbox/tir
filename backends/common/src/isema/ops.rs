@@ -65,7 +65,7 @@ pub struct LoadOp {
     r#impl: OpImpl,
 }
 
-/// Store data from register to memory 
+/// Store data from register to memory
 #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
 #[operation(
     name = "store",
