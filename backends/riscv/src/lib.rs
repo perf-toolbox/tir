@@ -89,6 +89,10 @@ pub fn disassemble(
         let offset = i * 4;
         if let Some(op) = disassemble_alu_instr(context, &stream[offset..]) {
             builder.insert_generic(&op);
+        } else if let Some(op) = disassemble_load_instr(context, &stream[offset..]) {
+            builder.insert_generic(&op);
+        } else if let Some(op) = disassemble_store_instr(context, &stream[offset..]) {
+            builder.insert_generic(&op);
         } else {
             // FIXME add an appropriate error
             return Err(DisassemblerError::Unknown);
