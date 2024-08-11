@@ -33,7 +33,27 @@ dialect!(riscv, |dialect: &mut Dialect| {
 });
 populate_riscv_ops!(
     // R-type ALU ops
-    AddOp, SubOp, SllOp, SltOp, SltuOp, SrlOp, SraOp, OrOp, AndOp,
+    AddOp,
+    SubOp,
+    SllOp,
+    SltOp,
+    SltuOp,
+    SrlOp,
+    SraOp,
+    OrOp,
+    AndOp,
+    // Load ops
+    LoadByte,
+    LoadHalfword,
+    LoadWord,
+    LoadDouble,
+    LoadByteUnsigned,
+    LoadHalfwordUnsigned,
+    LoadWordUnsigned,
+    // Store ops
+    StoreByte,
+    StoreHalfword,
+    StoreWord,
 );
 populate_dialect_types!();
 
@@ -68,6 +88,10 @@ pub fn disassemble(
     for i in 0..(stream.len() / 4) {
         let offset = i * 4;
         if let Some(op) = disassemble_alu_instr(context, &stream[offset..]) {
+            builder.insert_generic(&op);
+        } else if let Some(op) = disassemble_load_instr(context, &stream[offset..]) {
+            builder.insert_generic(&op);
+        } else if let Some(op) = disassemble_store_instr(context, &stream[offset..]) {
             builder.insert_generic(&op);
         } else {
             // FIXME add an appropriate error

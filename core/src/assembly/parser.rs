@@ -153,7 +153,7 @@ pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> AsmPR
 
 pub fn identifier<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
     let ident_sign = take_while(0.., |c: char| c.is_alphanum() || c.as_char() == '_');
-    (alpha1, ident_sign).recognize().parse_next(input)
+    (alpha1, ident_sign).take().parse_next(input)
 }
 
 fn dialect_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
@@ -162,7 +162,7 @@ fn dialect_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)>
 
 fn builtin_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
     identifier
-        .recognize()
+        .take()
         .parse_next(input)
         .map(|op| ("builtin", op))
 }
@@ -318,7 +318,7 @@ pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr
     let attr_pairs = separated::<_, _, HashMap<_, _>, _, _, _, _>(
         0..,
         attr_pair,
-        (space0, ",", space0).recognize(),
+        (space0, ",", space0),
     );
     trace(
         "attribute list",

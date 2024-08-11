@@ -10,5 +10,5 @@ tir-core = { path = "../../core" }
 tir-macros = { path = "../../macros" }
 tir-backend = { path = "../common" }
 seq-macro = "0.3.5"
-winnow = "0.6.7"
+winnow = "0.6.18"
 linkme = "0.3.27"

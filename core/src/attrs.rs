@@ -28,6 +28,17 @@ macro_rules! impl_from {
                 Err(())
             }
         }
+
+        impl TryInto<$from> for &Attr {
+            type Error = ();
+            fn try_into(self) -> Result<$from, Self::Error> {
+                if let Attr::$case(value) = self {
+                    return Ok(value.clone());
+                }
+
+                Err(())
+            }
+        }
     };
 }
 
