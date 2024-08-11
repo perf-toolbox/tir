@@ -4,7 +4,7 @@ use std::iter::Enumerate;
 use std::ops::Range;
 use std::rc::Rc;
 use tir_core::OpBuilder;
-use winnow::ascii::{alpha1, alphanumeric0, line_ending, multispace0, space1};
+use winnow::ascii::{alpha1, alphanumeric0, dec_int, line_ending, multispace0, space1};
 use winnow::combinator::{alt, delimited, empty, fail, repeat, terminated};
 use winnow::combinator::{dispatch, trace};
 use winnow::error::ContextError;
@@ -24,6 +24,9 @@ pub enum AsmToken<'a> {
     Ident(&'a str),
     Section(&'a str),
     Label(&'a str),
+    Number(i64),
+    OpenParen,
+    CloseParen,
     Comma,
 }
 
@@ -249,9 +252,15 @@ fn punct<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
 
     dispatch! {chr;
         "," => empty.value(AsmToken::Comma),
+        "(" => empty.value(AsmToken::OpenParen),
+        ")" => empty.value(AsmToken::CloseParen),
         _ => fail::<_, AsmToken, _>,
     }
     .parse_next(input)
+}
+
+fn number<'a>(input: &mut Located<&'a str>) -> PResult<AsmToken<'a>> {
+    dec_int(input).map(AsmToken::Number)
 }
 
 fn single_comment(input: &mut Located<&str>) -> PResult<()> {
@@ -279,9 +288,13 @@ pub fn comment(input: &mut Located<&str>) -> PResult<()> {
 
 /// Common parser for any token kind
 fn token<'a>(input: &mut Located<&'a str>) -> PResult<Spanned<'a>> {
-    delimited(comment, alt((section, label, ident, punct)), multispace0)
-        .with_span()
-        .parse_next(input)
+    delimited(
+        comment,
+        alt((section, label, ident, punct, number)),
+        multispace0,
+    )
+    .with_span()
+    .parse_next(input)
 }
 
 /// Split input assembly string into tokens

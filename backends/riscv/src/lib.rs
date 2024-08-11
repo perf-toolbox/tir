@@ -33,7 +33,27 @@ dialect!(riscv, |dialect: &mut Dialect| {
 });
 populate_riscv_ops!(
     // R-type ALU ops
-    AddOp, SubOp, SllOp, SltOp, SltuOp, SrlOp, SraOp, OrOp, AndOp,
+    AddOp,
+    SubOp,
+    SllOp,
+    SltOp,
+    SltuOp,
+    SrlOp,
+    SraOp,
+    OrOp,
+    AndOp,
+    // Load ops
+    LoadByte,
+    LoadHalfword,
+    LoadWord,
+    LoadDouble,
+    LoadByteUnsigned,
+    LoadHalfwordUnsigned,
+    LoadWordUnsigned,
+    // Store ops
+    StoreByte,
+    StoreHalfword,
+    StoreWord,
 );
 populate_dialect_types!();
 
