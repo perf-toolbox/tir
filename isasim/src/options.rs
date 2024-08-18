@@ -22,4 +22,8 @@ pub struct Cli {
     #[arg(short, long)]
     pub experiment: String,
     pub input: String,
+    #[arg(long, default_value_t = false, action = clap::ArgAction::SetTrue)]
+    pub dump_memory_before: bool,
+    #[arg(long, default_value_t = false, action = clap::ArgAction::SetTrue)]
+    pub dump_memory_after: bool,
 }
