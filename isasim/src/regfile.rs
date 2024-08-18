@@ -13,11 +13,10 @@ macro_rules! value_from_impl {
         impl From<$ty> for Value {
             fn from(value: $ty) -> Self {
                 let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
-                let value_bytes = value.to_be_bytes();
-                let offset = MAX_REG_SIZE - std::mem::size_of::<$vty>();
+                let value_bytes = value.to_le_bytes();
 
                 for i in 0..std::mem::size_of::<$vty>() {
-                    data[offset + i] = value_bytes[i];
+                    data[i] = value_bytes[i];
                 }
 
                 Self { data }
@@ -42,10 +41,9 @@ impl TryFrom<Vec<u8>> for Value {
         }
 
         let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
-        let offset = MAX_REG_SIZE - value.len();
 
         for i in 0..value.len() {
-            data[offset + i] = value[i];
+            data[i] = value[i];
         }
 
         Ok(Self { data })
@@ -54,11 +52,7 @@ impl TryFrom<Vec<u8>> for Value {
 
 impl Value {
     pub fn get_lower(&self) -> u32 {
-        u32::from_be_bytes(
-            self.data[MAX_REG_SIZE - 4..MAX_REG_SIZE]
-                .try_into()
-                .unwrap(),
-        )
+        u32::from_le_bytes(self.data[0..4].try_into().unwrap())
     }
 
     pub fn raw_bytes(&self, width: usize) -> Result<Vec<u8>, ()> {
@@ -66,7 +60,7 @@ impl Value {
             return Err(());
         }
 
-        Ok(self.data[MAX_REG_SIZE - width..MAX_REG_SIZE].to_vec())
+        Ok(self.data[0..width].to_vec())
     }
 
     pub fn dump(&self) -> String {

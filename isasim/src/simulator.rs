@@ -76,13 +76,13 @@ fn execute_load(
 
     let sign_extend: bool = op.borrow().get_sign_extend_attr().try_into().expect("");
 
-    let extent: u8 = if sign_extend && data.first().unwrap().bitand(1 << 7) != 0 {
+    let extent: u8 = if sign_extend && data.last().unwrap().bitand(1 << 7) != 0 {
         255
     } else {
         0
     };
     for _ in 0..(reg_file.borrow().base_width() as usize - data.len()) {
-        data.insert(0, extent);
+        data.push(extent);
     }
 
     let reg_value: crate::Value = data.try_into().expect("");

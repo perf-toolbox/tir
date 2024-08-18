@@ -46,18 +46,22 @@ pub fn sim_main(
     }
     if let Some(memory) = config.memory {
         for entry in &memory {
-            let bytes = entry.value.to_be_bytes();
+            let bytes = entry.value.to_le_bytes();
             mem.borrow_mut()
                 .add_region(entry.address, entry.region_size);
             for i in 0..(entry.region_size / entry.value_size as u64) {
                 mem.borrow_mut()
                     .store(
                         entry.address + i * entry.value_size as u64,
-                        &bytes[bytes.len() - entry.value_size as usize..bytes.len()],
+                        &bytes[0..entry.value_size as usize],
                     )
                     .expect("err handling");
             }
         }
+    }
+
+    if args.dump_memory_before {
+        println!("{}", mem.borrow().dump());
     }
 
     let asm = std::fs::read_to_string(args.input)?;
@@ -77,6 +81,10 @@ pub fn sim_main(
     simulator.run(&reg_file, &mem);
 
     println!("{}", reg_file.borrow().dump());
+
+    if args.dump_memory_after {
+        println!("{}", mem.borrow().dump());
+    }
 
     Ok(())
 }
