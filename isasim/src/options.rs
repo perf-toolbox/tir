@@ -14,7 +14,7 @@ pub struct Memory {
 #[derive(Serialize, Deserialize)]
 pub struct Config {
     pub register_state: HashMap<String, u64>,
-    pub memory: Vec<Memory>,
+    pub memory: Option<Vec<Memory>>,
 }
 
 #[derive(Debug, Parser)]

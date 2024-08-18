@@ -45,5 +45,16 @@ impl MemoryMap {
         Err(())
     }
 
-    pub fn load(&self, address: u64) {}
+    pub fn load(&self, address: u64, size: u8) -> Result<Vec<u8>, ()> {
+        for region in &self.regions {
+            let last_address = region.address + region.size;
+            if address >= region.address && address <= last_address {
+                let offset = (address - region.address) as usize;
+                let dst = &region.data[offset..size as usize];
+                return Ok(dst.to_vec());
+            }
+        }
+
+        Err(())
+    }
 }

@@ -43,12 +43,14 @@ pub fn sim_main(
     for (name, value) in &config.register_state {
         reg_file.borrow_mut().write_register(&name, &value.into());
     }
-    for entry in &config.memory {
-        let bytes = entry.value.to_le_bytes();
-        for i in 0..(entry.region_size / entry.value_size as u64) {
-            mem.borrow_mut()
-                .store(entry.address + i, &bytes[0..entry.value_size as usize])
-                .expect("err handling");
+    if let Some(memory) = config.memory {
+        for entry in &memory {
+            let bytes = entry.value.to_le_bytes();
+            for i in 0..(entry.region_size / entry.value_size as u64) {
+                mem.borrow_mut()
+                    .store(entry.address + i, &bytes[0..entry.value_size as usize])
+                    .expect("err handling");
+            }
         }
     }
 

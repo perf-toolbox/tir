@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use std::rc::Rc;
+use std::{cell::RefCell, ops::BitAnd};
 use tir_core::builtin::ModuleOp;
 use tir_core::OpRef;
 use tir_macros::match_op;
@@ -57,6 +57,63 @@ fn execute_load(
     reg_file: &Rc<RefCell<dyn RegFile>>,
     mem: &Rc<RefCell<MemoryMap>>,
 ) {
+    let base_reg: String = op
+        .borrow()
+        .get_base_addr_attr()
+        .clone()
+        .try_into()
+        .expect("reg name is a String attr");
+
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
+    let offset: u64 = op.borrow().get_offset_attr().try_into().expect("");
+
+    let addr = base_addr + offset;
+
+    let width: u8 = op.borrow().get_width_attr().try_into().expect("");
+
+    let mut data = mem.borrow().load(addr, width).expect("");
+
+    let sign_extend: bool = op.borrow().get_sign_extend_attr().try_into().expect("");
+
+    if sign_extend && data.last().unwrap().bitand(128) != 0 {
+        for _ in 0..(reg_file.borrow().base_width() as usize - data.len()) {
+            data.insert(0, 255);
+        }
+    }
+
+    let reg_value: crate::Value = data.try_into().expect("");
+
+    let dst: String = op.borrow().get_dst_attr().clone().try_into().expect("");
+
+    reg_file.borrow_mut().write_register(&dst, &reg_value);
+}
+
+fn execute_store(
+    op: &Rc<RefCell<tir_backend::isema::StoreOp>>,
+    reg_file: &Rc<RefCell<dyn RegFile>>,
+    mem: &Rc<RefCell<MemoryMap>>,
+) {
+    let base_reg: String = op
+        .borrow()
+        .get_base_addr_attr()
+        .clone()
+        .try_into()
+        .expect("reg name is a String attr");
+
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
+    let offset: u64 = op.borrow().get_offset_attr().try_into().expect("");
+
+    let addr = base_addr + offset;
+    let width: u8 = op.borrow().get_width_attr().try_into().expect("");
+
+    let src: String = op.borrow().get_src_attr().clone().try_into().expect("");
+    let value = reg_file
+        .borrow()
+        .read_register(&src)
+        .raw_bytes(width as usize)
+        .expect("");
+
+    mem.borrow_mut().store(addr, &value).expect("");
 }
 
 fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<MemoryMap>>) {
@@ -72,6 +129,7 @@ fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<
         SllOp => |sll| exec_sll(&sll, reg_file),
         SrlOp => |srl| exec_srl(&srl, reg_file),
         LoadOp => |load| execute_load(&load, reg_file, mem),
+        StoreOp => |store| execute_store(&store, reg_file, mem),
         _ => || println!("FAIL"),
     });
 }
