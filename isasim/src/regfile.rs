@@ -33,6 +33,25 @@ macro_rules! value_from {
     };
 }
 
+impl TryFrom<Vec<u8>> for Value {
+    type Error = ();
+
+    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        if value.len() > MAX_REG_SIZE {
+            return Err(());
+        }
+
+        let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
+        let offset = MAX_REG_SIZE - value.len();
+
+        for i in 0..value.len() {
+            data[offset + i] = value[i];
+        }
+
+        Ok(Self { data })
+    }
+}
+
 impl Value {
     pub fn get_lower(&self) -> u32 {
         u32::from_be_bytes(
@@ -40,6 +59,18 @@ impl Value {
                 .try_into()
                 .unwrap(),
         )
+    }
+
+    pub fn raw_bytes(&self, width: usize) -> Result<Vec<u8>, ()> {
+        if width > MAX_REG_SIZE {
+            return Err(());
+        }
+
+        Ok(self.data[MAX_REG_SIZE - width..MAX_REG_SIZE].to_vec())
+    }
+
+    pub fn dump(&self) -> String {
+        format!("{:?}", &self.data)
     }
 }
 
@@ -62,12 +93,14 @@ value_from!(i8);
 pub trait RegFile {
     fn read_register(&self, reg_name: &str) -> Value;
     fn write_register(&mut self, reg_name: &str, value: &Value);
+    fn base_width(&self) -> u8;
     fn dump(&self) -> String;
 }
 
 #[derive(Debug)]
 pub struct RISCVRegFile {
     registers: Vec<Value>,
+    base_width: u8,
 }
 
 impl RISCVRegFile {
@@ -75,11 +108,18 @@ impl RISCVRegFile {
         let mut registers = vec![];
         registers.resize(32, Value::default());
 
-        Rc::new(RefCell::new(Self { registers }))
+        Rc::new(RefCell::new(Self {
+            registers,
+            base_width: 4,
+        }))
     }
 }
 
 impl RegFile for RISCVRegFile {
+    fn base_width(&self) -> u8 {
+        self.base_width
+    }
+
     fn read_register(&self, reg_name: &str) -> Value {
         let reg = tir_riscv::register_parser.parse(reg_name).unwrap();
         self.registers[tir_riscv::get_reg_num(&reg)].clone()

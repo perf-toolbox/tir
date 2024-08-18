@@ -315,11 +315,8 @@ fn attr_pair(input: &mut ParseStream<'_>) -> AsmPResult<(String, Attr)> {
 }
 
 pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr>> {
-    let attr_pairs = separated::<_, _, HashMap<_, _>, _, _, _, _>(
-        0..,
-        attr_pair,
-        (space0, ",", space0),
-    );
+    let attr_pairs =
+        separated::<_, _, HashMap<_, _>, _, _, _, _>(0.., attr_pair, (space0, ",", space0));
     trace(
         "attribute list",
         terminated(

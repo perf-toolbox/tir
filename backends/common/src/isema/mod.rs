@@ -41,7 +41,9 @@ populate_dialect_ops!(
     SrlOp,
     SraOp,
     CompInstrOp,
-    CompInstrEndOp
+    CompInstrEndOp,
+    LoadOp,
+    StoreOp
 );
 populate_dialect_types!();
 
