@@ -38,9 +38,18 @@ pub fn sim_main(
     let config: Config = serde_yml::from_str(&config)?;
 
     let reg_file: Rc<RefCell<dyn RegFile>> = RISCVRegFile::new();
+    let mem = MemoryMap::new();
 
     for (name, value) in &config.register_state {
         reg_file.borrow_mut().write_register(&name, &value.into());
+    }
+    for entry in &config.memory {
+        let bytes = entry.value.to_le_bytes();
+        for i in 0..(entry.region_size / entry.value_size as u64) {
+            mem.borrow_mut()
+                .store(entry.address + i, &bytes[0..entry.value_size as usize])
+                .expect("err handling");
+        }
     }
 
     let asm = std::fs::read_to_string(args.input)?;
@@ -55,7 +64,7 @@ pub fn sim_main(
     let asm = tir_core::utils::op_cast::<ModuleOp>(asm).unwrap();
 
     let simulator = Simulator::new(asm);
-    simulator.run(&reg_file);
+    simulator.run(&reg_file, &mem);
 
     println!("{}", reg_file.borrow().dump());
 

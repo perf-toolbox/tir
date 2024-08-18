@@ -4,7 +4,7 @@ use tir_core::builtin::ModuleOp;
 use tir_core::OpRef;
 use tir_macros::match_op;
 
-use crate::{RegFile, Value};
+use crate::{MemoryMap, RegFile, Value};
 
 pub struct Simulator {
     module: Rc<RefCell<ModuleOp>>,
@@ -52,7 +52,14 @@ exec_alu!(exec_xor, tir_backend::isema::XorOp, ^);
 exec_alu!(exec_sll, tir_backend::isema::SllOp, <<);
 exec_alu!(exec_srl, tir_backend::isema::SrlOp, >>);
 
-fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>) {
+fn execute_load(
+    op: &Rc<RefCell<tir_backend::isema::LoadOp>>,
+    reg_file: &Rc<RefCell<dyn RegFile>>,
+    mem: &Rc<RefCell<MemoryMap>>,
+) {
+}
+
+fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<MemoryMap>>) {
     use tir_backend::isema::*;
 
     let op = op.clone();
@@ -64,6 +71,7 @@ fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>) {
         XorOp => |xor| exec_xor(&xor, reg_file),
         SllOp => |sll| exec_sll(&sll, reg_file),
         SrlOp => |srl| exec_srl(&srl, reg_file),
+        LoadOp => |load| execute_load(&load, reg_file, mem),
         _ => || println!("FAIL"),
     });
 }
@@ -73,7 +81,7 @@ impl Simulator {
         Simulator { module }
     }
 
-    pub fn run(&self, reg_file: &Rc<RefCell<dyn RegFile>>) {
+    pub fn run(&self, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<MemoryMap>>) {
         let iter = self.module.borrow().get_body().iter();
         for instr in iter {
             if let Some(section) =
@@ -90,7 +98,7 @@ impl Simulator {
                     let block_iter = block.iter();
 
                     for op in block_iter {
-                        execute_op(&op, reg_file);
+                        execute_op(&op, reg_file, mem);
                     }
                 }
             }

@@ -44,4 +44,6 @@ impl MemoryMap {
 
         Err(())
     }
+
+    pub fn load(&self, address: u64) {}
 }
