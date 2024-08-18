@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::{cell::RefCell, ops::BitAnd};
 use tir_core::builtin::ModuleOp;
-use tir_core::OpRef;
+use tir_core::{OpRef, StdoutPrinter};
 use tir_macros::match_op;
 
 use crate::{MemoryMap, RegFile, Value};
@@ -65,20 +65,24 @@ fn execute_load(
         .expect("reg name is a String attr");
 
     let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
-    let offset: u64 = op.borrow().get_offset_attr().try_into().expect("");
 
-    let addr = base_addr + offset;
+    let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
-    let width: u8 = op.borrow().get_width_attr().try_into().expect("");
+    let addr = (base_addr as i64 + offset as i64) as u64;
 
-    let mut data = mem.borrow().load(addr, width).expect("");
+    let width: i32 = op.borrow().get_width_attr().try_into().expect("");
+
+    let mut data = mem.borrow().load(addr, (width / 8) as u8).expect("");
 
     let sign_extend: bool = op.borrow().get_sign_extend_attr().try_into().expect("");
 
-    if sign_extend && data.last().unwrap().bitand(128) != 0 {
-        for _ in 0..(reg_file.borrow().base_width() as usize - data.len()) {
-            data.insert(0, 255);
-        }
+    let extent: u8 = if sign_extend && data.first().unwrap().bitand(1 << 7) != 0 {
+        255
+    } else {
+        0
+    };
+    for _ in 0..(reg_file.borrow().base_width() as usize - data.len()) {
+        data.insert(0, extent);
     }
 
     let reg_value: crate::Value = data.try_into().expect("");
@@ -101,16 +105,16 @@ fn execute_store(
         .expect("reg name is a String attr");
 
     let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
-    let offset: u64 = op.borrow().get_offset_attr().try_into().expect("");
+    let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
-    let addr = base_addr + offset;
-    let width: u8 = op.borrow().get_width_attr().try_into().expect("");
+    let addr = (base_addr as i64 + offset as i64) as u64;
+    let width: i32 = op.borrow().get_width_attr().try_into().expect("");
 
     let src: String = op.borrow().get_src_attr().clone().try_into().expect("");
     let value = reg_file
         .borrow()
         .read_register(&src)
-        .raw_bytes(width as usize)
+        .raw_bytes((width / 8) as usize)
         .expect("");
 
     mem.borrow_mut().store(addr, &value).expect("");
@@ -130,7 +134,12 @@ fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<
         SrlOp => |srl| exec_srl(&srl, reg_file),
         LoadOp => |load| execute_load(&load, reg_file, mem),
         StoreOp => |store| execute_store(&store, reg_file, mem),
-        _ => || println!("FAIL"),
+        _ => || {
+            let mut printer = StdoutPrinter::new();
+            op.borrow().print(&mut printer);
+            println!("FAIL")
+        },
+
     });
 }
 

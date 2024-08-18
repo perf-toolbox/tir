@@ -68,6 +68,10 @@ impl Value {
 
         Ok(self.data[MAX_REG_SIZE - width..MAX_REG_SIZE].to_vec())
     }
+
+    pub fn dump(&self) -> String {
+        format!("{:?}", &self.data)
+    }
 }
 
 impl Default for Value {

@@ -54,6 +54,7 @@ macro_rules! load_op_base {
             }
         }
 
+        #[tir_macros::op_implements(dialect = riscv)]
         impl WithISema for $struct_name {
             fn convert(&self, builder: &OpBuilder) {
                 let context = self.get_context();
@@ -199,6 +200,7 @@ macro_rules! store_op_base {
             }
         }
 
+        #[tir_macros::op_implements(dialect = riscv)]
         impl WithISema for $struct_name {
             fn convert(&self, builder: &OpBuilder) {
                 let context = self.get_context();

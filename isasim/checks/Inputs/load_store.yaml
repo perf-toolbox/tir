@@ -1,0 +1,8 @@
+register_state:
+  x1: 4096
+  x2: 42 
+memory:
+  - address: 4096
+    value: 36
+    value_size: 4
+    region_size: 4096

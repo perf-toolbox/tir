@@ -1,7 +1,8 @@
 use clap::{ArgMatches, FromArgMatches, Parser};
 use std::cell::RefCell;
 use std::rc::Rc;
-use tir_core::{builtin::ModuleOp, Context, ContextRef, OpRef, PassManager};
+use tir_core::Printable;
+use tir_core::{builtin::ModuleOp, Context, ContextRef, OpRef, PassManager, StdoutPrinter};
 
 mod memory;
 mod options;
@@ -45,10 +46,15 @@ pub fn sim_main(
     }
     if let Some(memory) = config.memory {
         for entry in &memory {
-            let bytes = entry.value.to_le_bytes();
+            let bytes = entry.value.to_be_bytes();
+            mem.borrow_mut()
+                .add_region(entry.address, entry.region_size);
             for i in 0..(entry.region_size / entry.value_size as u64) {
                 mem.borrow_mut()
-                    .store(entry.address + i, &bytes[0..entry.value_size as usize])
+                    .store(
+                        entry.address + i * entry.value_size as u64,
+                        &bytes[bytes.len() - entry.value_size as usize..bytes.len()],
+                    )
                     .expect("err handling");
             }
         }
@@ -64,6 +70,8 @@ pub fn sim_main(
     }
 
     let asm = tir_core::utils::op_cast::<ModuleOp>(asm).unwrap();
+    let mut printer = StdoutPrinter::new();
+    asm.borrow().print(&mut printer);
 
     let simulator = Simulator::new(asm);
     simulator.run(&reg_file, &mem);

@@ -33,12 +33,14 @@ impl MemoryMap {
     }
 
     pub fn store(&mut self, address: u64, data: &[u8]) -> Result<(), ()> {
-        for region in &self.regions {
+        for region in &mut self.regions {
             let last_address = region.address + region.size;
             if address >= region.address && address <= last_address {
-                let offset = (address - region.address) as usize;
-                let mut dst = &region.data[offset..data.len()];
-                dst.clone_from(&data);
+                let start = (address - region.address) as usize;
+                let end = start + data.len();
+                let dst = &mut region.data[start..end];
+                dst.clone_from_slice(&data);
+                return Ok(());
             }
         }
 
@@ -49,12 +51,25 @@ impl MemoryMap {
         for region in &self.regions {
             let last_address = region.address + region.size;
             if address >= region.address && address <= last_address {
-                let offset = (address - region.address) as usize;
-                let dst = &region.data[offset..size as usize];
+                let start = (address - region.address) as usize;
+                let end = start + size as usize;
+                let dst = &region.data[start..end];
                 return Ok(dst.to_vec());
             }
         }
 
         Err(())
+    }
+
+    pub fn dump(&self) -> String {
+        let mut mem = String::new();
+        for r in &self.regions {
+            mem += &format!(
+                "start = {}\nsize = {}\n{:?}\n---\n",
+                r.address, r.size, &r.data
+            );
+        }
+
+        mem
     }
 }
