@@ -11,6 +11,14 @@ example:
     sra x28, x6, x7
     or x28, x6, x7
     and x28, x6, x7
+    addi x28, x6, 42
+    slli x28, x6, 9
+    slti x28, x6, 8
+    sltiu x28, x6, 25
+    srli x28, x6, -3
+    srai x28, x6, 0
+    ori x28, x6, 1
+    andi x28, x6, 1
 
 # CHECK: module {
 # CHECK-NEXT: target.section ".text" {
