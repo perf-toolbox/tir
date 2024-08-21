@@ -42,6 +42,15 @@ populate_riscv_ops!(
     SraOp,
     OrOp,
     AndOp,
+    // I-type ALU ops
+    AddImmOp,
+    SllImmOp,
+    SltImmOp,
+    SltuImmOp,
+    SrlImmOp,
+    SraImmOp,
+    OrImmOp,
+    AndImmOp,
     // Load ops
     LoadByte,
     LoadHalfword,
