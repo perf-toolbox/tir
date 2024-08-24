@@ -1,5 +1,5 @@
-use crate::utils::RTypeInstr;
 use crate::utils::ITypeInstr;
+use crate::utils::RTypeInstr;
 use crate::{assemble_reg, disassemble_gpr};
 use crate::{register_parser, Register};
 use tir_backend::isema;
@@ -57,26 +57,35 @@ macro_rules! alu_op_base {
 
         impl ISAParser for $struct_name {
             fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                let opcode = one_of(|t| if let AsmToken::Ident(name) = t {
-                    name == lowercase!($op_name) || name == uppercase!($op_name)
-                } else {
-                    false
-                });
-                let reg = one_of(|t| matches!(t, AsmToken::Ident(_))).map(|t| {
+                let opcode = one_of(|t| {
                     if let AsmToken::Ident(name) = t {
-                        name
+                        name == lowercase!($op_name) || name == uppercase!($op_name)
                     } else {
-                        unreachable!();
+                        false
                     }
-                }).and_then(register_parser);
+                });
+                let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
+                    .map(|t| {
+                        if let AsmToken::Ident(name) = t {
+                            name
+                        } else {
+                            unreachable!();
+                        }
+                    })
+                    .and_then(register_parser);
                 let comma = one_of(|t| t == AsmToken::Comma).void();
 
-                let regs: Vec<Register> = preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
+                let regs: Vec<Register> =
+                    preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
                 let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
 
                 let builder = input.get_builder();
                 let context = builder.get_context();
-                let op = $struct_name::builder(&context).rs1(rs1).rs2(rs2).rd(rd).build();
+                let op = $struct_name::builder(&context)
+                    .rs1(rs1)
+                    .rs2(rs2)
+                    .rd(rd)
+                    .build();
                 builder.insert(&op);
 
                 Ok(())
@@ -121,18 +130,22 @@ macro_rules! alu_imm_op_base {
 
         impl ISAParser for $struct_name {
             fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                let opcode = one_of(|t| if let AsmToken::Ident(name) = t {
-                    name == lowercase!($op_name) || name == uppercase!($op_name)
-                } else {
-                    false
-                });
-                let reg = one_of(|t| matches!(t, AsmToken::Ident(_))).map(|t| {
+                let opcode = one_of(|t| {
                     if let AsmToken::Ident(name) = t {
-                        name
+                        name == lowercase!($op_name) || name == uppercase!($op_name)
                     } else {
-                        unreachable!();
+                        false
                     }
-                }).and_then(register_parser);
+                });
+                let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
+                    .map(|t| {
+                        if let AsmToken::Ident(name) = t {
+                            name
+                        } else {
+                            unreachable!();
+                        }
+                    })
+                    .and_then(register_parser);
                 let comma1 = one_of(|t| t == AsmToken::Comma).void();
                 let comma2 = one_of(|t| t == AsmToken::Comma).void();
                 let imm = one_of(|t| matches!(t, AsmToken::Number(_))).map(|t| match t {
@@ -140,12 +153,20 @@ macro_rules! alu_imm_op_base {
                     _ => unreachable!("Why is this not a number>"),
                 });
 
-                let args: (Vec<Register>, i16) = preceded(opcode, separated_pair(separated(2, reg, comma1), comma2, imm)).parse_next(input)?;
+                let args: (Vec<Register>, i16) = preceded(
+                    opcode,
+                    separated_pair(separated(2, reg, comma1), comma2, imm),
+                )
+                .parse_next(input)?;
                 let (rd, rs1, imm) = (args.0[0], args.0[1], args.1);
 
                 let builder = input.get_builder();
                 let context = builder.get_context();
-                let op = $struct_name::builder(&context).rs1(rs1).imm(imm.into()).rd(rd).build();
+                let op = $struct_name::builder(&context)
+                    .rs1(rs1)
+                    .imm(imm.into())
+                    .rd(rd)
+                    .build();
                 builder.insert(&op);
 
                 Ok(())
@@ -226,6 +247,13 @@ isema::def! {dialect = riscv, OrOp => tir_backend::isema::OrOp{rd = get_rd, rs1 
 isema::def! {dialect = riscv, SllOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
 isema::def! {dialect = riscv, SrlOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
 isema::def! {dialect = riscv, SraOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+
+isema::def! {dialect = riscv, AddImmOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, AndImmOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, OrImmOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, SllImmOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, SrlImmOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, SraImmOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
 
 #[cfg(test)]
 mod tests {

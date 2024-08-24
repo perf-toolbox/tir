@@ -19,12 +19,6 @@ macro_rules! exec_alu {
                 .clone()
                 .try_into()
                 .expect("reg name is a String attr");
-            let rs2: String = op
-                .borrow()
-                .get_rs2_attr()
-                .clone()
-                .try_into()
-                .expect("reg name is a String attr");
             let rd: String = op
                 .borrow()
                 .get_rd_attr()
@@ -33,10 +27,26 @@ macro_rules! exec_alu {
                 .expect("reg name is a String attr");
 
             let a = reg_file.borrow().read_register(&rs1).get_lower();
-            let b = reg_file.borrow().read_register(&rs2).get_lower();
 
-            let c = a $op b;
-            let c = Value::from(c);
+            let c = if let Some(rs2) = op.borrow().get_rs2_attr().clone() {
+                let rs2: String = rs2.try_into().expect("should have been validated");
+                let b = reg_file.borrow().read_register(&rs2).get_lower();
+                let c = a $op b;
+
+                Value::from(c)
+            } else {
+                let imm: i16 = op
+                    .borrow()
+                    .get_imm_attr()
+                    .expect("Either rs2 or imm must be present")
+                    .clone()
+                    .try_into()
+                    .expect("Either rs2 or imm must be present");
+                let b = imm as u32;
+                let c = a $op b;
+
+                Value::from(c)
+            };
 
             reg_file.borrow_mut().write_register(&rd, &c);
         }
