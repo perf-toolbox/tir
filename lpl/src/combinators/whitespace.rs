@@ -57,7 +57,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn match_literal() {
+    fn match_whitespace() {
         let input = "  \tSpace";
         let with_space: StrStream = input.into();
         let input2 = "NoSpaceString";

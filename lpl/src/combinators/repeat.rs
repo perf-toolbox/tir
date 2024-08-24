@@ -126,3 +126,32 @@ where
         Ok((result, next_input))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::combinators::literal;
+    use crate::parse_stream::StrStream;
+    use crate::Parser;
+
+    use super::*;
+
+    #[test]
+    fn test_repeat() {
+        let input1 = "test,test,test,";
+        let input2 = "test,test,test";
+        let input3 = ",test,test,test";
+        let stream1: StrStream = input1.into();
+        let stream2: StrStream = input2.into();
+        let stream3: StrStream = input3.into();
+
+        let matcher1 = interleaved(literal("test"), literal(","));
+        let matcher2 = separated(literal("test"), literal(","));
+
+        assert!(matcher1.parse(stream1.clone()).is_ok());
+        assert!(matcher1.parse(stream2.clone()).is_ok());
+        assert!(matcher1.parse(stream3.clone()).is_ok());
+        assert!(matcher2.parse(stream1.clone()).is_ok());
+        assert!(matcher2.parse(stream2.clone()).is_ok());
+        assert!(matcher2.parse(stream3.clone()).is_err());
+    }
+}

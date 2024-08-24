@@ -72,3 +72,42 @@ where
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::combinators::{any_whitespace1, literal};
+    use crate::parse_stream::StrStream;
+    use crate::Parser;
+
+    #[test]
+    fn test_spanned() {
+        let input = "Hello";
+        let stream: StrStream = input.into();
+
+        let matcher = literal("Hello").spanned();
+
+        assert!(matcher.parse(stream).is_ok());
+    }
+
+    #[test]
+    fn test_then() {
+        let input = "Hello    World";
+        let stream: StrStream = input.into();
+
+        let matcher = literal("Hello")
+            .and_then(any_whitespace1())
+            .and_then(literal("World"));
+
+        assert!(matcher.parse(stream.clone()).is_ok());
+    }
+
+    #[test]
+    fn test_or() {
+        let input = "Hello";
+        let stream: StrStream = input.into();
+
+        let matcher = literal("World").or_else(literal("Hello"));
+
+        assert!(matcher.parse(stream.clone()).is_ok());
+    }
+}

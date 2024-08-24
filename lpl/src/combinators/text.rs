@@ -58,3 +58,24 @@ where
         Ok((substr, next_input))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::parse_stream::StrStream;
+    use crate::Parser;
+
+    use super::*;
+
+    #[test]
+    fn test_take_while() {
+        let input = "  \tSpace";
+        let with_space: StrStream = input.into();
+        let input2 = "NoSpaceString";
+        let no_space: StrStream = input2.into();
+
+        let matcher = take_while(|c| c.is_whitespace());
+
+        assert!(matcher.parse(with_space.clone()).is_ok());
+        assert!(matcher.parse(no_space.clone()).is_err());
+    }
+}
