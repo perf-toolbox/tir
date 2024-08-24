@@ -9,5 +9,8 @@ members = [
     "fuzz",
     "utils/check-runner",
     "utils/filecheck",
-    "utils/not", "tools", "isasim",
+    "utils/not",
+    "tools",
+    "isasim",
+    "lpl",
 ]
