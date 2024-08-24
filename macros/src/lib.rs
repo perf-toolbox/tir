@@ -302,31 +302,6 @@ fn build_region_accessors(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStrea
     }
 }
 
-fn build_attr_accessors(attrs: &[Attr]) -> proc_macro2::TokenStream {
-    let mut attr_accessors = vec![];
-
-    for attr in attrs {
-        let getter_name = format_ident!("get_{}_attr", attr.0);
-        let setter_name = format_ident!("set_{}_attr", attr.0);
-        let attr_str = attr.0.to_string();
-
-        attr_accessors.push(quote! {
-            pub fn #getter_name<'a>(&'a self) -> &'a tir_core::Attr {
-                self.r#impl.attrs.get(#attr_str).unwrap()
-            }
-
-            pub fn #setter_name<T>(&mut self, value: T) where tir_core::Attr: From<T> {
-                let attr = tir_core::Attr::from(value);
-                self.r#impl.attrs.insert(#attr_str.to_string(), attr);
-            }
-        });
-    }
-
-    quote! {
-        #(#attr_accessors)*
-    }
-}
-
 fn build_return_type_accessor(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
     for field in fields {
         if let OpFieldAttrs::Return = field.attrs {

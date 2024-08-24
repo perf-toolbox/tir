@@ -83,7 +83,11 @@ macro_rules! three_reg_ops {
         $(
             #[doc = $doc]
             #[derive(Op, Debug, Clone, OpAssembly, OpValidator)]
-            #[operation(name = $op_name, dialect = isema, known_attrs(rs1: String, rs2: String, rd: String))]
+            #[operation(
+                name = $op_name,
+                dialect = isema,
+                known_attrs(rs1: String, rs2: Option<String>, imm: Option<I16Attr>, rd: String)
+            )]
             pub struct $struct_name {
                 r#impl: OpImpl,
             }
