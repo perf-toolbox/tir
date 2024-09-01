@@ -108,6 +108,62 @@ where
     }
 }
 
+pub fn ident<'a, Input>(predicate: impl Fn(char) -> bool) -> impl Parser<'a, Input, &'a str>
+where
+    Input: ParseStream<'a> + 'a,
+{
+    move |input: Input| {
+        if !input.is_string_like() {
+            return Err(ParserError::new(
+                "Expected string-like input".to_string(),
+                input.span(),
+            ));
+        }
+
+        let mut last = 0;
+
+        let mut chars = input.chars().peekable();
+
+        if !chars.peek().unwrap().is_alphabetic() {
+            return Err(ParserError::new(
+                "Identifier must start with an alphabetic character".to_string(),
+                input.span(),
+            ));
+        }
+
+        for c in chars {
+            if !c.is_alphanumeric() && !predicate(c) {
+                break;
+            }
+            last += c.len_utf8();
+        }
+
+        if last == 0 {
+            return Err(ParserError::new("".to_string(), input.span()));
+        }
+
+        let next_input: Option<Input> = input.slice(last..input.len());
+
+        let substr = input.substr(0..last).unwrap();
+
+        Ok((substr, next_input))
+    }
+}
+
+pub fn dec_number<'a, Input, Int>() -> impl Parser<'a, Input, Int>
+where
+    Input: ParseStream<'a> + 'a,
+    Int: std::str::FromStr + 'a,
+{
+    take_while(|c| c.is_digit(10)).map(|s| {
+        if let Ok(num) = Int::from_str(s) {
+            num
+        } else {
+            unreachable!()
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::parse_stream::StrStream;
