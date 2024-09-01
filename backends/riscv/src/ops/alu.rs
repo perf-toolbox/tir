@@ -36,6 +36,12 @@ macro_rules! alu_op_base {
             r#impl: OpImpl,
         }
 
+        impl $struct_name {
+            pub fn get_op_width(&self) -> u8 {
+                64
+            }
+        }
+
         impl BinaryEmittable for $struct_name {
             fn encode(
                 &self,
@@ -104,6 +110,12 @@ macro_rules! alu_imm_op_base {
             #[operand]
             rs1: Register,
             r#impl: OpImpl,
+        }
+
+        impl $struct_name {
+            pub fn get_op_width(&self) -> u8 {
+                64
+            }
         }
 
         impl BinaryEmittable for $struct_name {
@@ -240,20 +252,20 @@ alu_ops! {
     AndImmOp => { name = "andi", funct3 = 0b111 }
 }
 
-isema::def! {dialect = riscv, AddOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, SubOp => tir_backend::isema::SubOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, AndOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, OrOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, SllOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, SrlOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
-isema::def! {dialect = riscv, SraOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2}}
+isema::def! {dialect = riscv, AddOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, SubOp => tir_backend::isema::SubOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, AndOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, OrOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, SllOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, SrlOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
+isema::def! {dialect = riscv, SraOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, rs2 = get_rs2, width = get_op_width}}
 
-isema::def! {dialect = riscv, AddImmOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
-isema::def! {dialect = riscv, AndImmOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
-isema::def! {dialect = riscv, OrImmOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
-isema::def! {dialect = riscv, SllImmOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
-isema::def! {dialect = riscv, SrlImmOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
-isema::def! {dialect = riscv, SraImmOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr}}
+isema::def! {dialect = riscv, AddImmOp => tir_backend::isema::AddOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
+isema::def! {dialect = riscv, AndImmOp => tir_backend::isema::AndOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
+isema::def! {dialect = riscv, OrImmOp => tir_backend::isema::OrOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
+isema::def! {dialect = riscv, SllImmOp => tir_backend::isema::SllOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
+isema::def! {dialect = riscv, SrlImmOp => tir_backend::isema::SrlOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
+isema::def! {dialect = riscv, SraImmOp => tir_backend::isema::SraOp{rd = get_rd, rs1 = get_rs1, imm = get_imm_attr, width = get_op_width}}
 
 #[cfg(test)]
 mod tests {
