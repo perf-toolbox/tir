@@ -51,8 +51,12 @@ impl TryFrom<Vec<u8>> for Value {
 }
 
 impl Value {
-    pub fn get_lower(&self) -> u32 {
+    pub fn get_lower32(&self) -> u32 {
         u32::from_le_bytes(self.data[0..4].try_into().unwrap())
+    }
+
+    pub fn get_lower64(&self) -> u64 {
+        u64::from_le_bytes(self.data[0..8].try_into().unwrap())
     }
 
     pub fn raw_bytes(&self, width: usize) -> Result<Vec<u8>, ()> {
@@ -139,7 +143,7 @@ impl RegFile for RISCVRegFile {
             strings.push(format!(
                 "    \"{}\": {},",
                 tir_riscv::get_reg_name(&reg),
-                self.registers[id].get_lower()
+                self.registers[id].get_lower64()
             ));
         }
 
@@ -161,7 +165,7 @@ mod tests {
 
         let value = 42;
         reg_file.borrow_mut().write_register("x1", &value.into());
-        let other_value = reg_file.borrow().read_register("x1").get_lower();
+        let other_value = reg_file.borrow().read_register("x1").get_lower32();
 
         assert_eq!(value, other_value);
     }

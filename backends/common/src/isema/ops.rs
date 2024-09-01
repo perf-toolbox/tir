@@ -86,7 +86,7 @@ macro_rules! three_reg_ops {
             #[operation(
                 name = $op_name,
                 dialect = isema,
-                known_attrs(rs1: String, rs2: Option<String>, imm: Option<I16Attr>, rd: String)
+                known_attrs(rs1: String, rs2: Option<String>, imm: Option<I16Attr>, rd: String, width: u8)
             )]
             pub struct $struct_name {
                 r#impl: OpImpl,

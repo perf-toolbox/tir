@@ -10,6 +10,32 @@ pub struct Simulator {
     module: Rc<RefCell<ModuleOp>>,
 }
 
+enum Either<L, R> {
+    Left(L),
+    Right(R),
+}
+
+fn exec_alu_op_impl<T>(
+    rs1: &str,
+    rhs: Either<String, i16>,
+    rd: &str,
+    get_bits: impl Fn(Value) -> T,
+    imm_cvt: impl Fn(i16) -> T,
+    op: impl Fn(T, T) -> T,
+    reg_file: &Rc<RefCell<dyn RegFile>>,
+) where
+    Value: From<T>,
+{
+    let a = get_bits(reg_file.borrow().read_register(rs1));
+    let b = match rhs {
+        Either::Left(ref rs2) => get_bits(reg_file.borrow().read_register(rs2)),
+        Either::Right(imm) => imm_cvt(imm),
+    };
+
+    let c = Value::from(op(a, b));
+    reg_file.borrow_mut().write_register(&rd, &c);
+}
+
 macro_rules! exec_alu {
     ($name:ident, $op_ty:ty, $op:tt) => {
         fn $name(op: &Rc<RefCell<$op_ty>>, reg_file: &Rc<RefCell<dyn RegFile>>) {
@@ -26,14 +52,9 @@ macro_rules! exec_alu {
                 .try_into()
                 .expect("reg name is a String attr");
 
-            let a = reg_file.borrow().read_register(&rs1).get_lower();
-
-            let c = if let Some(rs2) = op.borrow().get_rs2_attr().clone() {
+            let rhs = if let Some(rs2) = op.borrow().get_rs2_attr().clone() {
                 let rs2: String = rs2.try_into().expect("should have been validated");
-                let b = reg_file.borrow().read_register(&rs2).get_lower();
-                let c = a $op b;
-
-                Value::from(c)
+                Either::Left(rs2)
             } else {
                 let imm: i16 = op
                     .borrow()
@@ -42,13 +63,28 @@ macro_rules! exec_alu {
                     .clone()
                     .try_into()
                     .expect("Either rs2 or imm must be present");
-                let b = imm as u32;
-                let c = a $op b;
-
-                Value::from(c)
+                Either::Right(imm)
             };
 
-            reg_file.borrow_mut().write_register(&rd, &c);
+            let width: u8 = op.borrow().get_width_attr().clone().try_into().expect("must succeed");
+
+            match width {
+                64 => {
+                    let get_bits = |value: Value| value.get_lower64();
+                    let imm_cvt = |imm: i16| imm as u64;
+                    let op_impl = |a: u64, b: u64| a $op b;
+
+                    exec_alu_op_impl(&rs1, rhs, &rd, get_bits, imm_cvt, op_impl, reg_file);
+                },
+                32 => {
+                    let get_bits = |value: Value| value.get_lower32();
+                    let imm_cvt = |imm: i16| imm as u32;
+                    let op_impl = |a: u32, b: u32| a $op b;
+
+                    exec_alu_op_impl(&rs1, rhs, &rd, get_bits, imm_cvt, op_impl, reg_file);
+                },
+                _ => unreachable!("unsupported width")
+            };
         }
 
     };
@@ -74,7 +110,7 @@ fn execute_load(
         .try_into()
         .expect("reg name is a String attr");
 
-    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64() as u64;
 
     let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
@@ -114,7 +150,7 @@ fn execute_store(
         .try_into()
         .expect("reg name is a String attr");
 
-    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower() as u64;
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64() as u64;
     let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
     let addr = (base_addr as i64 + offset as i64) as u64;
