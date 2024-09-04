@@ -94,6 +94,16 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         BoxedParser::new(combinators::map(self, map_fn))
     }
 
+    fn map_with<F, NewOutput>(self, map_fn: F) -> BoxedParser<'a, Input, NewOutput>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+        NewOutput: 'a,
+        F: Fn(Output, Option<&Input::Extra>) -> NewOutput + 'a,
+    {
+        BoxedParser::new(combinators::map_with(self, map_fn))
+    }
+
     fn or_else<P2>(self, parser2: P2) -> BoxedParser<'a, Input, Output>
     where
         P2: Parser<'a, Input, Output> + 'a,

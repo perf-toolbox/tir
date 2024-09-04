@@ -1,10 +1,22 @@
-use lpl::Parser;
-
+use lpl::{Parser, ParserError, ParseStream};
 use crate::target::SectionOp;
 use crate::{AsmToken, TokenStream};
 
 pub fn parse_asm<'a>(input: &TokenStream<'a>, instr_parser: Box<dyn Parser<'a, TokenStream<'a>, ()>>) {
 
+}
+
+fn directive_to_str<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
+    move |stream: TokenStream<'a>| match stream.get(0..1).unwrap()[0].0 {
+        AsmToken::Directive(d) => Ok((d, stream.slice(1..stream.len()))),
+        _ => Err(ParserError::new("expected a directive".to_string(), stream.span())),
+    }
+}
+
+fn section<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
+    directive_to_str().map_with(|_, builder| {
+        let builder = builder.unwrap();
+    })
 }
 
 // pub fn section(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {

@@ -1,4 +1,8 @@
-use std::ops::{Range, RangeBounds};
+use std::{
+    any::Any,
+    ops::{Range, RangeBounds},
+    rc::Rc,
+};
 
 use crate::Span;
 
@@ -49,6 +53,7 @@ pub trait ParseStream<'a>: Clone {
 pub struct StrStream<'a> {
     string: &'a str,
     offset: usize,
+    extra: Option<Rc<dyn Any>>,
 }
 
 impl<'a> ParseStream<'a> for StrStream<'a> {
@@ -121,6 +126,6 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
 
 impl<'a> From<&'a str> for StrStream<'a> {
     fn from(string: &'a str) -> Self {
-        StrStream { string, offset: 0 }
+        StrStream { string, offset: 0, extra: None }
     }
 }

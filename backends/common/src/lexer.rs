@@ -3,6 +3,7 @@
 use std::ops::{Bound, RangeBounds};
 
 use lpl::{combinators::{any_whitespace1, interleaved, literal, text::{dec_number, ident}}, ParseStream, Parser, ParserError, Spanned, StrStream};
+use tir_core::{ContextRef, OpBuilder};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum AsmToken<'a> {
@@ -19,16 +20,18 @@ pub enum AsmToken<'a> {
 #[derive(Clone, Debug)]
 pub struct TokenStream<'a> {
     tokens: &'a [Spanned<AsmToken<'a>>],
+    extra: OpBuilder,
 }
 
 impl<'a> TokenStream<'a> {
-    pub fn new(tokens: &'a [Spanned<AsmToken<'a>>]) -> Self {
-        Self { tokens }
+    pub fn new(tokens: &'a [Spanned<AsmToken<'a>>], extra: OpBuilder) -> Self {
+        Self { tokens, extra }
     }
 }
 
 impl<'a> ParseStream<'a> for TokenStream<'a> {
     type Slice = &'a [Spanned<AsmToken<'a>>];
+    type Extra = OpBuilder;
 
     fn get(&self, range: std::ops::Range<usize>) -> Option<Self::Slice> {
         let ub = match range.end_bound() {
@@ -57,6 +60,7 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
         if ub <= self.tokens.len() {
             Some(Self {
                 tokens: &self.tokens[range],
+                extra: self.extra.clone(),
             })
         } else {
             None
@@ -69,6 +73,14 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
 
     fn span(&self) -> lpl::Span {
         todo!()
+    }
+
+    fn set_extra(&mut self, extra: OpBuilder) {
+        self.extra = extra
+    }
+
+    fn get_extra(&self) -> Option<&OpBuilder> {
+        Some(&self.extra)
     }
 }
 

@@ -27,7 +27,7 @@ pub trait AsmPrintable {
 }
 
 pub trait ISAParser {
-    fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()>;
+    // fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()>;
 }
 
 #[derive(Error, Debug)]

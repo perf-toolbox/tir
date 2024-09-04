@@ -1,4 +1,5 @@
 use crate::{InternalError, ParseStream, Parser, Span, Spanned};
+use std::{any::Any, rc::Rc};
 
 pub fn map<'a, P, F, Input, Output1, Output2>(
     parser: P,
@@ -13,6 +14,22 @@ where
         parser
             .parse(input)
             .map(|(result, next_input)| (map_fn(result), next_input))
+    }
+}
+
+pub fn map_with<'a, P, F, Input, Output1, Output2, Extra>(
+    parser: P,
+    map_fn: F,
+) -> impl Parser<'a, Input, Output2>
+where
+    Input: ParseStream<'a, Extra = Extra> + 'a,
+    P: Parser<'a, Input, Output1>,
+    F: Fn(Output1, Option<&Extra>) -> Output2,
+{
+    move |input: Input| {
+        parser
+            .parse(input.clone())
+            .map(|(result, next_input)| (map_fn(result, input.get_extra()), next_input))
     }
 }
 
