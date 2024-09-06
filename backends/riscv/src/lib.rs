@@ -1,7 +1,7 @@
 use tir_backend::{DisassemblerError, ISAParser, TokenStream};
-use tir_core::parser::AsmPResult;
 use tir_core::Dialect;
 use tir_core::{ContextRef, OpAssembly, OpBuilder};
+use lpl::Parser;
 
 mod asm_parser;
 mod ops;
@@ -19,7 +19,7 @@ macro_rules! populate_riscv_ops {
 
         fn populate_riscv_asm_parsers(ext: &mut RVExt) {
             $(
-            ext.register_asm_parser(<$op as ISAParser>::parse);
+            ext.register_asm_parser(Box::new(<$op as ISAParser>::parse()));
             )*
         }
     };
@@ -68,18 +68,17 @@ populate_riscv_ops!(
 populate_dialect_types!();
 
 #[derive(Default)]
-pub struct RVExt {
-    asm_parsers: Vec<fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>>,
+pub struct RVExt<'a> {
+    asm_parsers: Vec<Box<dyn Parser<'a, TokenStream<'a>, ()>>>,
 }
 
-impl RVExt {
-    pub fn register_asm_parser(&mut self, parser: fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>) {
+impl<'a> RVExt<'a> {
+    pub fn register_asm_parser(&mut self, parser: Box<dyn Parser<'a, TokenStream<'a>, ()>>) {
         self.asm_parsers.push(parser);
     }
 
-    // TODO check if this can be zero-copy
-    pub fn get_asm_parsers(&self) -> Vec<fn(&mut TokenStream<'_, '_>) -> AsmPResult<()>> {
-        self.asm_parsers.clone()
+    pub fn get_asm_parsers(&'a self) -> &'a [Box<dyn Parser<'a, TokenStream<'a>, ()>>] {
+        &self.asm_parsers
     }
 }
 

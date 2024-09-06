@@ -168,6 +168,26 @@ where
     }
 }
 
+pub fn one_of<'a, Input, Output>(
+    parsers: &'a [Box<dyn Parser<'a, Input, Output>>],
+) -> impl Parser<'a, Input, Output>
+where
+    Input: ParseStream<'a> + 'a,
+{
+    move |input: Input| {
+        for p in parsers {
+            let result = p.parse(input.clone());
+            if let Ok(result) = result {
+                return Ok(result);
+            }
+        }
+        Err(ParserError::new(
+            "no parser matched".to_string(),
+            input.span(),
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::combinators::literal;

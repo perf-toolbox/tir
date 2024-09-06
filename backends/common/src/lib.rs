@@ -5,9 +5,10 @@ pub mod target;
 mod target_options;
 
 pub use lexer::*;
+use lpl::Parser;
 pub use target_options::*;
 
-use tir_core::{parser::AsmPResult, Result};
+use tir_core::Result;
 
 use thiserror::Error;
 
@@ -27,7 +28,7 @@ pub trait AsmPrintable {
 }
 
 pub trait ISAParser {
-    // fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()>;
+    fn parse<'a>() -> impl Parser<'a, TokenStream<'a>, ()>;
 }
 
 #[derive(Error, Debug)]

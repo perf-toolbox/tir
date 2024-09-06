@@ -105,6 +105,25 @@ where
     }
 }
 
+pub fn try_map<'a, P, F, Input, Output1, Output2>(
+    parser: P,
+    map_fn: F,
+) -> impl Parser<'a, Input, Output2>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output1>,
+    F: Fn(Output1, Span) -> Result<Output2, ParserError>,
+{
+    move |input: Input| {
+        let span = input.span();
+        let result = parser.parse(input);
+        match result {
+            Ok((res, next_input)) => map_fn(res, span).map(|res| (res, next_input)),
+            Err(err) => Err(err),
+        }
+    }
+}
+
 pub fn fold_left<'a, A, O, Input, Output1, Output2, Acc>(
     atom: A,
     operator: O,

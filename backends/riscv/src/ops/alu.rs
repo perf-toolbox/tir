@@ -13,9 +13,7 @@ use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{lowercase, uppercase};
 use tir_macros::{Op, OpAssembly, OpValidator};
-use winnow::combinator::{preceded, separated, separated_pair};
-use winnow::token::one_of;
-use winnow::Parser;
+use lpl::Parser;
 
 use crate::DIALECT_NAME;
 
@@ -62,39 +60,42 @@ macro_rules! alu_op_base {
         }
 
         impl ISAParser for $struct_name {
-            fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                let opcode = one_of(|t| {
-                    if let AsmToken::Ident(name) = t {
-                        name == lowercase!($op_name) || name == uppercase!($op_name)
-                    } else {
-                        false
-                    }
-                });
-                let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                    .map(|t| {
-                        if let AsmToken::Ident(name) = t {
-                            name
-                        } else {
-                            unreachable!();
-                        }
-                    })
-                    .and_then(register_parser);
-                let comma = one_of(|t| t == AsmToken::Comma).void();
+            fn parse<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
+                asm_ident().try_map(|t| {
+                    
+                })
+                // let opcode = one_of(|t| {
+                //     if let AsmToken::Ident(name) = t {
+                //         name == lowercase!($op_name) || name == uppercase!($op_name)
+                //     } else {
+                //         false
+                //     }
+                // });
+                // let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
+                //     .map(|t| {
+                //         if let AsmToken::Ident(name) = t {
+                //             name
+                //         } else {
+                //             unreachable!();
+                //         }
+                //     })
+                //     .and_then(register_parser);
+                // let comma = one_of(|t| t == AsmToken::Comma).void();
+                //
+                // let regs: Vec<Register> =
+                //     preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
+                // let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
+                //
+                // let builder = input.get_builder();
+                // let context = builder.get_context();
+                // let op = $struct_name::builder(&context)
+                //     .rs1(rs1)
+                //     .rs2(rs2)
+                //     .rd(rd)
+                //     .build();
+                // builder.insert(&op);
 
-                let regs: Vec<Register> =
-                    preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
-                let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
-
-                let builder = input.get_builder();
-                let context = builder.get_context();
-                let op = $struct_name::builder(&context)
-                    .rs1(rs1)
-                    .rs2(rs2)
-                    .rd(rd)
-                    .build();
-                builder.insert(&op);
-
-                Ok(())
+                // Ok(())
             }
         }
     };

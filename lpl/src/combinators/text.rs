@@ -124,6 +124,13 @@ where
 
         let mut chars = input.chars().peekable();
 
+        if input.len() == 0 {
+            return Err(ParserError::new(
+                "Expected at least one character".to_string(),
+                input.span(),
+            ));
+        }
+
         if !chars.peek().unwrap().is_alphabetic() {
             return Err(ParserError::new(
                 "Identifier must start with an alphabetic character".to_string(),
