@@ -12,6 +12,7 @@ serde = "1.0.204"
 serde_yml = "0.0.12"
 clap = "4.5.9"
 winnow = "0.6.18"
+thiserror = "1.0.63"
 
 [[bin]]
 name = "isasim"

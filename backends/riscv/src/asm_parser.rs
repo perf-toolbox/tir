@@ -43,6 +43,7 @@ pub fn parse_asm<'a>(
         panic!("lexer failed: {}", err);
     }
     let tokens = tokens.unwrap();
+    println!("Tokens: {:?}\n", &tokens);
     let stream = TokenStream::new(&builder, &tokens);
 
     let _: Vec<()> = repeat(0.., alt((section, label, asm_instr)))

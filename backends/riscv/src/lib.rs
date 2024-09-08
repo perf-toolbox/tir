@@ -63,6 +63,7 @@ populate_riscv_ops!(
     StoreByte,
     StoreHalfword,
     StoreWord,
+    StoreDouble,
 );
 populate_dialect_types!();
 

@@ -1,6 +1,7 @@
 use clap::{ArgMatches, FromArgMatches, Parser};
 use std::cell::RefCell;
 use std::rc::Rc;
+use thiserror::Error;
 use tir_core::Printable;
 use tir_core::{builtin::ModuleOp, Context, ContextRef, OpRef, PassManager, StdoutPrinter};
 
@@ -13,6 +14,16 @@ pub use memory::*;
 pub use options::*;
 pub use regfile::*;
 pub use simulator::*;
+
+#[derive(Error, Debug, Clone)]
+pub enum SimErr {
+    #[error("invalid memory access to address {0}")]
+    MemoryAccess(u64),
+    #[error("unaligned access: address `{0}`, data size `{1}`")]
+    UnalignedAccess(u64, usize),
+    #[error("unknown error")]
+    Unknown,
+}
 
 pub fn sim_main(
     context: Option<ContextRef>,
@@ -39,7 +50,10 @@ pub fn sim_main(
     let config: Config = serde_yml::from_str(&config)?;
 
     let reg_file: Rc<RefCell<dyn RegFile>> = RISCVRegFile::new();
-    let mem = MemoryMap::new();
+    let mem = MemoryMap::new(config.page_size);
+    if let Some(a) = config.map_faults_to_address {
+        mem.borrow_mut().set_map_faults_to_address(a);
+    }
 
     for (name, value) in &config.register_state {
         reg_file.borrow_mut().write_register(&name, &value.into());
@@ -78,7 +92,12 @@ pub fn sim_main(
     asm.borrow().print(&mut printer);
 
     let simulator = Simulator::new(asm);
-    simulator.run(&reg_file, &mem);
+
+    let max_repeat = config.repeat.unwrap_or(1);
+
+    for _ in 0..max_repeat {
+        simulator.run(&reg_file, &mem)?;
+    }
 
     println!("{}", reg_file.borrow().dump());
 

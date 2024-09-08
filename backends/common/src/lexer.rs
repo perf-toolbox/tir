@@ -1,3 +1,5 @@
+#![allow(dependency_on_unit_never_type_fallback)]
+
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::iter::Enumerate;

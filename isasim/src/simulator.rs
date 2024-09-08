@@ -4,7 +4,7 @@ use tir_core::builtin::ModuleOp;
 use tir_core::{OpRef, StdoutPrinter};
 use tir_macros::match_op;
 
-use crate::{MemoryMap, RegFile, Value};
+use crate::{MemoryMap, RegFile, SimErr, Value};
 
 pub struct Simulator {
     module: Rc<RefCell<ModuleOp>>,
@@ -38,7 +38,7 @@ fn exec_alu_op_impl<T>(
 
 macro_rules! exec_alu {
     ($name:ident, $op_ty:ty, $op:tt) => {
-        fn $name(op: &Rc<RefCell<$op_ty>>, reg_file: &Rc<RefCell<dyn RegFile>>) {
+        fn $name(op: &Rc<RefCell<$op_ty>>, reg_file: &Rc<RefCell<dyn RegFile>>) -> Result<(), SimErr> {
             let rs1: String = op
                 .borrow()
                 .get_rs1_attr()
@@ -85,6 +85,8 @@ macro_rules! exec_alu {
                 },
                 _ => unreachable!("unsupported width")
             };
+
+            Ok(())
         }
 
     };
@@ -102,7 +104,7 @@ fn execute_load(
     op: &Rc<RefCell<tir_backend::isema::LoadOp>>,
     reg_file: &Rc<RefCell<dyn RegFile>>,
     mem: &Rc<RefCell<MemoryMap>>,
-) {
+) -> Result<(), SimErr> {
     let base_reg: String = op
         .borrow()
         .get_base_addr_attr()
@@ -118,7 +120,10 @@ fn execute_load(
 
     let width: i32 = op.borrow().get_width_attr().try_into().expect("");
 
-    let mut data = mem.borrow().load(addr, (width / 8) as u8).expect("");
+    let mut data = mem
+        .borrow()
+        .load(addr, (width / 8) as u8)
+        .map_err(|_| SimErr::MemoryAccess(addr))?;
 
     let sign_extend: bool = op.borrow().get_sign_extend_attr().try_into().expect("");
 
@@ -136,13 +141,15 @@ fn execute_load(
     let dst: String = op.borrow().get_dst_attr().clone().try_into().expect("");
 
     reg_file.borrow_mut().write_register(&dst, &reg_value);
+
+    Ok(())
 }
 
 fn execute_store(
     op: &Rc<RefCell<tir_backend::isema::StoreOp>>,
     reg_file: &Rc<RefCell<dyn RegFile>>,
     mem: &Rc<RefCell<MemoryMap>>,
-) {
+) -> Result<(), SimErr> {
     let base_reg: String = op
         .borrow()
         .get_base_addr_attr()
@@ -163,10 +170,18 @@ fn execute_store(
         .raw_bytes((width / 8) as usize)
         .expect("");
 
-    mem.borrow_mut().store(addr, &value).expect("");
+    mem.borrow_mut()
+        .store(addr, &value)
+        .map_err(|_| SimErr::MemoryAccess(addr))?;
+
+    Ok(())
 }
 
-fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<MemoryMap>>) {
+fn execute_op(
+    op: &OpRef,
+    reg_file: &Rc<RefCell<dyn RegFile>>,
+    mem: &Rc<RefCell<MemoryMap>>,
+) -> Result<(), SimErr> {
     use tir_backend::isema::*;
 
     let op = op.clone();
@@ -183,10 +198,10 @@ fn execute_op(op: &OpRef, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<
         _ => || {
             let mut printer = StdoutPrinter::new();
             op.borrow().print(&mut printer);
-            println!("FAIL")
+            println!("FAIL");
+            unimplemented!()
         },
-
-    });
+    })
 }
 
 impl Simulator {
@@ -194,7 +209,11 @@ impl Simulator {
         Simulator { module }
     }
 
-    pub fn run(&self, reg_file: &Rc<RefCell<dyn RegFile>>, mem: &Rc<RefCell<MemoryMap>>) {
+    pub fn run(
+        &self,
+        reg_file: &Rc<RefCell<dyn RegFile>>,
+        mem: &Rc<RefCell<MemoryMap>>,
+    ) -> Result<(), SimErr> {
         let iter = self.module.borrow().get_body().iter();
         for instr in iter {
             if let Some(section) =
@@ -211,10 +230,12 @@ impl Simulator {
                     let block_iter = block.iter();
 
                     for op in block_iter {
-                        execute_op(&op, reg_file, mem);
+                        execute_op(&op, reg_file, mem)?;
                     }
                 }
             }
         }
+
+        Ok(())
     }
 }
