@@ -325,4 +325,5 @@ store_ops! {
     StoreByte => {name = "sb", funct3 = 0b000, width = 8 }
     StoreHalfword => {name = "sh", funct3 = 0b001, width = 16 }
     StoreWord => {name = "sw", funct3 = 0b010, width = 32 }
+    StoreDouble => {name = "sd", funct3 = 0b011, width = 64 }
 }

@@ -15,6 +15,10 @@ pub struct Memory {
 pub struct Config {
     pub register_state: HashMap<String, u64>,
     pub memory: Option<Vec<Memory>>,
+    pub page_size: u64,
+    pub map_faults_to_address: Option<u64>,
+    pub prohibit_unaligned_access: Option<bool>,
+    pub repeat: Option<u32>,
 }
 
 #[derive(Debug, Parser)]

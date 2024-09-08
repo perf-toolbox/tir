@@ -5,12 +5,12 @@ use tir_core::{
 };
 use tir_macros::{lowercase, uppercase};
 
-use winnow::stream::Compare;
 use winnow::{
     ascii::{alpha1, alphanumeric0},
     stream::{AsChar, Stream, StreamIsPartial},
     Parser,
 };
+use winnow::{combinator::trace, stream::Compare};
 
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
@@ -101,7 +101,7 @@ macro_rules! register {
 
 impl Parsable<Register> for Register {
     fn parse(input: &mut ParseStream<'_>) -> AsmPResult<Register> {
-        register_parser.parse_next(input)
+        trace("RISC-V register", register_parser).parse_next(input)
     }
 }
 
@@ -122,7 +122,7 @@ register! {
     X7 => { abi_name = "t2", encoding = 7, num = 7 },
     // Frame pointer, saved by callee
     // FIXME: this is also a saved register 0
-    X8 => { abi_name = "fp", encoding = 8, num = 8 },
+    X8 => { abi_name = "s0", encoding = 8, num = 8 },
     // Saved register 1, saved by callee
     X9 => { abi_name = "s1", encoding = 9, num = 9 },
     // Function argument 0 / return value 0, saved by caller

@@ -108,7 +108,7 @@ impl RISCVRegFile {
 
         Rc::new(RefCell::new(Self {
             registers,
-            base_width: 4,
+            base_width: 8,
         }))
     }
 }

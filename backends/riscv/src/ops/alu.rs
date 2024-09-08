@@ -162,7 +162,7 @@ macro_rules! alu_imm_op_base {
                 let comma2 = one_of(|t| t == AsmToken::Comma).void();
                 let imm = one_of(|t| matches!(t, AsmToken::Number(_))).map(|t| match t {
                     AsmToken::Number(num) => num as i16,
-                    _ => unreachable!("Why is this not a number>"),
+                    _ => unreachable!("Why is this not a number?"),
                 });
 
                 let args: (Vec<Register>, i16) = preceded(

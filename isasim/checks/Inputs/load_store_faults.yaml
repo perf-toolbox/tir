@@ -1,10 +1,12 @@
 register_state:
-  x1: 4096
+  x1: 4096 
   x2: 42 
 page_size: 4096
+map_faults_to_address: 8192  
 repeat: 4
 memory:
-  - address: 4096
+  - address: 8192 
     value: 36
     value_size: 8
     region_size: 4096
+
