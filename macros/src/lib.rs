@@ -225,7 +225,7 @@ pub fn populate_dialect_ops(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_ops(dialect: &mut Dialect) {
-            #(dialect.add_operation(#ty::get_operation_name(), <#ty>::parse_assembly);)*
+            #(dialect.add_operation(#ty::get_operation_name(), Box::new(<#ty>::parse_assembly));)*
         }
     })
 }
@@ -238,7 +238,7 @@ pub fn populate_dialect_types(input: TokenStream) -> TokenStream {
 
     TokenStream::from(quote! {
         fn populate_dialect_types(dialect: &mut Dialect) {
-            #(dialect.add_type(#ty::get_type_name(), #ty::print_assembly, #ty::parse_assembly);)*
+            #(dialect.add_type(#ty::get_type_name(), #ty::print_assembly, Box::new(#ty::parse_assembly));)*
         }
     })
 }

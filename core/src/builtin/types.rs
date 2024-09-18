@@ -19,10 +19,9 @@ impl TyAssembly for VoidType {
         fmt.write_direct("void");
     }
 
-    fn parse_assembly(
-        input: &mut tir_core::parser::ParseStream<'_>,
-    ) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
-        tir_core::parser::skip_attrs(input)
+    fn parse_assembly<'a>() -> BoxedParser<'a, IRStrStream<'a>, std::collections::HashMap<String, tir_core::Attr>> {
+        // tir_core::parser::skip_attrs(input)
+        todo!()
     }
 }
 
@@ -138,13 +137,12 @@ impl TyAssembly for IntType {
         fmt.write_direct(">");
     }
 
-    fn parse_assembly(
-        input: &mut tir_core::parser::ParseStream<'_>,
-    ) -> tir_core::parser::AsmPResult<HashMap<String, Attr>>
+    fn parse_assembly<'a>() -> BoxedParser<'a, IRStrStream<'a>, HashMap<String, Attr>>
     where
         Self: Sized,
     {
-        tir_core::parser::parse_int_bits(input)
+        // tir_core::parser::parse_int_bits(input)
+        todo!()
     }
 }
 

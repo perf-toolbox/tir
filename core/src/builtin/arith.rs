@@ -1,11 +1,9 @@
 use crate::assembly::parser::Parsable;
-// use crate::builtin::value::AnyValue;arith
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
 use crate::{Op, OpImpl, OpRef, Type};
 use tir_macros::{Op, OpAssembly, OpValidator};
-use winnow::Parser;
 
 use crate as tir_core;
 
