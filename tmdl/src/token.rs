@@ -21,6 +21,7 @@ pub enum Token<'src> {
     Identifier(&'src str),
     StringLiteral(&'src str),
     IntegerLiteral(i64),
+    BitLiteral(i64, i8),
 
     // Symbols
     /// `{`

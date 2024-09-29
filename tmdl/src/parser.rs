@@ -296,6 +296,41 @@ where
         })
 }
 
+fn parse_integer_literal<'a, 'src>() -> impl Parser<'a, TokenStream<'a, 'src>, ExpressionNode>
+where
+    'src: 'a,
+    'a: 'src,
+{
+    parse_number().map(|num| ExpressionNode::IntegerLiteral(num))
+}
+
+fn parse_bit_literal<'a, 'src>() -> impl Parser<'a, TokenStream<'a, 'src>, ExpressionNode>
+where
+    'src: 'a,
+    'a: 'src,
+{
+    move |input: TokenStream<'a, 'src>| {
+        if let Some((token, span)) = input.peek() {
+            if let Token::BitLiteral(num, bitwidth) = token {
+                Ok(((num, bitwidth), input.slice(1..input.len())))
+            } else {
+                Err(ParserError::new("Unexpected token", span))
+            }
+        } else {
+            Err(ParserError::new("Unexpected EOF", input.span()))
+        }
+    }
+}
+
+pub fn parse_expr<'a, 'src>() -> impl Parser<'a, TokenStream<'a, 'src>, ExpressionNode>
+where
+    'src: 'a,
+    'a: 'src,
+{
+    let atom = parse_integer_literal().or_else(parse_bit_literal());
+    todo()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -55,6 +55,10 @@ fn lex_integer_literal<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
     integer_literal(10).map(Token::IntegerLiteral)
 }
 
+fn lex_bit_literal<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
+    todo()
+}
+
 fn lex_keyword<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
     literal("instr_template")
         .map(|_| Token::InstrTemplate)
