@@ -1,0 +1,32 @@
+instr_template RInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str> {
+   rd: Register,
+   rs1: Register,
+   rs2: Register,
+}
+
+properties for ALUInstr {
+   let binary_encoding = $funct7 @ self.rs2 @ self.rs1 @ $funct3 @ self.rd 0b0110011;
+   let asm_syntax = "{$mnemonic} {self.rd}, {self.rs1}, {self.rs2}";
+}
+
+instr ADD : RInstr<0b0000000, 0b000, "add">;
+instr SUB : RInstr<0b0100000, 0b000, "sub">;
+instr SLL : RInstr<0b0000000, 0b001, "sll">;
+instr SLT : RInstr<0b0000000, 0b010, "slt">;
+instr SLTU : RInstr<0b0000000, 0b011, "sltu">;
+instr XOR : RInstr<0b0000000, 0b100, "xor">;
+instr SRL : RInstr<0b0000000, 0b101, "srl">;
+instr SRA : RInstr<0b0100000, 0b101, "sra">;
+instr OR : RInstr<0b0000000, 0b110, "or">;
+instr AND : RInstr<0b0000000, 0b111, "and">;
+
+instr_template IInstr<$imm: bits<12>, $rs1: bits<5>, $funct3: bits<3>, $rd: bits<5>, $mnemonic: str> {
+    rd: Register,
+    rs1: Register,
+    imm: bits<12>,
+}
+
+properties for IALUInstr {
+    let binary_encoding = $imm @ $rs1 @ $funct3 @ $rd @ 0b0010011;
+    let asm_syntax = "{$mnemonic} {self.rd}, {self.rs1}, {self.imm}";
+}

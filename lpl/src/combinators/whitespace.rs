@@ -48,6 +48,18 @@ where
     one_or_more(space()).map(|_| ())
 }
 
+pub fn spaced<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Output>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output> + 'a,
+    Output: 'a,
+{
+    space1()
+        .and_then(parser)
+        .and_then(space1())
+        .map(|((_, d), _)| d)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::combinators::space1;
