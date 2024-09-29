@@ -1,11 +1,12 @@
 use lpl::combinators::{
-    lang::{ident, line_comment},
-    literal, zero_or_more,
+    eof,
+    lang::{ident, integer_literal, line_comment},
+    literal, spaced, zero_or_more,
 };
 use lpl::Parser;
 use lpl::ParserError;
+use lpl::Spanned;
 use lpl::StrStream;
-use lpl::{Span, Spanned};
 
 use crate::Token;
 
@@ -28,21 +29,30 @@ use crate::Token;
 ///
 /// * `Result<TokenStream<'a>, ParserError>` - A Result containing either a TokenStream on success,
 ///   or a ParserError if lexing fails.
-pub fn lex<'a>(input: &'a str) -> Result<Vec<Spanned<Token<'a>>>, ParserError> {
+pub fn lex<'src>(input: &'src str) -> Result<Vec<Spanned<Token<'src>>>, ParserError> {
     let stream: StrStream = input.into();
 
     let token = lex_keyword()
+        .or_else(lex_identifier())
         .or_else(lex_punctuation())
         .or_else(lex_builtin_type())
         .or_else(lex_operator())
-        .or_else(lex_identifier())
+        .or_else(lex_integer_literal())
         .or_else(lex_comment());
 
-    let parser = zero_or_more(token.spanned());
+    let parser = zero_or_more(spaced(token.spanned())).and_then(eof());
 
-    let (tokens, _) = parser.parse(stream)?;
+    let ((tokens, _), _) = parser.parse(stream)?;
+
+    // let parser = zero_or_more(spaced(token.spanned()));
+
+    // let (tokens, _) = parser.parse(stream)?;
 
     Ok(tokens)
+}
+
+fn lex_integer_literal<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
+    integer_literal(10).map(Token::IntegerLiteral)
 }
 
 fn lex_keyword<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
@@ -63,8 +73,10 @@ fn lex_punctuation<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
         .or_else(literal(":").map(|_| Token::Colon))
         .or_else(literal(";").map(|_| Token::Semicolon))
         .or_else(literal(",").map(|_| Token::Comma))
+        .or_else(literal(".").map(|_| Token::Dot))
         .or_else(literal("$").map(|_| Token::Dollar))
         .or_else(literal("@").map(|_| Token::At))
+        .or_else(literal("\"").map(|_| Token::DoubleQuote))
 }
 
 fn lex_builtin_type<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
@@ -79,7 +91,7 @@ fn lex_operator<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
 }
 
 fn lex_identifier<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {
-    ident(|c| c == '_').map(Token::Identifier)
+    ident(|c| c == '_' || c == '$').map(Token::Identifier)
 }
 
 fn lex_comment<'a>() -> impl Parser<'a, StrStream<'a>, Token<'a>> {

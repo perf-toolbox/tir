@@ -1,3 +1,5 @@
+use core::num;
+
 use crate::{
     combinators::{literal, text::take_while},
     parse_stream::ParseStream,
@@ -63,9 +65,10 @@ where
             ));
         }
 
-        if !chars.peek().unwrap().is_alphabetic() {
+        if !chars.peek().unwrap().is_alphabetic() && !predicate(*chars.peek().unwrap()) {
             return Err(ParserError::new(
-                "Identifier must start with an alphabetic character".to_string(),
+                "Identifier must start with an alphabetic character or satisfy a predicate"
+                    .to_string(),
                 input.span(),
             ));
         }
@@ -78,7 +81,10 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new("".to_string(), input.span()));
+            return Err(ParserError::new(
+                "Expected identifier".to_string(),
+                input.span(),
+            ));
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());
@@ -89,10 +95,55 @@ where
     }
 }
 
+pub trait Integer {
+    fn parse_int(input: &str, radix: u32) -> Result<Self, std::num::ParseIntError>
+    where
+        Self: Sized;
+}
+
+impl Integer for i64 {
+    fn parse_int(input: &str, radix: u32) -> Result<Self, std::num::ParseIntError> {
+        Self::from_str_radix(input, radix)
+    }
+}
+
+pub fn integer_literal<'a, Input, Output>(radix: u32) -> impl Parser<'a, Input, Output>
+where
+    Input: ParseStream<'a> + 'a,
+    Output: Integer,
+{
+    move |input: Input| {
+        let chars = input.chars();
+        let mut last = 0;
+
+        for c in chars {
+            if !c.is_digit(radix) {
+                break;
+            }
+            last += c.len_utf8();
+        }
+
+        let next_input: Option<Input> = input.slice(last..input.len());
+
+        let substr = input.substr(0..last).unwrap();
+
+        let parsed_int = Output::parse_int(substr, radix);
+
+        if let Ok(parsed_int) = parsed_int {
+            Ok((parsed_int, next_input))
+        } else {
+            Err(ParserError::new(
+                "Expected integer literal".to_string(),
+                input.span(),
+            ))
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ParseResult, Parser, StrStream};
+    use crate::{Parser, StrStream};
     #[test]
     fn test_line_comment() {
         let input = "// This is a comment\n";

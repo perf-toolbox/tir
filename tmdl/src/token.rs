@@ -3,8 +3,8 @@ use std::ops::{Bound, Range, RangeBounds};
 use lpl::{ParseStream, Span, Spanned};
 
 /// A token in the TMDL language.
-#[derive(Debug, Clone)]
-pub enum Token<'a> {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Token<'src> {
     // Keywords
     /// `instr_template`
     InstrTemplate,
@@ -18,8 +18,8 @@ pub enum Token<'a> {
     Instr,
 
     // Identifiers and literals
-    Identifier(&'a str),
-    StringLiteral(&'a str),
+    Identifier(&'src str),
+    StringLiteral(&'src str),
     IntegerLiteral(i64),
 
     // Symbols
@@ -37,10 +37,14 @@ pub enum Token<'a> {
     Semicolon,
     /// `,`
     Comma,
+    /// `.`
+    Dot,
     /// `$`
     Dollar,
     /// `@`
     At,
+    /// `"`
+    DoubleQuote,
 
     // Types
     /// `Register`
@@ -54,20 +58,26 @@ pub enum Token<'a> {
     /// `=`
     Equals,
 
-    Comment(&'a str),
+    Comment(&'src str),
 
     // Special
     EOF,
 }
 
 #[derive(Debug, Clone)]
-pub struct TokenStream<'a> {
-    tokens: &'a [Spanned<Token<'a>>],
+pub struct TokenStream<'a, 'src>
+where
+    'src: 'a,
+{
+    tokens: &'a [Spanned<Token<'src>>],
     position: usize,
 }
 
-impl<'a> TokenStream<'a> {
-    pub fn new(tokens: &'a [Spanned<Token<'a>>]) -> Self {
+impl<'a, 'src> TokenStream<'a, 'src>
+where
+    'src: 'a,
+{
+    pub fn new(tokens: &'a [Spanned<Token<'src>>]) -> Self {
         Self {
             tokens,
             position: 0,
@@ -75,10 +85,10 @@ impl<'a> TokenStream<'a> {
     }
 }
 
-impl<'a> ParseStream<'a> for TokenStream<'a> {
-    type Slice = &'a [Spanned<Token<'a>>];
+impl<'a, 'src> ParseStream<'src> for TokenStream<'a, 'src> {
+    type Slice = &'a [Spanned<Token<'src>>];
     type Extra = ();
-    type Item = Spanned<Token<'a>>;
+    type Item = Spanned<Token<'src>>;
 
     fn get(&self, range: Range<usize>) -> Option<Self::Slice> {
         let ub = match range.end_bound() {
@@ -106,7 +116,10 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
     }
 
     fn span(&self) -> Span {
-        unimplemented!()
+        if self.tokens.is_empty() {
+            return Span::new(None, 0, None);
+        }
+        self.tokens[0].1.clone()
     }
 
     fn set_extra(&mut self, _extra: Self::Extra) {}

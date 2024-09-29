@@ -1,5 +1,3 @@
-use std::{any::Any, rc::Rc};
-
 use crate::{ParseStream, Parser, ParserError, Span, Spanned};
 
 pub fn map<'a, P, F, Input, Output1, Output2>(
@@ -106,6 +104,20 @@ where
         match result {
             Ok((res, next_input)) => map_fn(res, span).map(|res| (res, next_input)),
             Err(err) => Err(err),
+        }
+    }
+}
+
+pub fn optional<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Option<Output>>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output>,
+{
+    move |input: Input| {
+        if let Ok((output, next_input)) = parser.parse(input.clone()) {
+            Ok((Some(output), next_input))
+        } else {
+            Ok((None, Some(input)))
         }
     }
 }

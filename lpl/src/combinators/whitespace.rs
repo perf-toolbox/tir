@@ -54,9 +54,9 @@ where
     P: Parser<'a, Input, Output> + 'a,
     Output: 'a,
 {
-    space1()
+    any_whitespace0()
         .and_then(parser)
-        .and_then(space1())
+        .and_then(any_whitespace0())
         .map(|((_, d), _)| d)
 }
 
