@@ -16,22 +16,6 @@ where
     }
 }
 
-pub fn map_with<'a, P, F, Input, Output1, Output2, Extra>(
-    parser: P,
-    map_fn: F,
-) -> impl Parser<'a, Input, Output2>
-where
-    Input: ParseStream<'a, Extra = Extra> + 'a,
-    P: Parser<'a, Input, Output1>,
-    F: Fn(Output1, Option<&Extra>) -> Output2,
-{
-    move |input: Input| {
-        parser
-            .parse(input.clone())
-            .map(|(result, next_input)| (map_fn(result, input.get_extra()), next_input))
-    }
-}
-
 pub fn or_else<'a, P1, P2, Input, Output>(
     parser1: P1,
     parser2: P2,
@@ -86,25 +70,6 @@ where
             let final_span = Span::new(span.clone_filename(), span.get_offset_start(), new_span);
             ((output, final_span), next_input)
         })
-    }
-}
-
-pub fn try_map<'a, P, F, Input, Output1, Output2>(
-    parser: P,
-    map_fn: F,
-) -> impl Parser<'a, Input, Output2>
-where
-    Input: ParseStream<'a> + 'a,
-    P: Parser<'a, Input, Output1>,
-    F: Fn(Output1, Span) -> Result<Output2, ParserError>,
-{
-    move |input: Input| {
-        let span = input.span();
-        let result = parser.parse(input);
-        match result {
-            Ok((res, next_input)) => map_fn(res, span).map(|res| (res, next_input)),
-            Err(err) => Err(err),
-        }
     }
 }
 

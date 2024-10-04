@@ -59,20 +59,6 @@ where
     }
 }
 
-pub fn dec_number<'a, Input, Int>() -> impl Parser<'a, Input, Int>
-where
-    Input: ParseStream<'a> + 'a,
-    Int: std::str::FromStr + 'a,
-{
-    take_while(|c| c.is_digit(10)).map(|s| {
-        if let Ok(num) = Int::from_str(s) {
-            num
-        } else {
-            unreachable!()
-        }
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use crate::parse_stream::StrStream;
