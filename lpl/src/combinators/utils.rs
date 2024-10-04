@@ -19,3 +19,15 @@ where
         }
     }
 }
+
+pub fn reset<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Output>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output>,
+{
+    move |input: Input| {
+        parser
+            .parse(input.clone())
+            .map(|(output, _)| (output, Some(input)))
+    }
+}

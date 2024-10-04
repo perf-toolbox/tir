@@ -164,8 +164,8 @@ mod tests {
         let stream2: StrStream = input2.into();
         let stream3: StrStream = input3.into();
 
-        let matcher1 = interleaved(literal("test"), literal(","));
-        let matcher2 = separated(literal("test"), literal(","));
+        let matcher1 = interleaved(literal("test"), literal(",").map(|_| ()));
+        let matcher2 = separated(literal("test"), literal(",").map(|_| ()));
 
         assert!(matcher1.parse(stream1.clone()).is_ok());
         assert!(matcher1.parse(stream2.clone()).is_ok());

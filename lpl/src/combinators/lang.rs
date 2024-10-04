@@ -1,10 +1,18 @@
-use core::num;
-
 use crate::{
-    combinators::{literal, text::take_while},
+    combinators::{literal, reset, text::take_while},
     parse_stream::ParseStream,
-    ParseResult, Parser, ParserError,
+    Parser, ParserError,
 };
+
+pub fn line_comment<'a, Input>(comment_start: &'static str) -> impl Parser<'a, Input, &'a str>
+where
+    Input: ParseStream<'a> + 'a,
+    Input::Slice: PartialEq<&'a str>,
+{
+    reset(literal(comment_start))
+        .and_then(take_while(|c| *c != '\n'))
+        .map(|(_, c)| c)
+}
 
 /// Parses an identifier based on a custom predicate.
 ///
@@ -32,16 +40,6 @@ use crate::{
 /// - The input is empty.
 /// - The first character is not alphabetic.
 /// - No valid identifier characters are found.
-pub fn line_comment<'a, Input>(comment_start: &'static str) -> impl Parser<'a, Input, &'a str>
-where
-    Input: ParseStream<'a> + 'a,
-    Input::Slice: PartialEq<&'a str>,
-{
-    literal(comment_start)
-        .and_then(take_while(|c| *c != '\n'))
-        .map(|(_, c)| c)
-}
-
 pub fn ident<'a, Input>(predicate: impl Fn(char) -> bool) -> impl Parser<'a, Input, &'a str>
 where
     Input: ParseStream<'a> + 'a,
@@ -107,10 +105,9 @@ impl Integer for i64 {
     }
 }
 
-pub fn integer_literal<'a, Input, Output>(radix: u32) -> impl Parser<'a, Input, Output>
+pub fn integer_literal<'a, Input>(radix: u32) -> impl Parser<'a, Input, &'a str>
 where
     Input: ParseStream<'a> + 'a,
-    Output: Integer,
 {
     move |input: Input| {
         let chars = input.chars();
@@ -127,10 +124,10 @@ where
 
         let substr = input.substr(0..last).unwrap();
 
-        let parsed_int = Output::parse_int(substr, radix);
+        let parsed_int = i64::parse_int(substr, radix);
 
-        if let Ok(parsed_int) = parsed_int {
-            Ok((parsed_int, next_input))
+        if let Ok(_) = parsed_int {
+            Ok((substr, next_input))
         } else {
             Err(ParserError::new(
                 "Expected integer literal".to_string(),
@@ -151,6 +148,6 @@ mod tests {
         let parser = line_comment("//");
         let result = parser.parse(stream);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap().0, " This is a comment");
+        assert_eq!(result.unwrap().0, "// This is a comment");
     }
 }

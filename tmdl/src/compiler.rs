@@ -1,6 +1,6 @@
 use clap::{ArgMatches, FromArgMatches, Parser, ValueEnum};
 
-use crate::{lex, parse};
+use crate::lex;
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Action {
@@ -28,11 +28,10 @@ pub fn compiler_main(args: Option<&ArgMatches>) -> Result<(), Box<dyn std::error
     match args.action {
         Action::EmitTokens => {
             let tokens = lex(&source).unwrap();
-            println!("{:?}", tokens);
+            println!("{:#?}", tokens);
         }
         Action::EmitSyntaxTree => {
-            let syntax_tree = parse(&source).unwrap();
-            println!("{:?}", syntax_tree);
+            unimplemented!()
         }
     }
 

@@ -1,11 +1,7 @@
 mod compiler;
-mod concrete_syntax_tree;
 mod lexer;
-mod parser;
-mod token;
+mod syntax_kind;
 
 pub use compiler::*;
-pub use concrete_syntax_tree::*;
 pub use lexer::*;
-pub use parser::*;
-pub use token::*;
+pub use syntax_kind::*;
