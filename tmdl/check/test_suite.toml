@@ -1,0 +1,4 @@
+[suite]
+name = "TMDL Compiler checks"
+glob = ["**/*.tmdl", "!Inputs/**/*"]
+

@@ -13,4 +13,5 @@ members = [
     "tools",
     "isasim",
     "lpl",
+    "tmdl",
 ]

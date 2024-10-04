@@ -73,6 +73,57 @@ where
     }
 }
 
+pub fn optional<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Option<Output>>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output>,
+{
+    move |input: Input| {
+        if let Ok((output, next_input)) = parser.parse(input.clone()) {
+            Ok((Some(output), next_input))
+        } else {
+            Ok((None, Some(input)))
+        }
+    }
+}
+
+pub fn fold_left<'a, A, O, Input, Output1, Output2, Acc>(
+    atom: A,
+    operator: O,
+    acc: Acc,
+) -> impl Parser<'a, Input, Output1>
+where
+    Input: ParseStream<'a> + 'a,
+    A: Parser<'a, Input, Output1>,
+    O: Parser<'a, Input, Output2>,
+    Acc: Fn(Output1, Output2, Output1) -> Output1,
+{
+    move |input: Input| {
+        let (mut result, mut next_input) = atom.parse(input.clone())?;
+
+        loop {
+            if let Some(ref next_input_unwrapped) = next_input {
+                match operator.parse(next_input_unwrapped.clone()) {
+                    Ok((op, op_next_input)) => {
+                        match atom.parse(op_next_input.unwrap_or(input.clone())) {
+                            Ok((right, right_next_input)) => {
+                                result = acc(result, op, right);
+                                next_input = right_next_input;
+                            }
+                            Err(_) => break,
+                        }
+                    }
+                    Err(_) => break,
+                }
+            } else {
+                break;
+            }
+        }
+
+        Ok((result, next_input))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::combinators::{any_whitespace1, literal};

@@ -1,4 +1,5 @@
 pub mod combinators;
+pub mod syntax;
 
 mod err;
 mod parse_stream;
@@ -8,7 +9,7 @@ pub use parse_stream::*;
 
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Span {
     filename: Option<Arc<String>>,
     offset_start: usize,
@@ -26,6 +27,10 @@ impl Span {
             offset_start,
             offset_end,
         }
+    }
+
+    pub fn empty() -> Self {
+        Self::new(None, 0, None)
     }
 
     pub fn unbound(filename: Option<Arc<String>>, offset_start: usize) -> Self {

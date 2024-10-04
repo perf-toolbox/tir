@@ -7,8 +7,11 @@ pub struct ParserError {
 }
 
 impl ParserError {
-    pub fn new(message: String, span: Span) -> Self {
-        Self { message, span }
+    pub fn new<S: AsRef<str>>(message: S, span: Span) -> Self {
+        Self {
+            message: message.as_ref().to_string(),
+            span,
+        }
     }
 
     pub fn take_message(self) -> String {

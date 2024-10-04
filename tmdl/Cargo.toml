@@ -1,0 +1,12 @@
+[package]
+name = "tmdl"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lpl = { path = "../lpl" }
+clap = "4.5.9"
+
+[[bin]]
+name = "tmdlc"
+path = "bin.rs"
