@@ -18,7 +18,7 @@ jobs:
     - name: Install mdbook
       run: cargo install mdbook
     - name: Build docs
-      run: cargo make docs
+      run: cargo xtask docs
     - uses: actions/upload-pages-artifact@v3.0.1
       with:
         path: book
