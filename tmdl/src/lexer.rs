@@ -30,7 +30,7 @@ use crate::{SyntaxKind, Token, TokenData};
 ///
 /// * `Result<TokenStream<'a>, ParserError>` - A Result containing either a TokenStream on success,
 ///   or a ParserError if lexing fails.
-pub fn lex<'src>(input: &'src str) -> Result<Vec<GreenElement<SyntaxKind>>, ParserError> {
+pub fn lex(input: &str) -> Result<Vec<GreenElement<SyntaxKind>>, ParserError> {
     let stream: StrStream = input.into();
 
     let token = lex_keyword()

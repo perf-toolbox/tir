@@ -15,6 +15,7 @@ macro_rules! value_from_impl {
                 let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
                 let value_bytes = value.to_le_bytes();
 
+                #[allow(clippy::manual_memcpy)]
                 for i in 0..std::mem::size_of::<$vty>() {
                     data[i] = value_bytes[i];
                 }
@@ -42,6 +43,7 @@ impl TryFrom<Vec<u8>> for Value {
 
         let mut data: [u8; MAX_REG_SIZE] = [0; MAX_REG_SIZE];
 
+        #[allow(clippy::manual_memcpy)]
         for i in 0..value.len() {
             data[i] = value[i];
         }
@@ -59,6 +61,7 @@ impl Value {
         u64::from_le_bytes(self.data[0..8].try_into().unwrap())
     }
 
+    #[allow(clippy::result_unit_err)]
     pub fn raw_bytes(&self, width: usize) -> Result<Vec<u8>, ()> {
         if width > MAX_REG_SIZE {
             return Err(());

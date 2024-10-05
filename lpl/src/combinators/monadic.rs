@@ -48,10 +48,7 @@ where
                 Some(next_input) => parser2
                     .parse(next_input)
                     .map(|(out2, next_input)| ((out, out2), next_input)),
-                None => Err(ParserError::new(
-                    "no more input to parse".to_string(),
-                    input.span(),
-                )),
+                None => Err(ParserError::new("no more input to parse", input.span())),
             })
     }
 }
@@ -66,7 +63,7 @@ where
         parser.parse(input.clone()).map(|(output, next_input)| {
             let new_span = next_input
                 .clone()
-                .map_or(None, |input| Some(input.span().get_offset_start()));
+                .map(|input| input.span().get_offset_start());
             let final_span = Span::new(span.clone_filename(), span.get_offset_start(), new_span);
             ((output, final_span), next_input)
         })
@@ -101,22 +98,18 @@ where
     move |input: Input| {
         let (mut result, mut next_input) = atom.parse(input.clone())?;
 
-        loop {
-            if let Some(ref next_input_unwrapped) = next_input {
-                match operator.parse(next_input_unwrapped.clone()) {
-                    Ok((op, op_next_input)) => {
-                        match atom.parse(op_next_input.unwrap_or(input.clone())) {
-                            Ok((right, right_next_input)) => {
-                                result = acc(result, op, right);
-                                next_input = right_next_input;
-                            }
-                            Err(_) => break,
+        while let Some(ref next_input_unwrapped) = next_input {
+            match operator.parse(next_input_unwrapped.clone()) {
+                Ok((op, op_next_input)) => {
+                    match atom.parse(op_next_input.unwrap_or(input.clone())) {
+                        Ok((right, right_next_input)) => {
+                            result = acc(result, op, right);
+                            next_input = right_next_input;
                         }
+                        Err(_) => break,
                     }
-                    Err(_) => break,
                 }
-            } else {
-                break;
+                Err(_) => break,
             }
         }
 

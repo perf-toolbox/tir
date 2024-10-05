@@ -72,7 +72,7 @@ impl OpBuilder {
     }
 
     pub fn erase(&self, op: &OpRef) {
-        self.0.borrow_mut().erase(&op);
+        self.0.borrow_mut().erase(op);
     }
 
     pub fn insert_generic(&self, op: &OpRef) {

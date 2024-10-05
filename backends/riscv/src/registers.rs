@@ -19,6 +19,7 @@ macro_rules! register {
             $($case_name,)*
         }
 
+        #[allow(clippy::from_over_into)]
         impl Into<tir_core::Attr> for Register {
             fn into(self) -> tir_core::Attr {
                 tir_core::Attr::String(get_reg_name(&self).to_string())

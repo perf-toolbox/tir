@@ -499,7 +499,7 @@ pub fn derive_op(input: TokenStream) -> TokenStream {
             _ => None,
         })
         .collect();
-    let has_regions = region_names.len() > 0;
+    let has_regions = !region_names.is_empty();
 
     let op_ident_const = format_ident!(
         "{}_{}_METADATA",

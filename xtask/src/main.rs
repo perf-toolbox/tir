@@ -10,7 +10,7 @@ fn main() -> anyhow::Result<()> {
         Some("check") => {
             build(&sh)?;
             check(&sh)?
-        },
+        }
         Some("check-only") => check(&sh)?,
         Some("docs") => build_docs(&sh)?,
         _ => print_help(),
@@ -43,7 +43,7 @@ fn build_docs(sh: &Shell) -> anyhow::Result<()> {
     cmd!(sh, "cargo doc --no-deps").run()?;
 
     let api_dest = root.join("docs/api");
-    if let Ok(_) = std::fs::read_dir(&api_dest) {
+    if std::fs::read_dir(&api_dest).is_ok() {
         std::fs::remove_dir_all(&api_dest)?;
     }
 

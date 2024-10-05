@@ -1,3 +1,6 @@
+#![allow(clippy::redundant_pattern_matching)]
+#![allow(clippy::manual_unwrap_or_default)]
+
 use darling::{FromDeriveInput, FromField, FromMeta};
 use quote::{format_ident, quote};
 use syn::parse::{Parse, ParseStream, Parser};

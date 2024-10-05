@@ -15,7 +15,7 @@ pub fn convert_to_isema(op: &Rc<RefCell<ModuleOp>>) -> Result<(), PassError> {
         if let Some(isema) = op_dyn_cast::<dyn WithISema>(cand.clone()) {
             builder.set_insertion_point_after(&isema);
             isema.borrow().convert(&builder);
-            builder.erase(&cand);
+            builder.erase(cand);
         }
     });
 

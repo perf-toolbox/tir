@@ -15,7 +15,7 @@ where
             next_input = ni;
             result.push(first_item);
         } else {
-            return Err(ParserError::new("none found".to_string(), input.span()));
+            return Err(ParserError::new("none found", input.span()));
         }
 
         while let Some(ref inp) = next_input {
@@ -117,10 +117,7 @@ where
         }
 
         if result.is_empty() {
-            return Err(ParserError::new(
-                "no items could be parserd".to_string(),
-                input.span(),
-            ));
+            return Err(ParserError::new("no items could be parserd", input.span()));
         }
 
         Ok((result, next_input))

@@ -46,10 +46,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new(
-                "Expected string-like input".to_string(),
-                input.span(),
-            ));
+            return Err(ParserError::new("Expected string-like input", input.span()));
         }
 
         let mut last = 0;
@@ -58,15 +55,14 @@ where
 
         if input.len() == 0 {
             return Err(ParserError::new(
-                "Expected at least one character".to_string(),
+                "Expected at least one character",
                 input.span(),
             ));
         }
 
         if !chars.peek().unwrap().is_alphabetic() && !predicate(*chars.peek().unwrap()) {
             return Err(ParserError::new(
-                "Identifier must start with an alphabetic character or satisfy a predicate"
-                    .to_string(),
+                "Identifier must start with an alphabetic character or satisfy a predicate",
                 input.span(),
             ));
         }
@@ -79,10 +75,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new(
-                "Expected identifier".to_string(),
-                input.span(),
-            ));
+            return Err(ParserError::new("Expected identifier", input.span()));
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());
@@ -126,13 +119,10 @@ where
 
         let parsed_int = i64::parse_int(substr, radix);
 
-        if let Ok(_) = parsed_int {
+        if parsed_int.is_ok() {
             Ok((substr, next_input))
         } else {
-            Err(ParserError::new(
-                "Expected integer literal".to_string(),
-                input.span(),
-            ))
+            Err(ParserError::new("Expected integer literal", input.span()))
         }
     }
 }

@@ -13,6 +13,10 @@ pub trait ParseStream<'a>: Clone {
         Self: Sized;
     fn len(&self) -> usize;
 
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
     fn span(&self) -> Span;
 
     fn set_extra(&mut self, extra: Self::Extra);
