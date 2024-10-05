@@ -35,7 +35,7 @@ jobs:
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
         RUSTDOCFLAGS: '-C instrument-coverage'
     - name: Run check tests
-      run: cargo make check-only
+      run: cargo xtask check-only
       env:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
