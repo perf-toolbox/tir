@@ -4,7 +4,7 @@ use tmdl::lex;
 const LARGE_INSTR_TEMPLATE_INPUT: &str = include_str!("./Inputs/large_instr_template.tmdl");
 
 fn large_instr_template(c: &mut Criterion) {
-    c.bench_function("large_instr_template", |b| {
+    c.bench_function("lex_large_instr_template", |b| {
         b.iter(|| {
             let _ = lex(LARGE_INSTR_TEMPLATE_INPUT).unwrap();
         })
