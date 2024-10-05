@@ -1,6 +1,6 @@
 use clap::{ArgMatches, FromArgMatches, Parser, ValueEnum};
 
-use crate::{lex, parser::parse};
+use crate::{lex, parse};
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Action {
