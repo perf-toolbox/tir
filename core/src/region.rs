@@ -353,7 +353,8 @@ impl Region {
     }
 
     pub fn find_op_block(&self, op: &OpRef) -> Option<BlockRef> {
-        self.iter().find(|blk| blk.find(op.borrow().get_alloc_id()).is_some())
+        self.iter()
+            .find(|blk| blk.find(op.borrow().get_alloc_id()).is_some())
     }
 }
 

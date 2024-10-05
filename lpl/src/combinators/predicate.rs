@@ -11,10 +11,7 @@ where
             if predicate(&value) {
                 Ok((value, next_input))
             } else {
-                Err(ParserError::new(
-                    "TODO error message",
-                    input.span(),
-                ))
+                Err(ParserError::new("TODO error message", input.span()))
             }
         }
         Err(err) => Err(err),

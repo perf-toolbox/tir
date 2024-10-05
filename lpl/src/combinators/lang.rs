@@ -46,10 +46,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new(
-                "Expected string-like input",
-                input.span(),
-            ));
+            return Err(ParserError::new("Expected string-like input", input.span()));
         }
 
         let mut last = 0;
@@ -78,10 +75,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new(
-                "Expected identifier",
-                input.span(),
-            ));
+            return Err(ParserError::new("Expected identifier", input.span()));
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());
@@ -128,10 +122,7 @@ where
         if parsed_int.is_ok() {
             Ok((substr, next_input))
         } else {
-            Err(ParserError::new(
-                "Expected integer literal",
-                input.span(),
-            ))
+            Err(ParserError::new("Expected integer literal", input.span()))
         }
     }
 }

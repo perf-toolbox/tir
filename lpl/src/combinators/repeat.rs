@@ -117,10 +117,7 @@ where
         }
 
         if result.is_empty() {
-            return Err(ParserError::new(
-                "no items could be parserd",
-                input.span(),
-            ));
+            return Err(ParserError::new("no items could be parserd", input.span()));
         }
 
         Ok((result, next_input))

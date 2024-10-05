@@ -4,7 +4,7 @@ use regex::Regex;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::env;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use unescaper::unescape;
 
@@ -35,10 +35,7 @@ fn run_command(command: &str, test_path: &Path) -> Result<Output, std::io::Error
         .map(|term| {
             let term = term.to_string();
             let term = term.replace("%s", test_path.to_str().unwrap());
-            let term = term.replace(
-                "%S",
-                test_path.parent().unwrap().to_str().unwrap(),
-            );
+            let term = term.replace("%S", test_path.parent().unwrap().to_str().unwrap());
             term
         })
         .collect::<Vec<String>>();

@@ -5,10 +5,7 @@ where
     Input: ParseStream<'a>,
 {
     if !input.is_string_like() {
-        return Err(ParserError::new(
-            "Expected string-like input",
-            input.span(),
-        ));
+        return Err(ParserError::new("Expected string-like input", input.span()));
     }
 
     match input.chars().next() {
@@ -30,10 +27,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new(
-                "Expected string-like input",
-                input.span(),
-            ));
+            return Err(ParserError::new("Expected string-like input", input.span()));
         }
 
         let mut last = 0;
