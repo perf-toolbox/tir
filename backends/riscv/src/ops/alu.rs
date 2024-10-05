@@ -356,9 +356,9 @@ mod tests {
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
         let add = AddOp::builder(&context)
-            .rd(Register::X0.into())
-            .rs1(Register::X0.into())
-            .rs2(Register::X0.into())
+            .rd(Register::X0)
+            .rs1(Register::X0)
+            .rs2(Register::X0)
             .build();
         builder.insert(&add);
 

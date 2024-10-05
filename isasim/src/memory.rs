@@ -11,8 +11,7 @@ struct Region {
 
 impl Region {
     pub fn new(address: u64, size: u64) -> Self {
-        let mut data = Vec::new();
-        data.resize(size as usize, 0);
+        let data = vec![0; size as usize];
         Self {
             address,
             size,
@@ -60,7 +59,7 @@ impl MemoryMap {
                 }
             }
 
-            return Err(SimErr::MemoryAccess(address));
+            Err(SimErr::MemoryAccess(address))
         };
 
         if let Ok(id) = find(&self.regions, address) {
@@ -73,7 +72,7 @@ impl MemoryMap {
             return find(&self.regions, new_addr).map(|id| (id, new_addr));
         }
 
-        return Err(SimErr::MemoryAccess(address));
+        Err(SimErr::MemoryAccess(address))
     }
 
     pub fn store(&mut self, address: u64, data: &[u8]) -> Result<(), SimErr> {
@@ -86,7 +85,7 @@ impl MemoryMap {
         let start = (address - region.address) as usize;
         let end = start + data.len();
         let dst = &mut region.data[start..end];
-        dst.clone_from_slice(&data);
+        dst.clone_from_slice(data);
         Ok(())
     }
 

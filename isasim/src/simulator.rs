@@ -33,7 +33,7 @@ fn exec_alu_op_impl<T>(
     };
 
     let c = Value::from(op(a, b));
-    reg_file.borrow_mut().write_register(&rd, &c);
+    reg_file.borrow_mut().write_register(rd, &c);
 }
 
 macro_rules! exec_alu {
@@ -112,7 +112,7 @@ fn execute_load(
         .try_into()
         .expect("reg name is a String attr");
 
-    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64() as u64;
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64();
 
     let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
@@ -157,7 +157,7 @@ fn execute_store(
         .try_into()
         .expect("reg name is a String attr");
 
-    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64() as u64;
+    let base_addr = reg_file.borrow().read_register(&base_reg).get_lower64();
     let offset: i16 = op.borrow().get_offset_attr().try_into().expect("");
 
     let addr = (base_addr as i64 + offset as i64) as u64;

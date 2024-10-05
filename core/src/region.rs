@@ -119,12 +119,7 @@ impl BlockImpl {
     }
 
     fn find(&self, op_id: AllocId) -> Option<usize> {
-        for idx in 0..self.operations.len() {
-            if self.operations[idx] == op_id {
-                return Some(idx);
-            }
-        }
-        None
+        (0..self.operations.len()).find(|&idx| self.operations[idx] == op_id)
     }
 }
 
@@ -268,9 +263,7 @@ impl Validate for Block {
         }
 
         for op in self.iter() {
-            if let Err(err) = op.borrow().validate() {
-                return Err(err);
-            }
+            op.borrow().validate()?
         }
 
         Ok(())
@@ -356,32 +349,18 @@ impl Region {
     }
 
     pub fn get_block_by_name(&self, name: &str) -> Option<BlockRef> {
-        for blk in self.iter() {
-            if blk.get_name() == name {
-                return Some(blk);
-            }
-        }
-
-        None
+        self.iter().find(|blk| blk.get_name() == name)
     }
 
     pub fn find_op_block(&self, op: &OpRef) -> Option<BlockRef> {
-        for blk in self.iter() {
-            if blk.find(op.borrow().get_alloc_id()).is_some() {
-                return Some(blk);
-            }
-        }
-
-        None
+        self.iter().find(|blk| blk.find(op.borrow().get_alloc_id()).is_some())
     }
 }
 
 impl Validate for Region {
     fn validate(&self) -> Result<(), ValidateErr> {
         for blk in self.iter() {
-            if let Err(err) = blk.validate() {
-                return Err(err);
-            }
+            blk.validate()?
         }
         Ok(())
     }

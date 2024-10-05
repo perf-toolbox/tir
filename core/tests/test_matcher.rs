@@ -15,18 +15,18 @@ fn match_ops() {
       ModuleOp => |_| true,
       _ => || false,
     });
-    assert_eq!(res, true);
+    assert!(res);
 
     let res = match_op!(module2 {
       ConstOp => |_| true,
       _ => || false,
     });
-    assert_eq!(res, false);
+    assert!(!res);
 
     let res = match_op!(module3 {
       ConstOp => |_| false,
       ModuleOp => |_| true,
       _ => || false,
     });
-    assert_eq!(res, true);
+    assert!(res);
 }

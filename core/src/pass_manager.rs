@@ -64,7 +64,7 @@ impl PassManager {
     /// Optimizes IR inside regions of a particular operation
     pub fn run(&self, op: &OpRef) -> Result<(), PassError> {
         for pass in &self.passes {
-            pass.run(&op)?;
+            pass.run(op)?;
         }
         Ok(())
     }
@@ -166,7 +166,7 @@ mod tests {
 
         let passes = format!("{:?}", pm);
 
-        assert!(passes.find("test-pass").is_some());
+        assert!(passes.contains("test-pass"));
 
         let context = Context::new();
         let module: OpRef = ModuleOp::builder(&context).build();
@@ -187,6 +187,6 @@ mod tests {
     fn passes_from_list() {
         let pm = PassManager::new_from_list(&["test-pass"]).expect("failed to create PM");
         let passes = format!("{:?}", pm);
-        assert!(passes.find("test-pass").is_some());
+        assert!(passes.contains("test-pass"));
     }
 }

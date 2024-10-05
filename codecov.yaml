@@ -2,3 +2,4 @@ ignore:
   - "macros"
   - "fuzz"
   - "**/tests/**"
+  - "xtask"

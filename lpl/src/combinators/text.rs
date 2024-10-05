@@ -6,7 +6,7 @@ where
 {
     if !input.is_string_like() {
         return Err(ParserError::new(
-            "Expected string-like input".to_string(),
+            "Expected string-like input",
             input.span(),
         ));
     }
@@ -17,7 +17,7 @@ where
             Ok((next, next_input))
         }
         _ => Err(ParserError::new(
-            "Expected a char, got end of string".to_string(),
+            "Expected a char, got end of string",
             input.span(),
         )),
     }
@@ -31,7 +31,7 @@ where
     move |input: Input| {
         if !input.is_string_like() {
             return Err(ParserError::new(
-                "Expected string-like input".to_string(),
+                "Expected string-like input",
                 input.span(),
             ));
         }
@@ -48,7 +48,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new("".to_string(), input.span()));
+            return Err(ParserError::new("", input.span()));
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());

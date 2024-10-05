@@ -12,7 +12,7 @@ where
                 Ok((value, next_input))
             } else {
                 Err(ParserError::new(
-                    "TODO error message".to_string(),
+                    "TODO error message",
                     input.span(),
                 ))
             }

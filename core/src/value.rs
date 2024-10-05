@@ -113,6 +113,7 @@ impl<T: Into<Type> + TryFrom<Type> + Clone> Value<T> {
 }
 
 impl Value<Type> {
+    #[allow(clippy::result_unit_err)]
     pub fn try_cast<Target: Ty + Clone + Into<Type> + TryFrom<Type>>(
         &self,
     ) -> Result<Value<Target>, ()> {

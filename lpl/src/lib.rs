@@ -37,7 +37,7 @@ impl Span {
         Self::new(filename, offset_start, None)
     }
 
-    pub fn get_filename<'a>(&'a self) -> Option<&'a str> {
+    pub fn get_filename(&self) -> Option<&str> {
         match &self.filename {
             Some(filename) => Some(filename.as_ref()),
             None => None,

@@ -135,7 +135,7 @@ impl ITypeInstr {
 
     pub fn imm(&self) -> i16 {
         let num = ((self.instr & (0b11111111111 << 19)) >> 19) as i16;
-        let sign = ((self.instr & (0b1 << 31)) >> 31) as u32;
+        let sign = (self.instr & (0b1 << 31)) >> 31;
         if sign == 0 {
             num
         } else {
@@ -233,7 +233,7 @@ impl STypeInstr {
     pub fn imm(&self) -> i16 {
         let part1 = ((self.instr & (0b11111 << 6)) >> 6) as i16;
         let part2 = ((self.instr & (0b111111 << 24)) >> 19) as i16;
-        let sign = ((self.instr & (0b1 << 31)) >> 31) as u32;
+        let sign = (self.instr & (0b1 << 31)) >> 31;
         let num = part1 + part2;
         if sign == 0 {
             num

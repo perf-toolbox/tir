@@ -361,7 +361,7 @@ pub fn print_parser_diag(
                 .with_tab_width(2)
                 .with_index_type(ariadne::IndexType::Byte),
         )
-        .with_message(&format!("{}", &inner));
+        .with_message(format!("{}", &inner));
 
     match inner {
         PError::UnknownOperation(dialect_name, op_name) => {

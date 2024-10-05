@@ -56,7 +56,7 @@ pub fn sim_main(
     }
 
     for (name, value) in &config.register_state {
-        reg_file.borrow_mut().write_register(&name, &value.into());
+        reg_file.borrow_mut().write_register(name, &value.into());
     }
     if let Some(memory) = config.memory {
         for entry in &memory {

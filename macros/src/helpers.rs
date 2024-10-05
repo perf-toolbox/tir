@@ -9,7 +9,7 @@ struct MatchArm {
 
 impl Parse for MatchArm {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        if let Ok(_) = input.parse::<Token![_]>() {
+        if input.parse::<Token![_]>().is_ok() {
             input.parse::<Token![=>]>()?;
             let body: syn::Expr = input.parse()?;
 
@@ -36,7 +36,6 @@ impl Parse for MatchInput {
         let target: syn::Ident = input.parse()?;
         let body;
         braced!(body in input);
-        // panic!("{:?}", body);
         let all_arms = Punctuated::<MatchArm, Token![,]>::parse_terminated(&body)?;
         let mut arms = vec![];
         let mut catch_all = None;

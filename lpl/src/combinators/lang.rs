@@ -47,7 +47,7 @@ where
     move |input: Input| {
         if !input.is_string_like() {
             return Err(ParserError::new(
-                "Expected string-like input".to_string(),
+                "Expected string-like input",
                 input.span(),
             ));
         }
@@ -58,15 +58,14 @@ where
 
         if input.len() == 0 {
             return Err(ParserError::new(
-                "Expected at least one character".to_string(),
+                "Expected at least one character",
                 input.span(),
             ));
         }
 
         if !chars.peek().unwrap().is_alphabetic() && !predicate(*chars.peek().unwrap()) {
             return Err(ParserError::new(
-                "Identifier must start with an alphabetic character or satisfy a predicate"
-                    .to_string(),
+                "Identifier must start with an alphabetic character or satisfy a predicate",
                 input.span(),
             ));
         }
@@ -80,7 +79,7 @@ where
 
         if last == 0 {
             return Err(ParserError::new(
-                "Expected identifier".to_string(),
+                "Expected identifier",
                 input.span(),
             ));
         }
@@ -126,11 +125,11 @@ where
 
         let parsed_int = i64::parse_int(substr, radix);
 
-        if let Ok(_) = parsed_int {
+        if parsed_int.is_ok() {
             Ok((substr, next_input))
         } else {
             Err(ParserError::new(
-                "Expected integer literal".to_string(),
+                "Expected integer literal",
                 input.span(),
             ))
         }
