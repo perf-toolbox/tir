@@ -5,5 +5,5 @@ mod syntax_kind;
 
 pub use compiler::*;
 pub use lexer::*;
-pub use syntax_kind::*;
 pub use parser::*;
+pub use syntax_kind::*;
