@@ -39,6 +39,10 @@ where
         })
     }
 
+    pub fn span(&self) -> Span {
+        self.span.clone()
+    }
+
     pub fn kind(&self) -> SK {
         self.kind
     }
@@ -120,10 +124,26 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum NodeOrToken<N, T> {
     Node(N),
     Token(T),
+}
+
+impl<N, T> NodeOrToken<N, T> {
+    pub fn as_node(&self) -> &N {
+        match self {
+            NodeOrToken::Node(n) => n,
+            _ => panic!("Not a Node"),
+        }
+    }
+
+    pub fn as_token(&self) -> &T {
+        match self {
+            NodeOrToken::Token(t) => t,
+            _ => panic!("Not a Token"),
+        }
+    }
 }
 
 impl<N, T> fmt::Display for NodeOrToken<N, T>
@@ -135,6 +155,19 @@ where
         match self {
             NodeOrToken::Node(node) => fmt::Display::fmt(node, f),
             NodeOrToken::Token(token) => fmt::Display::fmt(token, f),
+        }
+    }
+}
+
+impl<N, T> fmt::Debug for NodeOrToken<N, T>
+where
+    N: fmt::Debug,
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            NodeOrToken::Node(node) => fmt::Debug::fmt(node, f),
+            NodeOrToken::Token(token) => fmt::Debug::fmt(token, f),
         }
     }
 }

@@ -1,5 +1,6 @@
 mod compiler;
 mod lexer;
+mod parser;
 mod syntax_kind;
 
 pub use compiler::*;
