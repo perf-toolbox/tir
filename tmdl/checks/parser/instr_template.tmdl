@@ -335,47 +335,71 @@
 // CHECK:                             ],
 // CHECK:                             span: <unknown>@114..117,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n",
+// CHECK:                             span: <unknown>@128..129,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightBrace,
+// CHECK:                             text: "}",
+// CHECK:                             span: <unknown>@129..130,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@74..75,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@0..14,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n\n",
+// CHECK:             span: <unknown>@130..132,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrTemplateDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrTemplateKw,
+// CHECK:                     text: "instr_template",
+// CHECK:                     span: <unknown>@132..146,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@146..147,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "Empty1",
+// CHECK:                             span: <unknown>@147..153,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@147..153,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateParams,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@153..154,
+// CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@128..129,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightBrace,
-// CHECK:                                     text: "}",
-// CHECK:                                     span: <unknown>@129..130,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n\n",
-// CHECK:                                     span: <unknown>@130..132,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrTemplateKw,
-// CHECK:                                     text: "instr_template",
-// CHECK:                                     span: <unknown>@132..146,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@146..147,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "Empty1",
-// CHECK:                                     span: <unknown>@147..153,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@153..154,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$foo",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$foo",
+// CHECK:                                             span: <unknown>@154..158,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@154..158,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -399,23 +423,29 @@
 // CHECK:                                     ],
 // CHECK:                                     span: <unknown>@160..163,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@163..164,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@164..165,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftBrace,
-// CHECK:                                     text: "{",
-// CHECK:                                     span: <unknown>@165..166,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@147..153,
+// CHECK:                             span: <unknown>@154..158,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@163..164,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@153..154,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@164..165,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: StructBody,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftBrace,
+// CHECK:                             text: "{",
+// CHECK:                             span: <unknown>@165..166,
 // CHECK:                         },
 // CHECK:                         GreenTokenData {
 // CHECK:                             kind: RightBrace,
@@ -423,10 +453,10 @@
 // CHECK:                             span: <unknown>@166..167,
 // CHECK:                         },
 // CHECK:                     ],
-// CHECK:                     span: <unknown>@74..75,
+// CHECK:                     span: <unknown>@165..166,
 // CHECK:                 },
 // CHECK:             ],
-// CHECK:             span: <unknown>@0..14,
+// CHECK:             span: <unknown>@132..146,
 // CHECK:         },
 // CHECK:         GreenTokenData {
 // CHECK:             kind: Whitespace,

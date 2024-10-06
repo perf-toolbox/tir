@@ -95,8 +95,8 @@ where
         &self.children
     }
 
-    pub fn span(&self) -> &Span {
-        &self.span
+    pub fn span(&self) -> Span {
+        self.span.clone()
     }
 
     pub fn replace_child(&self, index: usize, new_child: GreenElement<SK>) -> GreenNode<SK> {

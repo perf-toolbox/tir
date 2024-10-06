@@ -86,6 +86,8 @@ pub enum SyntaxKind {
     StructField,
     StructFieldName,
 
+    StructFieldAccess,
+
     EncodingDecl,
     AsmDecl,
 

@@ -345,178 +345,268 @@
 // CHECK:                             ],
 // CHECK:                             span: <unknown>@136..139,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n",
+// CHECK:                             span: <unknown>@150..151,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightBrace,
+// CHECK:                             text: "}",
+// CHECK:                             span: <unknown>@151..152,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@96..97,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@22..36,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n\n",
+// CHECK:             span: <unknown>@152..154,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: EncodingDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: EncodingKw,
+// CHECK:                     text: "encoding",
+// CHECK:                     span: <unknown>@154..162,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@162..163,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: ForKw,
+// CHECK:                     text: "for",
+// CHECK:                     span: <unknown>@163..166,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@166..167,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "ALUInstr",
+// CHECK:                             span: <unknown>@167..175,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@167..175,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@175..176,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: BlockExpr,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftBrace,
+// CHECK:                             text: "{",
+// CHECK:                             span: <unknown>@176..177,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n    ",
+// CHECK:                             span: <unknown>@177..182,
+// CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: BinOpExpr,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@150..151,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightBrace,
-// CHECK:                                     text: "}",
-// CHECK:                                     span: <unknown>@151..152,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n\n",
-// CHECK:                                     span: <unknown>@152..154,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: EncodingKw,
-// CHECK:                                     text: "encoding",
-// CHECK:                                     span: <unknown>@154..162,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@162..163,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: ForKw,
-// CHECK:                                     text: "for",
-// CHECK:                                     span: <unknown>@163..166,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@166..167,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "ALUInstr",
-// CHECK:                                     span: <unknown>@167..175,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@175..176,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftBrace,
-// CHECK:                                     text: "{",
-// CHECK:                                     span: <unknown>@176..177,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n    ",
-// CHECK:                                     span: <unknown>@177..182,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$funct7",
-// CHECK:                                     span: <unknown>@182..189,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@189..190,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
-// CHECK:                                     span: <unknown>@190..191,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@191..192,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "self",
-// CHECK:                                     span: <unknown>@192..196,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Dot,
-// CHECK:                                     text: ".",
-// CHECK:                                     span: <unknown>@196..197,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "rs2",
-// CHECK:                                     span: <unknown>@197..200,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@200..201,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
-// CHECK:                                     span: <unknown>@201..202,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@202..203,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "self",
-// CHECK:                                     span: <unknown>@203..207,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Dot,
-// CHECK:                                     text: ".",
-// CHECK:                                     span: <unknown>@207..208,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "rs1",
-// CHECK:                                     span: <unknown>@208..211,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@211..212,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
-// CHECK:                                     span: <unknown>@212..213,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@213..214,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$funct3",
-// CHECK:                                     span: <unknown>@214..221,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@221..222,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: BinOpExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenNodeData {
+// CHECK:                                             kind: BinOpExpr,
+// CHECK:                                             children: [
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: BinOpExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenNodeData {
+// CHECK:                                                             kind: BinOpExpr,
+// CHECK:                                                             children: [
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: LiteralExpr,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: Identifier,
+// CHECK:                                                                             text: "$funct7",
+// CHECK:                                                                             span: <unknown>@182..189,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@182..189,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@189..190,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: At,
+// CHECK:                                                                     text: "@",
+// CHECK:                                                                     span: <unknown>@190..191,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@191..192,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: LiteralExpr,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenNodeData {
+// CHECK:                                                                             kind: StructFieldAccess,
+// CHECK:                                                                             children: [
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Identifier,
+// CHECK:                                                                                     text: "self",
+// CHECK:                                                                                     span: <unknown>@192..196,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Dot,
+// CHECK:                                                                                     text: ".",
+// CHECK:                                                                                     span: <unknown>@196..197,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Identifier,
+// CHECK:                                                                                     text: "rs2",
+// CHECK:                                                                                     span: <unknown>@197..200,
+// CHECK:                                                                                 },
+// CHECK:                                                                             ],
+// CHECK:                                                                             span: <unknown>@196..197,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@196..197,
+// CHECK:                                                                 },
+// CHECK:                                                             ],
+// CHECK:                                                             span: <unknown>@190..191,
+// CHECK:                                                         },
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Whitespace,
+// CHECK:                                                             text: " ",
+// CHECK:                                                             span: <unknown>@200..201,
+// CHECK:                                                         },
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: At,
+// CHECK:                                                             text: "@",
+// CHECK:                                                             span: <unknown>@201..202,
+// CHECK:                                                         },
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Whitespace,
+// CHECK:                                                             text: " ",
+// CHECK:                                                             span: <unknown>@202..203,
+// CHECK:                                                         },
+// CHECK:                                                         GreenNodeData {
+// CHECK:                                                             kind: LiteralExpr,
+// CHECK:                                                             children: [
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: StructFieldAccess,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: Identifier,
+// CHECK:                                                                             text: "self",
+// CHECK:                                                                             span: <unknown>@203..207,
+// CHECK:                                                                         },
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: Dot,
+// CHECK:                                                                             text: ".",
+// CHECK:                                                                             span: <unknown>@207..208,
+// CHECK:                                                                         },
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: Identifier,
+// CHECK:                                                                             text: "rs1",
+// CHECK:                                                                             span: <unknown>@208..211,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@207..208,
+// CHECK:                                                                 },
+// CHECK:                                                             ],
+// CHECK:                                                             span: <unknown>@207..208,
+// CHECK:                                                         },
+// CHECK:                                                     ],
+// CHECK:                                                     span: <unknown>@201..202,
+// CHECK:                                                 },
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: Whitespace,
+// CHECK:                                                     text: " ",
+// CHECK:                                                     span: <unknown>@211..212,
+// CHECK:                                                 },
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: At,
+// CHECK:                                                     text: "@",
+// CHECK:                                                     span: <unknown>@212..213,
+// CHECK:                                                 },
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: Whitespace,
+// CHECK:                                                     text: " ",
+// CHECK:                                                     span: <unknown>@213..214,
+// CHECK:                                                 },
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Identifier,
+// CHECK:                                                             text: "$funct3",
+// CHECK:                                                             span: <unknown>@214..221,
+// CHECK:                                                         },
+// CHECK:                                                     ],
+// CHECK:                                                     span: <unknown>@214..221,
+// CHECK:                                                 },
+// CHECK:                                             ],
+// CHECK:                                             span: <unknown>@212..213,
+// CHECK:                                         },
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Whitespace,
+// CHECK:                                             text: " ",
+// CHECK:                                             span: <unknown>@221..222,
+// CHECK:                                         },
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: At,
+// CHECK:                                             text: "@",
+// CHECK:                                             span: <unknown>@222..223,
+// CHECK:                                         },
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Whitespace,
+// CHECK:                                             text: " ",
+// CHECK:                                             span: <unknown>@223..224,
+// CHECK:                                         },
+// CHECK:                                         GreenNodeData {
+// CHECK:                                             kind: LiteralExpr,
+// CHECK:                                             children: [
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: StructFieldAccess,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Identifier,
+// CHECK:                                                             text: "self",
+// CHECK:                                                             span: <unknown>@224..228,
+// CHECK:                                                         },
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Dot,
+// CHECK:                                                             text: ".",
+// CHECK:                                                             span: <unknown>@228..229,
+// CHECK:                                                         },
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: Identifier,
+// CHECK:                                                             text: "rd",
+// CHECK:                                                             span: <unknown>@229..231,
+// CHECK:                                                         },
+// CHECK:                                                     ],
+// CHECK:                                                     span: <unknown>@228..229,
+// CHECK:                                                 },
+// CHECK:                                             ],
+// CHECK:                                             span: <unknown>@228..229,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@222..223,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@223..224,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "self",
-// CHECK:                                     span: <unknown>@224..228,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Dot,
-// CHECK:                                     text: ".",
-// CHECK:                                     span: <unknown>@228..229,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "rd",
-// CHECK:                                     span: <unknown>@229..231,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -533,239 +623,286 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@233..234,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0110011",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0110011",
+// CHECK:                                             span: <unknown>@234..243,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@234..243,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@243..244,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightBrace,
-// CHECK:                                     text: "}",
-// CHECK:                                     span: <unknown>@244..245,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n\n",
-// CHECK:                                     span: <unknown>@245..247,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: AsmKw,
-// CHECK:                                     text: "asm",
-// CHECK:                                     span: <unknown>@247..250,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@250..251,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: ForKw,
-// CHECK:                                     text: "for",
-// CHECK:                                     span: <unknown>@251..254,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@254..255,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "ALUInstr",
-// CHECK:                                     span: <unknown>@255..263,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@263..264,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftBrace,
-// CHECK:                                     text: "{",
-// CHECK:                                     span: <unknown>@264..265,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n    ",
-// CHECK:                                     span: <unknown>@265..270,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@232..233,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n",
+// CHECK:                             span: <unknown>@243..244,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightBrace,
+// CHECK:                             text: "}",
+// CHECK:                             span: <unknown>@244..245,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@176..177,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@154..162,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n\n",
+// CHECK:             span: <unknown>@245..247,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: AsmDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: AsmKw,
+// CHECK:                     text: "asm",
+// CHECK:                     span: <unknown>@247..250,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@250..251,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: ForKw,
+// CHECK:                     text: "for",
+// CHECK:                     span: <unknown>@251..254,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@254..255,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "ALUInstr",
+// CHECK:                             span: <unknown>@255..263,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@255..263,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@263..264,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: BlockExpr,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftBrace,
+// CHECK:                             text: "{",
+// CHECK:                             span: <unknown>@264..265,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n    ",
+// CHECK:                             span: <unknown>@265..270,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: LiteralExpr,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: StringLiteral,
 // CHECK:                                     text: "\"{$mnemonic} {self.rd}, {self.rs1}, {self.rs2}\"",
 // CHECK:                                     span: <unknown>@270..317,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@317..318,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightBrace,
-// CHECK:                                     text: "}",
-// CHECK:                                     span: <unknown>@318..319,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n\n",
-// CHECK:                                     span: <unknown>@319..321,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@321..326,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@326..327,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "ADD",
-// CHECK:                                     span: <unknown>@327..330,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@330..331,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@331..332,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@332..333,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@333..339,
-// CHECK:                                         },
-// CHECK:                                     ],
-// CHECK:                                     span: <unknown>@333..339,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@339..340,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
-// CHECK:                                     span: <unknown>@340..349,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@167..175,
+// CHECK:                             span: <unknown>@270..317,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Whitespace,
+// CHECK:                             text: "\n",
+// CHECK:                             span: <unknown>@317..318,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightBrace,
+// CHECK:                             text: "}",
+// CHECK:                             span: <unknown>@318..319,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@264..265,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@247..250,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n\n",
+// CHECK:             span: <unknown>@319..321,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: InstrKw,
+// CHECK:             text: "instr",
+// CHECK:             span: <unknown>@321..326,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: " ",
+// CHECK:             span: <unknown>@326..327,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "ADD",
+// CHECK:                     span: <unknown>@327..330,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@330..331,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@331..332,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@332..333,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "RInstr",
+// CHECK:                             span: <unknown>@333..339,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@333..339,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: LeftAngle,
+// CHECK:                     text: "<",
+// CHECK:                     span: <unknown>@339..340,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b0000000",
+// CHECK:                     span: <unknown>@340..349,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@349..350,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@350..351,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b000",
+// CHECK:                     span: <unknown>@351..356,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@356..357,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@357..358,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: StringLiteral,
+// CHECK:                     text: "\"add\"",
+// CHECK:                     span: <unknown>@358..363,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: RightAngle,
+// CHECK:                     text: ">",
+// CHECK:                     span: <unknown>@363..364,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@364..365,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: "\n",
+// CHECK:                     span: <unknown>@365..366,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrKw,
+// CHECK:                     text: "instr",
+// CHECK:                     span: <unknown>@366..371,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@371..372,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SUB",
+// CHECK:                     span: <unknown>@372..375,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@375..376,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@376..377,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@377..378,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrParentTemplate,
+// CHECK:                     children: [
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateName,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@350..351,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b000",
-// CHECK:                                     span: <unknown>@351..356,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@356..357,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@357..358,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"add\"",
-// CHECK:                                     span: <unknown>@358..363,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@363..364,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@364..365,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@365..366,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@366..371,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@371..372,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SUB",
-// CHECK:                                     span: <unknown>@372..375,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@375..376,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@376..377,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@377..378,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@378..384,
-// CHECK:                                         },
-// CHECK:                                     ],
+// CHECK:                                     text: "RInstr",
 // CHECK:                                     span: <unknown>@378..384,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@384..385,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@378..384,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@384..385,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: BitLiteral,
 // CHECK:                                     text: "0b0100000",
 // CHECK:                                     span: <unknown>@385..394,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@372..375,
+// CHECK:                             span: <unknown>@385..394,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -777,11 +914,12 @@
 // CHECK:                                     text: "0b000",
 // CHECK:                                     span: <unknown>@396..401,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@401..402,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@396..401,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
@@ -792,174 +930,191 @@
 // CHECK:                                     text: "\"sub\"",
 // CHECK:                                     span: <unknown>@403..408,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@408..409,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@409..410,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@410..411,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@411..416,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@416..417,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SLL",
-// CHECK:                                     span: <unknown>@417..420,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@420..421,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@421..422,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@422..423,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@423..429,
-// CHECK:                                         },
-// CHECK:                                     ],
-// CHECK:                                     span: <unknown>@423..429,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@429..430,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
-// CHECK:                                     span: <unknown>@430..439,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@417..420,
+// CHECK:                             span: <unknown>@403..408,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@408..409,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@378..384,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@409..410,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@327..330,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n",
+// CHECK:             span: <unknown>@410..411,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: InstrKw,
+// CHECK:             text: "instr",
+// CHECK:             span: <unknown>@411..416,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: " ",
+// CHECK:             span: <unknown>@416..417,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SLL",
+// CHECK:                     span: <unknown>@417..420,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@420..421,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@421..422,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@422..423,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "RInstr",
+// CHECK:                             span: <unknown>@423..429,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@423..429,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: LeftAngle,
+// CHECK:                     text: "<",
+// CHECK:                     span: <unknown>@429..430,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b0000000",
+// CHECK:                     span: <unknown>@430..439,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@439..440,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@440..441,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b001",
+// CHECK:                     span: <unknown>@441..446,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@446..447,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@447..448,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: StringLiteral,
+// CHECK:                     text: "\"sll\"",
+// CHECK:                     span: <unknown>@448..453,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: RightAngle,
+// CHECK:                     text: ">",
+// CHECK:                     span: <unknown>@453..454,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@454..455,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: "\n",
+// CHECK:                     span: <unknown>@455..456,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrKw,
+// CHECK:                     text: "instr",
+// CHECK:                     span: <unknown>@456..461,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@461..462,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SLT",
+// CHECK:                     span: <unknown>@462..465,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@465..466,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@466..467,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@467..468,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrParentTemplate,
+// CHECK:                     children: [
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateName,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@440..441,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b001",
-// CHECK:                                     span: <unknown>@441..446,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@446..447,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@447..448,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sll\"",
-// CHECK:                                     span: <unknown>@448..453,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@453..454,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@454..455,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@455..456,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@456..461,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@461..462,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SLT",
-// CHECK:                                     span: <unknown>@462..465,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@465..466,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@466..467,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@467..468,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@468..474,
-// CHECK:                                         },
-// CHECK:                                     ],
+// CHECK:                                     text: "RInstr",
 // CHECK:                                     span: <unknown>@468..474,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@474..475,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@468..474,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@474..475,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: BitLiteral,
 // CHECK:                                     text: "0b0000000",
 // CHECK:                                     span: <unknown>@475..484,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@462..465,
+// CHECK:                             span: <unknown>@475..484,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -971,11 +1126,12 @@
 // CHECK:                                     text: "0b010",
 // CHECK:                                     span: <unknown>@486..491,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@491..492,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@486..491,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
@@ -986,174 +1142,191 @@
 // CHECK:                                     text: "\"slt\"",
 // CHECK:                                     span: <unknown>@493..498,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@498..499,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@499..500,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@500..501,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@501..506,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@506..507,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SLTU",
-// CHECK:                                     span: <unknown>@507..511,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@511..512,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@512..513,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@513..514,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@514..520,
-// CHECK:                                         },
-// CHECK:                                     ],
-// CHECK:                                     span: <unknown>@514..520,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@520..521,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
-// CHECK:                                     span: <unknown>@521..530,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@507..511,
+// CHECK:                             span: <unknown>@493..498,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@498..499,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@468..474,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@499..500,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@417..420,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n",
+// CHECK:             span: <unknown>@500..501,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: InstrKw,
+// CHECK:             text: "instr",
+// CHECK:             span: <unknown>@501..506,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: " ",
+// CHECK:             span: <unknown>@506..507,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SLTU",
+// CHECK:                     span: <unknown>@507..511,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@511..512,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@512..513,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@513..514,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "RInstr",
+// CHECK:                             span: <unknown>@514..520,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@514..520,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: LeftAngle,
+// CHECK:                     text: "<",
+// CHECK:                     span: <unknown>@520..521,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b0000000",
+// CHECK:                     span: <unknown>@521..530,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@530..531,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@531..532,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b011",
+// CHECK:                     span: <unknown>@532..537,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@537..538,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@538..539,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: StringLiteral,
+// CHECK:                     text: "\"sltu\"",
+// CHECK:                     span: <unknown>@539..545,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: RightAngle,
+// CHECK:                     text: ">",
+// CHECK:                     span: <unknown>@545..546,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@546..547,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: "\n",
+// CHECK:                     span: <unknown>@547..548,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrKw,
+// CHECK:                     text: "instr",
+// CHECK:                     span: <unknown>@548..553,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@553..554,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "XOR",
+// CHECK:                     span: <unknown>@554..557,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@557..558,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@558..559,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@559..560,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrParentTemplate,
+// CHECK:                     children: [
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateName,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@531..532,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b011",
-// CHECK:                                     span: <unknown>@532..537,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@537..538,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@538..539,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sltu\"",
-// CHECK:                                     span: <unknown>@539..545,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@545..546,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@546..547,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@547..548,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@548..553,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@553..554,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "XOR",
-// CHECK:                                     span: <unknown>@554..557,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@557..558,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@558..559,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@559..560,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@560..566,
-// CHECK:                                         },
-// CHECK:                                     ],
+// CHECK:                                     text: "RInstr",
 // CHECK:                                     span: <unknown>@560..566,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@566..567,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@560..566,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@566..567,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: BitLiteral,
 // CHECK:                                     text: "0b0000000",
 // CHECK:                                     span: <unknown>@567..576,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@554..557,
+// CHECK:                             span: <unknown>@567..576,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -1165,11 +1338,12 @@
 // CHECK:                                     text: "0b100",
 // CHECK:                                     span: <unknown>@578..583,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@583..584,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@578..583,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
@@ -1180,174 +1354,191 @@
 // CHECK:                                     text: "\"xor\"",
 // CHECK:                                     span: <unknown>@585..590,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@590..591,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@591..592,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@592..593,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@593..598,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@598..599,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SRL",
-// CHECK:                                     span: <unknown>@599..602,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@602..603,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@603..604,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@604..605,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@605..611,
-// CHECK:                                         },
-// CHECK:                                     ],
-// CHECK:                                     span: <unknown>@605..611,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@611..612,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
-// CHECK:                                     span: <unknown>@612..621,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@599..602,
+// CHECK:                             span: <unknown>@585..590,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@590..591,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@560..566,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@591..592,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@507..511,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n",
+// CHECK:             span: <unknown>@592..593,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: InstrKw,
+// CHECK:             text: "instr",
+// CHECK:             span: <unknown>@593..598,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: " ",
+// CHECK:             span: <unknown>@598..599,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SRL",
+// CHECK:                     span: <unknown>@599..602,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@602..603,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@603..604,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@604..605,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "RInstr",
+// CHECK:                             span: <unknown>@605..611,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@605..611,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: LeftAngle,
+// CHECK:                     text: "<",
+// CHECK:                     span: <unknown>@611..612,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b0000000",
+// CHECK:                     span: <unknown>@612..621,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@621..622,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@622..623,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b101",
+// CHECK:                     span: <unknown>@623..628,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@628..629,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@629..630,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: StringLiteral,
+// CHECK:                     text: "\"srl\"",
+// CHECK:                     span: <unknown>@630..635,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: RightAngle,
+// CHECK:                     text: ">",
+// CHECK:                     span: <unknown>@635..636,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@636..637,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: "\n",
+// CHECK:                     span: <unknown>@637..638,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrKw,
+// CHECK:                     text: "instr",
+// CHECK:                     span: <unknown>@638..643,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@643..644,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "SRA",
+// CHECK:                     span: <unknown>@644..647,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@647..648,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@648..649,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@649..650,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrParentTemplate,
+// CHECK:                     children: [
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateName,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@622..623,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b101",
-// CHECK:                                     span: <unknown>@623..628,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@628..629,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@629..630,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"srl\"",
-// CHECK:                                     span: <unknown>@630..635,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@635..636,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@636..637,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@637..638,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@638..643,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@643..644,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "SRA",
-// CHECK:                                     span: <unknown>@644..647,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@647..648,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@648..649,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@649..650,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@650..656,
-// CHECK:                                         },
-// CHECK:                                     ],
+// CHECK:                                     text: "RInstr",
 // CHECK:                                     span: <unknown>@650..656,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@656..657,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@650..656,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@656..657,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: BitLiteral,
 // CHECK:                                     text: "0b0100000",
 // CHECK:                                     span: <unknown>@657..666,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@644..647,
+// CHECK:                             span: <unknown>@657..666,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -1359,11 +1550,12 @@
 // CHECK:                                     text: "0b101",
 // CHECK:                                     span: <unknown>@668..673,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@673..674,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@668..673,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
@@ -1374,174 +1566,191 @@
 // CHECK:                                     text: "\"sra\"",
 // CHECK:                                     span: <unknown>@675..680,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@680..681,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@681..682,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@682..683,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@683..688,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@688..689,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "OR",
-// CHECK:                                     span: <unknown>@689..691,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@691..692,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@692..693,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@693..694,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@694..700,
-// CHECK:                                         },
-// CHECK:                                     ],
-// CHECK:                                     span: <unknown>@694..700,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@700..701,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
-// CHECK:                                     span: <unknown>@701..710,
-// CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@689..691,
+// CHECK:                             span: <unknown>@675..680,
 // CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@680..681,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@650..656,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@681..682,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@599..602,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n",
+// CHECK:             span: <unknown>@682..683,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: InstrKw,
+// CHECK:             text: "instr",
+// CHECK:             span: <unknown>@683..688,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: " ",
+// CHECK:             span: <unknown>@688..689,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "OR",
+// CHECK:                     span: <unknown>@689..691,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@691..692,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@692..693,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@693..694,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "RInstr",
+// CHECK:                             span: <unknown>@694..700,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@694..700,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: LeftAngle,
+// CHECK:                     text: "<",
+// CHECK:                     span: <unknown>@700..701,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b0000000",
+// CHECK:                     span: <unknown>@701..710,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@710..711,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@711..712,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: BitLiteral,
+// CHECK:                     text: "0b110",
+// CHECK:                     span: <unknown>@712..717,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Comma,
+// CHECK:                     text: ",",
+// CHECK:                     span: <unknown>@717..718,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@718..719,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: StringLiteral,
+// CHECK:                     text: "\"or\"",
+// CHECK:                     span: <unknown>@719..723,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: RightAngle,
+// CHECK:                     text: ">",
+// CHECK:                     span: <unknown>@723..724,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@724..725,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: "\n",
+// CHECK:                     span: <unknown>@725..726,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrKw,
+// CHECK:                     text: "instr",
+// CHECK:                     span: <unknown>@726..731,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@731..732,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Identifier,
+// CHECK:                     text: "AND",
+// CHECK:                     span: <unknown>@732..735,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@735..736,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Colon,
+// CHECK:                     text: ":",
+// CHECK:                     span: <unknown>@736..737,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@737..738,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrParentTemplate,
+// CHECK:                     children: [
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateName,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@711..712,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b110",
-// CHECK:                                     span: <unknown>@712..717,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@717..718,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@718..719,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"or\"",
-// CHECK:                                     span: <unknown>@719..723,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@723..724,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@724..725,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n",
-// CHECK:                                     span: <unknown>@725..726,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrKw,
-// CHECK:                                     text: "instr",
-// CHECK:                                     span: <unknown>@726..731,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@731..732,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "AND",
-// CHECK:                                     span: <unknown>@732..735,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@735..736,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Colon,
-// CHECK:                                     text: ":",
-// CHECK:                                     span: <unknown>@736..737,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@737..738,
-// CHECK:                                 },
-// CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: Type,
-// CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Identifier,
-// CHECK:                                             text: "RInstr",
-// CHECK:                                             span: <unknown>@738..744,
-// CHECK:                                         },
-// CHECK:                                     ],
+// CHECK:                                     text: "RInstr",
 // CHECK:                                     span: <unknown>@738..744,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@744..745,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@738..744,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@744..745,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: BitLiteral,
 // CHECK:                                     text: "0b0000000",
 // CHECK:                                     span: <unknown>@745..754,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@732..735,
+// CHECK:                             span: <unknown>@745..754,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
@@ -1553,11 +1762,12 @@
 // CHECK:                                     text: "0b111",
 // CHECK:                                     span: <unknown>@756..761,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Comma,
-// CHECK:                                     text: ",",
-// CHECK:                                     span: <unknown>@761..762,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@756..761,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrParentTemplateArg,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
@@ -1568,44 +1778,74 @@
 // CHECK:                                     text: "\"and\"",
 // CHECK:                                     span: <unknown>@763..768,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@768..769,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Semicolon,
-// CHECK:                                     text: ";",
-// CHECK:                                     span: <unknown>@769..770,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: "\n\n",
-// CHECK:                                     span: <unknown>@770..772,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: InstrTemplateKw,
-// CHECK:                                     text: "instr_template",
-// CHECK:                                     span: <unknown>@772..786,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@786..787,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "IInstr",
-// CHECK:                                     span: <unknown>@787..793,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftAngle,
-// CHECK:                                     text: "<",
-// CHECK:                                     span: <unknown>@793..794,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$imm",
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@763..768,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@768..769,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@738..744,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Semicolon,
+// CHECK:                     text: ";",
+// CHECK:                     span: <unknown>@769..770,
+// CHECK:                 },
+// CHECK:             ],
+// CHECK:             span: <unknown>@689..691,
+// CHECK:         },
+// CHECK:         GreenTokenData {
+// CHECK:             kind: Whitespace,
+// CHECK:             text: "\n\n",
+// CHECK:             span: <unknown>@770..772,
+// CHECK:         },
+// CHECK:         GreenNodeData {
+// CHECK:             kind: InstrTemplateDecl,
+// CHECK:             children: [
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: InstrTemplateKw,
+// CHECK:                     text: "instr_template",
+// CHECK:                     span: <unknown>@772..786,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@786..787,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateName,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: Identifier,
+// CHECK:                             text: "IInstr",
+// CHECK:                             span: <unknown>@787..793,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@787..793,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: InstrTemplateParams,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftAngle,
+// CHECK:                             text: "<",
+// CHECK:                             span: <unknown>@793..794,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: InstrTemplateSingleParam,
+// CHECK:                             children: [
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$imm",
+// CHECK:                                             span: <unknown>@794..798,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@794..798,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -1651,19 +1891,25 @@
 // CHECK:                                     span: <unknown>@800..804,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@787..793,
+// CHECK:                             span: <unknown>@794..798,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@809..810,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$rs1",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$rs1",
+// CHECK:                                             span: <unknown>@810..814,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@810..814,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -1712,16 +1958,22 @@
 // CHECK:                             span: <unknown>@810..814,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@824..825,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$funct3",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$funct3",
+// CHECK:                                             span: <unknown>@825..832,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@825..832,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -1770,16 +2022,22 @@
 // CHECK:                             span: <unknown>@825..832,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@842..843,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$rd",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$rd",
+// CHECK:                                             span: <unknown>@843..846,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@843..846,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -1828,16 +2086,22 @@
 // CHECK:                             span: <unknown>@843..846,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
-// CHECK:                             kind: StructField,
+// CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@856..857,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "$mnemonic",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "$mnemonic",
+// CHECK:                                             span: <unknown>@857..866,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@857..866,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -1861,21 +2125,33 @@
 // CHECK:                                     ],
 // CHECK:                                     span: <unknown>@868..871,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: RightAngle,
-// CHECK:                                     text: ">",
-// CHECK:                                     span: <unknown>@871..872,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Whitespace,
-// CHECK:                                     text: " ",
-// CHECK:                                     span: <unknown>@872..873,
-// CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: LeftBrace,
-// CHECK:                                     text: "{",
-// CHECK:                                     span: <unknown>@873..874,
-// CHECK:                                 },
+// CHECK:                             ],
+// CHECK:                             span: <unknown>@857..866,
+// CHECK:                         },
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: RightAngle,
+// CHECK:                             text: ">",
+// CHECK:                             span: <unknown>@871..872,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                     span: <unknown>@793..794,
+// CHECK:                 },
+// CHECK:                 GreenTokenData {
+// CHECK:                     kind: Whitespace,
+// CHECK:                     text: " ",
+// CHECK:                     span: <unknown>@872..873,
+// CHECK:                 },
+// CHECK:                 GreenNodeData {
+// CHECK:                     kind: StructBody,
+// CHECK:                     children: [
+// CHECK:                         GreenTokenData {
+// CHECK:                             kind: LeftBrace,
+// CHECK:                             text: "{",
+// CHECK:                             span: <unknown>@873..874,
+// CHECK:                         },
+// CHECK:                         GreenNodeData {
+// CHECK:                             kind: StructField,
+// CHECK:                             children: [
 // CHECK:                                 GreenTokenData {
 // CHECK:                                     kind: Whitespace,
 // CHECK:                                     text: "\n    ",
@@ -1896,13 +2172,19 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@882..883,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: Identifier,
-// CHECK:                                     text: "Register",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: Type,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: Identifier,
+// CHECK:                                             text: "Register",
+// CHECK:                                             span: <unknown>@883..891,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@883..891,
 // CHECK:                                 },
 // CHECK:                             ],
-// CHECK:                             span: <unknown>@857..866,
+// CHECK:                             span: <unknown>@879..881,
 // CHECK:                         },
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: StructField,
@@ -2010,10 +2292,10 @@
 // CHECK:                             span: <unknown>@931..932,
 // CHECK:                         },
 // CHECK:                     ],
-// CHECK:                     span: <unknown>@96..97,
+// CHECK:                     span: <unknown>@873..874,
 // CHECK:                 },
 // CHECK:             ],
-// CHECK:             span: <unknown>@22..36,
+// CHECK:             span: <unknown>@772..786,
 // CHECK:         },
 // CHECK:         GreenTokenData {
 // CHECK:             kind: Whitespace,

@@ -260,12 +260,20 @@ fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, Gre
 }
 
 fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
-    eat_until(SyntaxKind::Identifier)
+    eat_until_one_of(&[SyntaxKind::Identifier, SyntaxKind::RightBrace])
         .and_then(token(SyntaxKind::Identifier))
-        .and_then(eat_until(SyntaxKind::Colon))
+        .and_then(eat_until_one_of(&[
+            SyntaxKind::Colon,
+            SyntaxKind::RightBrace,
+            SyntaxKind::Comma,
+        ]))
         .and_then(token(SyntaxKind::Colon))
         .map(|(((aliens0, name), aliens1), colon)| (aliens0, name, aliens1, colon))
-        .and_then(eat_until(SyntaxKind::Identifier))
+        .and_then(eat_until_one_of(&[
+            SyntaxKind::Identifier,
+            SyntaxKind::RightBrace,
+            SyntaxKind::Comma,
+        ]))
         .map(|((aliens0, name, aliens1, colon), aliens2)| (aliens0, name, aliens1, colon, aliens2))
         .and_then(parse_type())
         .map(|((aliens0, name, aliens1, colon, aliens2), ty)| {
@@ -419,15 +427,21 @@ fn parse_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>
 
 fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
     let operator_atom = token(SyntaxKind::At);
-    let operator = eat_until_one_of(&[SyntaxKind::At])
-        .and_then(operator_atom)
-        .and_then(eat_until_one_of(&[
-            SyntaxKind::At,
-            SyntaxKind::Identifier,
-            SyntaxKind::IntegerLiteral,
-            SyntaxKind::BitLiteral,
-            SyntaxKind::StringLiteral,
-        ]));
+    let operator = eat_until_one_of(&[
+        SyntaxKind::At,
+        SyntaxKind::RightBrace,
+        SyntaxKind::Semicolon,
+    ])
+    .and_then(operator_atom)
+    .and_then(eat_until_one_of(&[
+        SyntaxKind::At,
+        SyntaxKind::Identifier,
+        SyntaxKind::IntegerLiteral,
+        SyntaxKind::BitLiteral,
+        SyntaxKind::StringLiteral,
+        SyntaxKind::Semicolon,
+        SyntaxKind::RightBrace,
+    ]));
     fold_left(
         parse_atom_expr(),
         operator,
@@ -444,10 +458,26 @@ fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Synt
     )
 }
 
+fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    fold_left(
+        token(SyntaxKind::Identifier),
+        token(SyntaxKind::Dot),
+        |left, dot, right| {
+            let span = dot.as_token().span();
+            NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::StructFieldAccess,
+                vec![left, dot, right],
+                span,
+            ))
+        },
+    )
+}
+
 fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
     let lit_atom = token(SyntaxKind::IntegerLiteral)
         .or_else(token(SyntaxKind::BitLiteral))
         .or_else(token(SyntaxKind::StringLiteral))
+        .or_else(parse_field_access())
         .or_else(token(SyntaxKind::Identifier));
     eat_until_one_of(&[
         SyntaxKind::IntegerLiteral,
@@ -459,7 +489,10 @@ fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Syntax
     ])
     .and_then(lit_atom)
     .map(|(aliens, lit)| {
-        let span = lit.as_token().span();
+        let span = match lit {
+            NodeOrToken::Node(ref n) => n.span(),
+            NodeOrToken::Token(ref t) => t.span(),
+        };
         let mut elements = aliens;
         elements.push(lit);
         NodeOrToken::Node(GreenNodeData::new(SyntaxKind::LiteralExpr, elements, span))
