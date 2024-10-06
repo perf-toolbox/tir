@@ -39,6 +39,10 @@ pub trait ParseStream<'a>: Clone {
     fn substr(&self, _range: Range<usize>) -> Option<&'a str> {
         unimplemented!()
     }
+
+    fn starts_with(&self, _prefix: &str) -> bool {
+        unimplemented!()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -88,6 +92,10 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
 
     fn substr(&self, range: Range<usize>) -> Option<&'a str> {
         self.string.get(range)
+    }
+
+    fn starts_with(&self, prefix: &str) -> bool {
+        self.string.starts_with(prefix)
     }
 
     fn span(&self) -> Span {

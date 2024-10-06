@@ -53,6 +53,71 @@ where
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct StringConfig {
+    pub string_separator: &'static str,
+    pub allow_multiline: bool,
+}
+
+impl Default for StringConfig {
+    fn default() -> Self {
+        StringConfig {
+            string_separator: "\"",
+            allow_multiline: false,
+        }
+    }
+}
+
+pub fn string_literal<'a, Input>(config: StringConfig) -> impl Parser<'a, Input, &'a str>
+where
+    Input: ParseStream<'a> + 'a,
+{
+    move |input: Input| {
+        if !input.is_string_like() {
+            return Err(ParserError::new("Expected string-like input", input.span()));
+        }
+
+        if !input.starts_with(config.string_separator) {
+            return Err(ParserError::new(
+                format!(
+                    "Expected string literal to start with `{}`",
+                    config.string_separator
+                ),
+                input.span(),
+            ));
+        }
+
+        let last = || {
+            let chars = input.chars().skip(config.string_separator.len());
+
+            for (id, c) in chars.enumerate() {
+                let lb = config.string_separator.len() + id;
+                let ub = config.string_separator.len() * 2 + id;
+                if input.substr(lb..ub).unwrap_or_default() == config.string_separator {
+                    return Ok(ub);
+                }
+
+                if c == '\n' && !config.allow_multiline {
+                    return Err(id);
+                }
+            }
+
+            Err(input.len())
+        };
+
+        match last() {
+            Ok(last) => Ok((input.substr(0..last).unwrap(), input.slice(last..))),
+            Err(pos) => {
+                let span = crate::Span::new(input.span().filename.clone(), pos, pos);
+                Err(ParserError::new(
+                    format!("Expected '{}'", config.string_separator),
+                    span,
+                ))
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::parse_stream::StrStream;

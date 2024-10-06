@@ -7,21 +7,18 @@ mod parse_stream;
 pub use err::*;
 pub use parse_stream::*;
 
+use core::fmt;
 use std::sync::Arc;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct Span {
     filename: Option<Arc<String>>,
     offset_start: usize,
-    offset_end: Option<usize>,
+    offset_end: usize,
 }
 
 impl Span {
-    pub fn new(
-        filename: Option<Arc<String>>,
-        offset_start: usize,
-        offset_end: Option<usize>,
-    ) -> Self {
+    pub fn new(filename: Option<Arc<String>>, offset_start: usize, offset_end: usize) -> Self {
         Self {
             filename,
             offset_start,
@@ -30,11 +27,11 @@ impl Span {
     }
 
     pub fn empty() -> Self {
-        Self::new(None, 0, None)
+        Self::new(None, 0, 0)
     }
 
     pub fn unbound(filename: Option<Arc<String>>, offset_start: usize) -> Self {
-        Self::new(filename, offset_start, None)
+        Self::new(filename, offset_start, usize::MAX)
     }
 
     pub fn get_filename(&self) -> Option<&str> {
@@ -52,8 +49,22 @@ impl Span {
         self.offset_start
     }
 
-    pub fn get_offset_end(&self) -> Option<usize> {
+    pub fn get_offset_end(&self) -> usize {
         self.offset_end
+    }
+}
+
+impl fmt::Debug for Span {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(ref name) = self.filename {
+            fmt::Debug::fmt(name, f)?;
+        } else {
+            write!(f, "<unknown>")?;
+        }
+        write!(f, "@")?;
+        fmt::Debug::fmt(&self.offset_start, f)?;
+        write!(f, "..")?;
+        fmt::Debug::fmt(&self.offset_end, f)
     }
 }
 

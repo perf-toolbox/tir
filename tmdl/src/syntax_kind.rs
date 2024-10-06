@@ -16,8 +16,10 @@ pub enum SyntaxKind {
     // Keywords
     /// `instr_template`
     InstrTemplateKw,
-    /// `properties`
-    PropertiesKw,
+    /// `encoding`
+    EncodingKw,
+    /// `asm`
+    AsmKw,
     /// `for`
     ForKw,
     /// `let`
@@ -71,12 +73,25 @@ pub enum SyntaxKind {
     InstrTemplateSingleParam,
     InstrTemplateBody,
 
+    InstrDecl,
+    InstrName,
+    InstrParentTemplate,
+    InstrParentTemplateName,
+    InstrParentTemplateArg,
+
     Type,
     TypeParams,
 
     StructBody,
     StructField,
     StructFieldName,
+
+    EncodingDecl,
+    AsmDecl,
+
+    BlockExpr,
+    LiteralExpr,
+    BinOpExpr,
 }
 
 #[derive(Debug, Clone)]

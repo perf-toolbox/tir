@@ -1,4 +1,4 @@
-use lpl::combinators::text::take_while;
+use lpl::combinators::text::{string_literal, take_while, StringConfig};
 use lpl::combinators::{
     eof,
     lang::{ident, integer_literal, line_comment},
@@ -35,6 +35,7 @@ pub fn lex(input: &str) -> Result<Vec<GreenElement<SyntaxKind>>, ParserError> {
 
     let token = lex_keyword()
         .or_else(lex_bit_literal())
+        .or_else(lex_string_literal())
         .or_else(lex_identifier())
         .or_else(lex_punctuation())
         .or_else(lex_integer_literal())
@@ -67,8 +68,9 @@ fn lex_keyword<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
     literal("instr_template")
         .map(|kw| TokenData::new(SyntaxKind::InstrTemplateKw, kw.to_owned()))
         .or_else(
-            literal("properties").map(|kw| TokenData::new(SyntaxKind::PropertiesKw, kw.to_owned())),
+            literal("encoding").map(|kw| TokenData::new(SyntaxKind::EncodingKw, kw.to_owned())),
         )
+        .or_else(literal("asm").map(|kw| TokenData::new(SyntaxKind::AsmKw, kw.to_owned())))
         .or_else(literal("instr").map(|kw| TokenData::new(SyntaxKind::InstrKw, kw.to_owned())))
         .or_else(literal("for").map(|kw| TokenData::new(SyntaxKind::ForKw, kw.to_owned())))
         .or_else(literal("let").map(|kw| TokenData::new(SyntaxKind::LetKw, kw.to_owned())))
@@ -100,4 +102,9 @@ fn lex_comment<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
 
 fn lex_whitespace<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
     take_while(|c| c.is_whitespace()).map(|p| TokenData::new(SyntaxKind::Whitespace, p.to_string()))
+}
+
+fn lex_string_literal<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
+    string_literal(StringConfig::default())
+        .map(|lit| TokenData::new(SyntaxKind::StringLiteral, lit.to_string()))
 }

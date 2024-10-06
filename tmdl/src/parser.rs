@@ -10,7 +10,10 @@ use crate::{SyntaxKind, TokenStream};
 pub fn parse(tokens: &[GreenElement<SyntaxKind>]) -> GreenNode<SyntaxKind> {
     let stream = TokenStream::new(tokens);
 
-    let top_level_decl = parse_instr_template_decl();
+    let top_level_decl = parse_instr_template_decl()
+        .or_else(parse_instr_decl())
+        .or_else(parse_encoding())
+        .or_else(parse_asm());
     let parser = zero_or_more(top_level_decl.map(NodeOrToken::Node).or_else(catch_all()));
 
     let result = parser.parse(stream).unwrap();
@@ -48,6 +51,25 @@ fn eat_until<'a>(
             format!("Expected `{:?}` not found", kind),
             tokens.span(),
         ))
+    }
+}
+
+fn eat_whitespace<'a>() -> impl Parser<'a, TokenStream<'a>, Vec<GreenElement<SyntaxKind>>> {
+    move |tokens: TokenStream<'a>| {
+        let mut alien_tokens = vec![];
+        for i in 0..tokens.len() {
+            if let Some(element) = tokens.nth(i) {
+                if let NodeOrToken::Token(token) = &element {
+                    if token.kind() != SyntaxKind::Whitespace {
+                        return Ok((alien_tokens, tokens.slice(i..)));
+                    } else {
+                        alien_tokens.push(element);
+                    }
+                }
+            }
+        }
+
+        Ok((alien_tokens, None))
     }
 }
 
@@ -291,4 +313,291 @@ fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxK
 
             GreenNodeData::new(SyntaxKind::StructBody, elements, span)
         })
+}
+
+fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    token(SyntaxKind::LeftBrace)
+        .and_then(eat_whitespace())
+        .and_then(zero_or_more(parse_expr()))
+        .map(|((left_brace, aliens), exprs)| (left_brace, aliens, exprs))
+        .and_then(eat_until(SyntaxKind::RightBrace))
+        .map(|((left_brace, aliens1, exprs), aliens2)| (left_brace, aliens1, exprs, aliens2))
+        .and_then(token(SyntaxKind::RightBrace))
+        .map(|((left_brace, aliens1, exprs, aliens2), right_brace)| {
+            (left_brace, aliens1, exprs, aliens2, right_brace)
+        })
+        .map(|(left_brace, aliens1, exprs, aliens2, right_brace)| {
+            let mut elements = vec![];
+            let span = left_brace.as_token().span();
+            elements.push(left_brace);
+            elements.extend(aliens1);
+            elements.extend(exprs);
+            elements.extend(aliens2);
+            elements.push(right_brace);
+
+            NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BlockExpr, elements, span))
+        })
+}
+
+fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+    token(SyntaxKind::EncodingKw)
+        .and_then(eat_until(SyntaxKind::ForKw))
+        .and_then(token(SyntaxKind::ForKw))
+        .map(|((enc, aliens1), for_)| (enc, aliens1, for_))
+        .and_then(eat_until(SyntaxKind::Identifier))
+        .map(|((enc, aliens1, for_), aliens2)| (enc, aliens1, for_, aliens2))
+        .and_then(token(SyntaxKind::Identifier))
+        .map(|((enc, aliens1, for_, aliens2), name)| (enc, aliens1, for_, aliens2, name))
+        .and_then(eat_until(SyntaxKind::LeftBrace))
+        .map(|((enc, aliens1, for_, aliens2, name), aliens3)| {
+            (enc, aliens1, for_, aliens2, name, aliens3)
+        })
+        .and_then(parse_func_body())
+        .map(|((enc, aliens1, for_, aliens2, name, aliens3), body)| {
+            (enc, aliens1, for_, aliens2, name, aliens3, body)
+        })
+        .map(|(enc, aliens1, for_, aliens2, name, aliens3, body)| {
+            let span = enc.as_token().span();
+            let mut elements = vec![];
+            elements.push(enc);
+            elements.extend(aliens1);
+            elements.push(for_);
+            elements.extend(aliens2);
+            let name_span = name.as_token().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::InstrTemplateName,
+                vec![name],
+                name_span,
+            )));
+            elements.extend(aliens3);
+            elements.push(body);
+
+            GreenNodeData::new(SyntaxKind::EncodingDecl, elements, span)
+        })
+}
+
+fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+    token(SyntaxKind::AsmKw)
+        .and_then(eat_until(SyntaxKind::ForKw))
+        .and_then(token(SyntaxKind::ForKw))
+        .map(|((asm_, aliens1), for_)| (asm_, aliens1, for_))
+        .and_then(eat_until(SyntaxKind::Identifier))
+        .map(|((asm_, aliens1, for_), aliens2)| (asm_, aliens1, for_, aliens2))
+        .and_then(token(SyntaxKind::Identifier))
+        .map(|((asm_, aliens1, for_, aliens2), name)| (asm_, aliens1, for_, aliens2, name))
+        .and_then(eat_until(SyntaxKind::LeftBrace))
+        .map(|((asm_, aliens1, for_, aliens2, name), aliens3)| {
+            (asm_, aliens1, for_, aliens2, name, aliens3)
+        })
+        .and_then(parse_func_body())
+        .map(|((asm_, aliens1, for_, aliens2, name, aliens3), body)| {
+            (asm_, aliens1, for_, aliens2, name, aliens3, body)
+        })
+        .map(|(asm_, aliens1, for_, aliens2, name, aliens3, body)| {
+            let span = asm_.as_token().span();
+            let mut elements = vec![];
+            elements.push(asm_);
+            elements.extend(aliens1);
+            elements.push(for_);
+            elements.extend(aliens2);
+            let name_span = name.as_token().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::InstrTemplateName,
+                vec![name],
+                name_span,
+            )));
+            elements.extend(aliens3);
+            elements.push(body);
+
+            GreenNodeData::new(SyntaxKind::AsmDecl, elements, span)
+        })
+}
+
+fn parse_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    parse_binary_expr().or_else(parse_atom_expr())
+}
+
+fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    let operator_atom = token(SyntaxKind::At);
+    let operator = eat_until_one_of(&[SyntaxKind::At])
+        .and_then(operator_atom)
+        .and_then(eat_until_one_of(&[
+            SyntaxKind::At,
+            SyntaxKind::Identifier,
+            SyntaxKind::IntegerLiteral,
+            SyntaxKind::BitLiteral,
+            SyntaxKind::StringLiteral,
+        ]));
+    fold_left(
+        parse_atom_expr(),
+        operator,
+        |left, ((aliens_left, op), aliens_right), right| {
+            let span = op.as_token().span();
+            let mut elements = vec![];
+            elements.push(left);
+            elements.extend(aliens_left);
+            elements.push(op);
+            elements.extend(aliens_right);
+            elements.push(right);
+            NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BinOpExpr, elements, span))
+        },
+    )
+}
+
+fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    let lit_atom = token(SyntaxKind::IntegerLiteral)
+        .or_else(token(SyntaxKind::BitLiteral))
+        .or_else(token(SyntaxKind::StringLiteral))
+        .or_else(token(SyntaxKind::Identifier));
+    eat_until_one_of(&[
+        SyntaxKind::IntegerLiteral,
+        SyntaxKind::BitLiteral,
+        SyntaxKind::StringLiteral,
+        SyntaxKind::Identifier,
+        SyntaxKind::Semicolon,
+        SyntaxKind::RightBrace,
+    ])
+    .and_then(lit_atom)
+    .map(|(aliens, lit)| {
+        let span = lit.as_token().span();
+        let mut elements = aliens;
+        elements.push(lit);
+        NodeOrToken::Node(GreenNodeData::new(SyntaxKind::LiteralExpr, elements, span))
+    })
+}
+
+fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+    token(SyntaxKind::Identifier)
+        .and_then(eat_until(SyntaxKind::Identifier))
+        .and_then(token(SyntaxKind::Identifier))
+        .map(|((instr_kw, aliens1), name)| (instr_kw, aliens1, name))
+        .and_then(eat_until(SyntaxKind::Colon))
+        .map(|((instr_kw, aliens1, name), aliens2)| (instr_kw, aliens1, name, aliens2))
+        .and_then(token(SyntaxKind::Colon))
+        .map(|((instr_kw, aliens1, name, aliens2), colon)| {
+            (instr_kw, aliens1, name, aliens2, colon)
+        })
+        .and_then(eat_until(SyntaxKind::Identifier))
+        .map(|((instr_kw, aliens1, name, aliens2, colon), aliens3)| {
+            (instr_kw, aliens1, name, aliens2, colon, aliens3)
+        })
+        .and_then(parse_template_instantiation())
+        .map(
+            |((instr_kw, aliens1, name, aliens2, colon, aliens3), template)| {
+                (instr_kw, aliens1, name, aliens2, colon, aliens3, template)
+            },
+        )
+        .and_then(eat_until(SyntaxKind::Semicolon))
+        .map(
+            |((instr_kw, aliens1, name, aliens2, colon, aliens3, template), aliens4)| {
+                (
+                    instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
+                )
+            },
+        )
+        .and_then(token(SyntaxKind::Semicolon))
+        .map(
+            |((instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4), semicolon)| {
+                (
+                    instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4, semicolon,
+                )
+            },
+        )
+        .map(
+            |(instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4, semicolon)| {
+                let mut elements = vec![];
+                let span = instr_kw.as_token().span();
+                elements.push(instr_kw);
+                elements.extend(aliens1);
+                let name_span = name.as_token().span();
+                elements.push(NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::InstrName,
+                    vec![name],
+                    name_span,
+                )));
+                elements.extend(aliens2);
+                elements.push(colon);
+                elements.extend(aliens3);
+                elements.push(template);
+                elements.extend(aliens4);
+                elements.push(semicolon);
+
+                GreenNodeData::new(SyntaxKind::InstrDecl, elements, span)
+            },
+        )
+}
+
+fn parse_template_instantiation_param<'a>(
+) -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+    eat_until_one_of(&[
+        SyntaxKind::StringLiteral,
+        SyntaxKind::IntegerLiteral,
+        SyntaxKind::BitLiteral,
+    ])
+    .and_then(
+        token(SyntaxKind::StringLiteral)
+            .or_else(token(SyntaxKind::IntegerLiteral))
+            .or_else(token(SyntaxKind::BitLiteral)),
+    )
+    .and_then(eat_until_one_of(&[
+        SyntaxKind::Comma,
+        SyntaxKind::RightAngle,
+    ]))
+    .map(|((aliens0, lit), aliens1)| {
+        let mut elements = vec![];
+        let span = lit.as_token().span();
+        elements.extend(aliens0);
+        elements.push(lit);
+        elements.extend(aliens1);
+        NodeOrToken::Node(GreenNodeData::new(
+            SyntaxKind::InstrParentTemplateArg,
+            elements,
+            span,
+        ))
+    })
+}
+
+fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>>
+{
+    token(SyntaxKind::Identifier)
+        .and_then(eat_until(SyntaxKind::LeftAngle))
+        .and_then(token(SyntaxKind::LeftAngle))
+        .map(|((ident, aliens1), left_angle)| (ident, aliens1, left_angle))
+        .and_then(separated(
+            parse_template_instantiation_param(),
+            token(SyntaxKind::Comma).map(|_| ()),
+        ))
+        .map(|((ident, aliens1, left_angle), params)| (ident, aliens1, left_angle, params))
+        .and_then(eat_until(SyntaxKind::RightAngle))
+        .map(|((ident, aliens1, left_angle, params), aliens2)| {
+            (ident, aliens1, left_angle, params, aliens2)
+        })
+        .and_then(token(SyntaxKind::RightAngle))
+        .map(
+            |((ident, aliens1, left_angle, params, aliens2), right_angle)| {
+                (ident, aliens1, left_angle, params, aliens2, right_angle)
+            },
+        )
+        .map(
+            |(ident, aliens1, left_angle, params, aliens2, right_angle)| {
+                let mut elements = vec![];
+                let span = ident.as_token().span();
+                elements.push(NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::InstrParentTemplateName,
+                    vec![ident],
+                    span.clone(),
+                )));
+                elements.extend(aliens1);
+                elements.push(left_angle);
+                elements.extend(params);
+                elements.extend(aliens2);
+                elements.push(right_angle);
+
+                NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::InstrParentTemplate,
+                    elements,
+                    span,
+                ))
+            },
+        )
 }
