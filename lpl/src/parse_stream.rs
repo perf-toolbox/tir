@@ -7,10 +7,14 @@ pub trait ParseStream<'a>: Clone {
     type Extra;
     type Item;
 
-    fn get(&self, range: Range<usize>) -> Option<Self::Slice>;
-    fn slice(&self, range: Range<usize>) -> Option<Self>
+    fn nth(&self, n: usize) -> Option<Self::Item>;
+    fn get<R>(&self, range: R) -> Option<Self::Slice>
     where
-        Self: Sized;
+        R: RangeBounds<usize>;
+    fn slice<R>(&self, range: R) -> Option<Self>
+    where
+        Self: Sized,
+        R: RangeBounds<usize>;
     fn len(&self) -> usize;
 
     fn is_empty(&self) -> bool {
@@ -35,6 +39,10 @@ pub trait ParseStream<'a>: Clone {
     fn substr(&self, _range: Range<usize>) -> Option<&'a str> {
         unimplemented!()
     }
+
+    fn starts_with(&self, _prefix: &str) -> bool {
+        unimplemented!()
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -48,17 +56,26 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
     type Extra = ();
     type Item = char;
 
-    fn get(&self, range: Range<usize>) -> Option<Self::Slice> {
-        self.string.get(range)
+    fn get<R>(&self, range: R) -> Option<Self::Slice>
+    where
+        R: RangeBounds<usize>,
+    {
+        self.string
+            .get((range.start_bound().cloned(), range.end_bound().cloned()))
     }
 
-    fn slice(&self, range: Range<usize>) -> Option<Self> {
+    fn slice<R>(&self, range: R) -> Option<Self>
+    where
+        R: RangeBounds<usize>,
+    {
         let offset = match range.start_bound() {
             std::ops::Bound::Included(bound) => self.offset + bound,
             std::ops::Bound::Excluded(bound) => self.offset + bound + 1,
             std::ops::Bound::Unbounded => self.offset,
         };
-        self.string.get(range).map(|string| Self { string, offset })
+        self.string
+            .get((range.start_bound().cloned(), range.end_bound().cloned()))
+            .map(|string| Self { string, offset })
     }
 
     fn len(&self) -> usize {
@@ -77,6 +94,10 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
         self.string.get(range)
     }
 
+    fn starts_with(&self, prefix: &str) -> bool {
+        self.string.starts_with(prefix)
+    }
+
     fn span(&self) -> Span {
         Span::unbound(None, self.offset)
     }
@@ -91,6 +112,10 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
 
     fn peek(&self) -> Option<Self::Item> {
         self.string.chars().next()
+    }
+
+    fn nth(&self, n: usize) -> Option<Self::Item> {
+        self.string.chars().nth(n)
     }
 }
 

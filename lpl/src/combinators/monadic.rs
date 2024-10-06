@@ -64,7 +64,11 @@ where
             let new_span = next_input
                 .clone()
                 .map(|input| input.span().get_offset_start());
-            let final_span = Span::new(span.clone_filename(), span.get_offset_start(), new_span);
+            let final_span = Span::new(
+                span.clone_filename(),
+                span.get_offset_start(),
+                new_span.unwrap_or(usize::MAX),
+            );
             ((output, final_span), next_input)
         })
     }

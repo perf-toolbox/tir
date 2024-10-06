@@ -1,0 +1,1502 @@
+// Generated for 100 of 10 fields
+
+
+// Some comment for Template0
+instr_template Template0<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template1
+instr_template Template1<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template2
+instr_template Template2<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template3
+instr_template Template3<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template4
+instr_template Template4<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template5
+instr_template Template5<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template6
+instr_template Template6<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template7
+instr_template Template7<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template8
+instr_template Template8<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template9
+instr_template Template9<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template10
+instr_template Template10<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template11
+instr_template Template11<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template12
+instr_template Template12<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template13
+instr_template Template13<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template14
+instr_template Template14<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template15
+instr_template Template15<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template16
+instr_template Template16<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template17
+instr_template Template17<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template18
+instr_template Template18<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template19
+instr_template Template19<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template20
+instr_template Template20<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template21
+instr_template Template21<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template22
+instr_template Template22<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template23
+instr_template Template23<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template24
+instr_template Template24<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template25
+instr_template Template25<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template26
+instr_template Template26<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template27
+instr_template Template27<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template28
+instr_template Template28<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template29
+instr_template Template29<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template30
+instr_template Template30<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template31
+instr_template Template31<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template32
+instr_template Template32<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template33
+instr_template Template33<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template34
+instr_template Template34<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template35
+instr_template Template35<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template36
+instr_template Template36<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template37
+instr_template Template37<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template38
+instr_template Template38<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template39
+instr_template Template39<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template40
+instr_template Template40<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template41
+instr_template Template41<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template42
+instr_template Template42<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template43
+instr_template Template43<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template44
+instr_template Template44<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template45
+instr_template Template45<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template46
+instr_template Template46<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template47
+instr_template Template47<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template48
+instr_template Template48<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template49
+instr_template Template49<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template50
+instr_template Template50<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template51
+instr_template Template51<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template52
+instr_template Template52<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template53
+instr_template Template53<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template54
+instr_template Template54<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template55
+instr_template Template55<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template56
+instr_template Template56<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template57
+instr_template Template57<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template58
+instr_template Template58<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template59
+instr_template Template59<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template60
+instr_template Template60<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template61
+instr_template Template61<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template62
+instr_template Template62<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template63
+instr_template Template63<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template64
+instr_template Template64<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template65
+instr_template Template65<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template66
+instr_template Template66<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template67
+instr_template Template67<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template68
+instr_template Template68<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template69
+instr_template Template69<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template70
+instr_template Template70<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template71
+instr_template Template71<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template72
+instr_template Template72<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template73
+instr_template Template73<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template74
+instr_template Template74<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template75
+instr_template Template75<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template76
+instr_template Template76<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template77
+instr_template Template77<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template78
+instr_template Template78<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template79
+instr_template Template79<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template80
+instr_template Template80<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template81
+instr_template Template81<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template82
+instr_template Template82<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template83
+instr_template Template83<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template84
+instr_template Template84<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template85
+instr_template Template85<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template86
+instr_template Template86<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template87
+instr_template Template87<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template88
+instr_template Template88<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template89
+instr_template Template89<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template90
+instr_template Template90<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template91
+instr_template Template91<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template92
+instr_template Template92<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template93
+instr_template Template93<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template94
+instr_template Template94<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template95
+instr_template Template95<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template96
+instr_template Template96<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template97
+instr_template Template97<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template98
+instr_template Template98<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
+
+// Some comment for Template99
+instr_template Template99<$param1: bits<100>, $param2: bits<2>, $param3: bits<1>, $param3: str> {
+          field0: Register,
+  field1: Register,
+  field2: Register,
+  field3: Register,
+  field4: Register,
+  field5: Register,
+  field6: Register,
+  field7: Register,
+  field8: Register,
+  field9: Register,
+}
+
