@@ -1,3 +1,4 @@
+pub mod ast;
 mod compiler;
 mod lexer;
 mod parser;
