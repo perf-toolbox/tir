@@ -219,6 +219,14 @@ where
         self.green().text_len()
     }
 
+    pub fn text(&self) -> &str {
+        self.green().text()
+    }
+
+    pub fn span(&self) -> Span {
+        self.green().span()
+    }
+
     pub fn parent(&self) -> Option<&RedNode<SK>> {
         self.parent.as_ref()
     }
@@ -251,10 +259,20 @@ where
         self.parent.as_ref()
     }
 
+    pub fn span(&self) -> Span {
+        self.green().span()
+    }
+
     pub fn children<'a>(self: &'a RedNode<SK>) -> impl Iterator<Item = RedElement<SK>> + 'a {
         self.green().children().iter().map(|c| match c {
-            NodeOrToken::Node(n) => NodeOrToken::Node(Rc::new(RedNodeData {parent: Some(self.clone()), green: Arc::clone(n)})),
-            NodeOrToken::Token(t) => NodeOrToken::Token(Rc::new(RedTokenData {parent: Some(self.clone()), green: Arc::clone(t)})),
+            NodeOrToken::Node(n) => NodeOrToken::Node(Rc::new(RedNodeData {
+                parent: Some(self.clone()),
+                green: Arc::clone(n),
+            })),
+            NodeOrToken::Token(t) => NodeOrToken::Token(Rc::new(RedTokenData {
+                parent: Some(self.clone()),
+                green: Arc::clone(t),
+            })),
         })
     }
 }

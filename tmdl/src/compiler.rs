@@ -1,11 +1,12 @@
 use clap::{ArgMatches, FromArgMatches, Parser, ValueEnum};
 
-use crate::{lex, parse};
+use crate::{ast, lex, parse, SyntaxNodeData};
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum Action {
     EmitTokens,
     EmitSyntaxTree,
+    EmitAst,
 }
 
 #[derive(Debug, Parser)]
@@ -34,6 +35,13 @@ pub fn compiler_main(args: Option<&ArgMatches>) -> Result<(), Box<dyn std::error
             let tokens = lex(&source).unwrap();
             let root = parse(&tokens);
             println!("{:#?}", root);
+        }
+        Action::EmitAst => {
+            let tokens = lex(&source).unwrap();
+            let root = parse(&tokens);
+            let red_root = SyntaxNodeData::new(root);
+            let translation_unit = ast::build(red_root);
+            println!("{:#?}", translation_unit);
         }
     }
 

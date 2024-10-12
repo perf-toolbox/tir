@@ -1,45 +1,73 @@
+use core::fmt;
 use std::marker::PhantomData;
 
-use lpl::{
-    syntax::{GreenNode, NodeOrToken},
-    Span,
-};
+use lpl::{syntax::NodeOrToken, Span};
 
-use crate::SyntaxKind;
+use crate::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 pub type TranslationUnit = AstNode<TranslationUnitKind>;
 pub type InstrTemplateDecl = AstNode<InstrTemplateDeclKind>;
 pub type InstrTemplateParameterDecl = AstNode<InstrTemplateParameterDeclKind>;
+pub type InstrDecl = AstNode<InstrDeclKind>;
+pub type InstrTemplateArgDecl = AstNode<InstrTemplateArgDeclKind>;
 pub type StructFieldDecl = AstNode<StructFieldDeclKind>;
+pub type BlockExpr = AstNode<BlockExprKind>;
+pub type LiteralExpr = AstNode<LiteralExprKind>;
+pub type BinOpExpr = AstNode<BinOpExprKind>;
+pub type EncodingDecl = AstNode<EncodingDeclKind>;
+pub type AsmDecl = AstNode<AsmDeclKind>;
 
 pub struct AstNode<NodeKind: AstNodeKind> {
-    green_node: GreenNode<SyntaxKind>,
+    syntax_node: SyntaxNode,
     _p: PhantomData<NodeKind>,
+}
+
+pub fn build(root: SyntaxNode) -> TranslationUnit {
+    TranslationUnit::new(root)
 }
 
 impl TranslationUnit {
     pub fn instr_templates<'a>(&'a self) -> impl Iterator<Item = InstrTemplateDecl> + 'a {
-        self.green_node
-            .children()
-            .iter()
-            .filter_map(|child| match child {
-                NodeOrToken::Node(node) => {
-                    if node.kind() == SyntaxKind::InstrTemplateDecl {
-                        Some(InstrTemplateDecl::new(node.clone()))
-                    } else {
-                        None
-                    }
+        self.syntax_node.children().filter_map(|child| match child {
+            NodeOrToken::Node(node) => {
+                if node.kind() == SyntaxKind::InstrTemplateDecl {
+                    Some(InstrTemplateDecl::new(node.clone()))
+                } else {
+                    None
                 }
-                _ => None,
-            })
+            }
+            _ => None,
+        })
+    }
+
+    pub fn instructions<'a>(&'a self) -> impl Iterator<Item = InstrDecl> + 'a {
+        self.syntax_node.children().filter_map(|child| match child {
+            NodeOrToken::Node(node) => {
+                if node.kind() == SyntaxKind::InstrDecl {
+                    Some(InstrDecl::new(node.clone()))
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        })
+    }
+}
+
+impl fmt::Debug for TranslationUnit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TranslationUnit ")?;
+        f.debug_list()
+            .entries(self.instr_templates())
+            .entries(self.instructions())
+            .finish()
     }
 }
 
 impl InstrTemplateDecl {
-    pub fn name<'a>(&'a self) -> &'a str {
-        self.green_node
+    pub fn name<'a>(&'a self) -> String {
+        self.syntax_node
             .children()
-            .iter()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) => {
                     if node.kind() == SyntaxKind::InstrTemplateName {
@@ -49,9 +77,21 @@ impl InstrTemplateDecl {
                     }
                 }
                 _ => None,
-            });
-
-        todo!()
+            })
+            .iter()
+            .map(|node| node.children())
+            .flatten()
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
     }
 
     pub fn template_parameters<'a>(&'a self) {
@@ -59,18 +99,118 @@ impl InstrTemplateDecl {
     }
 }
 
+impl fmt::Debug for InstrTemplateDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("InstrTemplateDecl")
+            .field("name", &self.name())
+            .finish()
+    }
+}
+
+impl InstrDecl {
+    pub fn name<'a>(&'a self) -> String {
+        self.syntax_node
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrName => Some(node),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
+
+    pub fn template_name<'a>(&'a self) -> String {
+        self.syntax_node
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => {
+                    Some(node)
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                SyntaxElement::Node(node) if node.kind() == SyntaxKind::InstrParentTemplateName => {
+                    Some(node)
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                SyntaxElement::Token(token) if token.kind() == SyntaxKind::Identifier => {
+                    Some(token.text().to_string())
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
+
+    pub fn template_args<'a>(&'a self) -> impl Iterator<Item = InstrTemplateArgDecl> + 'a {
+        self.syntax_node
+            .children()
+            .filter_map(|child| match child {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => {
+                    Some(node)
+                }
+                _ => None,
+            })
+            // TODO(alexbatashev): can we get rid of `collect` here?
+            .flat_map(|node| node.children().collect::<Vec<_>>())
+            .filter_map(|child| match child {
+                NodeOrToken::Node(child_node)
+                    if child_node.kind() == SyntaxKind::InstrParentTemplateArg =>
+                {
+                    Some(InstrTemplateArgDecl::new(child_node.clone()))
+                }
+                _ => None,
+            })
+    }
+}
+
+impl fmt::Debug for InstrDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("InstrDecl")
+            .field("name", &self.name())
+            .field("template_name", &self.template_name())
+            .field("template_args", &self.template_args().collect::<Vec<_>>())
+            .finish()
+    }
+}
+
+impl fmt::Debug for InstrTemplateArgDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("InstrTemplateArgDecl")
+            .field("name", &"TODO")
+            .field("type", &"TODO")
+            .finish()
+    }
+}
+
 impl<NK: AstNodeKind> AstNode<NK> {
-    pub fn new(green_node: GreenNode<SyntaxKind>) -> Self {
-        assert!(green_node.kind() == NK::get_syntax_kind());
+    pub fn new(syntax_node: SyntaxNode) -> Self {
+        assert!(syntax_node.kind() == NK::get_syntax_kind());
 
         Self {
-            green_node,
+            syntax_node,
             _p: PhantomData::default(),
         }
     }
 
     pub fn span(&self) -> Span {
-        self.green_node.span()
+        self.syntax_node.span()
     }
 }
 
@@ -107,5 +247,61 @@ pub enum StructFieldDeclKind {}
 impl AstNodeKind for StructFieldDeclKind {
     fn get_syntax_kind() -> SyntaxKind {
         SyntaxKind::StructField
+    }
+}
+
+pub enum BlockExprKind {}
+
+impl AstNodeKind for BlockExprKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::BlockExpr
+    }
+}
+
+pub enum LiteralExprKind {}
+
+impl AstNodeKind for LiteralExprKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::LiteralExpr
+    }
+}
+
+pub enum BinOpExprKind {}
+
+impl AstNodeKind for BinOpExprKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::BinOpExpr
+    }
+}
+
+pub enum EncodingDeclKind {}
+
+impl AstNodeKind for EncodingDeclKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::EncodingDecl
+    }
+}
+
+pub enum AsmDeclKind {}
+
+impl AstNodeKind for AsmDeclKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::AsmDecl
+    }
+}
+
+pub enum InstrDeclKind {}
+
+impl AstNodeKind for InstrDeclKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::InstrDecl
+    }
+}
+
+pub enum InstrTemplateArgDeclKind {}
+
+impl AstNodeKind for InstrTemplateArgDeclKind {
+    fn get_syntax_kind() -> SyntaxKind {
+        SyntaxKind::InstrParentTemplateArg
     }
 }
