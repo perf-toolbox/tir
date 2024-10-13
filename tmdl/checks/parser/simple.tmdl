@@ -614,88 +614,234 @@
 // CHECK:                             kind: BinOpExpr,
 // CHECK:                             children: [
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: BinOpExpr,
+// CHECK:                                     kind: BinOpExprLeft,
 // CHECK:                                     children: [
 // CHECK:                                         GreenNodeData {
 // CHECK:                                             kind: BinOpExpr,
 // CHECK:                                             children: [
 // CHECK:                                                 GreenNodeData {
-// CHECK:                                                     kind: BinOpExpr,
+// CHECK:                                                     kind: BinOpExprLeft,
 // CHECK:                                                     children: [
 // CHECK:                                                         GreenNodeData {
 // CHECK:                                                             kind: BinOpExpr,
 // CHECK:                                                             children: [
 // CHECK:                                                                 GreenNodeData {
-// CHECK:                                                                     kind: LiteralExpr,
-// CHECK:                                                                     children: [
-// CHECK:                                                                         GreenTokenData {
-// CHECK:                                                                             kind: Identifier,
-// CHECK:                                                                             text: "$funct7",
-// CHECK:                                                                             span: <unknown>@245..252,
-// CHECK:                                                                         },
-// CHECK:                                                                     ],
-// CHECK:                                                                     span: <unknown>@245..252,
-// CHECK:                                                                 },
-// CHECK:                                                                 GreenTokenData {
-// CHECK:                                                                     kind: Whitespace,
-// CHECK:                                                                     text: " ",
-// CHECK:                                                                     span: <unknown>@252..253,
-// CHECK:                                                                 },
-// CHECK:                                                                 GreenTokenData {
-// CHECK:                                                                     kind: At,
-// CHECK:                                                                     text: "@",
-// CHECK:                                                                     span: <unknown>@253..254,
-// CHECK:                                                                 },
-// CHECK:                                                                 GreenTokenData {
-// CHECK:                                                                     kind: Whitespace,
-// CHECK:                                                                     text: " ",
-// CHECK:                                                                     span: <unknown>@254..255,
-// CHECK:                                                                 },
-// CHECK:                                                                 GreenNodeData {
-// CHECK:                                                                     kind: LiteralExpr,
+// CHECK:                                                                     kind: BinOpExprLeft,
 // CHECK:                                                                     children: [
 // CHECK:                                                                         GreenNodeData {
-// CHECK:                                                                             kind: StructFieldAccess,
+// CHECK:                                                                             kind: BinOpExpr,
+// CHECK:                                                                             children: [
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprLeft,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenNodeData {
+// CHECK:                                                                                             kind: BinOpExpr,
+// CHECK:                                                                                             children: [
+// CHECK:                                                                                                 GreenNodeData {
+// CHECK:                                                                                                     kind: BinOpExprLeft,
+// CHECK:                                                                                                     children: [
+// CHECK:                                                                                                         GreenNodeData {
+// CHECK:                                                                                                             kind: LiteralExpr,
+// CHECK:                                                                                                             children: [
+// CHECK:                                                                                                                 GreenTokenData {
+// CHECK:                                                                                                                     kind: Identifier,
+// CHECK:                                                                                                                     text: "$funct7",
+// CHECK:                                                                                                                     span: <unknown>@245..252,
+// CHECK:                                                                                                                 },
+// CHECK:                                                                                                             ],
+// CHECK:                                                                                                             span: <unknown>@245..252,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                     ],
+// CHECK:                                                                                                     span: <unknown>@245..252,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                                 GreenTokenData {
+// CHECK:                                                                                                     kind: Whitespace,
+// CHECK:                                                                                                     text: " ",
+// CHECK:                                                                                                     span: <unknown>@252..253,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                                 GreenNodeData {
+// CHECK:                                                                                                     kind: BinOpExprOp,
+// CHECK:                                                                                                     children: [
+// CHECK:                                                                                                         GreenTokenData {
+// CHECK:                                                                                                             kind: At,
+// CHECK:                                                                                                             text: "@",
+// CHECK:                                                                                                             span: <unknown>@253..254,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                     ],
+// CHECK:                                                                                                     span: <unknown>@253..254,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                                 GreenTokenData {
+// CHECK:                                                                                                     kind: Whitespace,
+// CHECK:                                                                                                     text: " ",
+// CHECK:                                                                                                     span: <unknown>@254..255,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                                 GreenNodeData {
+// CHECK:                                                                                                     kind: BinOpExprRight,
+// CHECK:                                                                                                     children: [
+// CHECK:                                                                                                         GreenNodeData {
+// CHECK:                                                                                                             kind: LiteralExpr,
+// CHECK:                                                                                                             children: [
+// CHECK:                                                                                                                 GreenNodeData {
+// CHECK:                                                                                                                     kind: StructFieldAccess,
+// CHECK:                                                                                                                     children: [
+// CHECK:                                                                                                                         GreenTokenData {
+// CHECK:                                                                                                                             kind: Identifier,
+// CHECK:                                                                                                                             text: "self",
+// CHECK:                                                                                                                             span: <unknown>@255..259,
+// CHECK:                                                                                                                         },
+// CHECK:                                                                                                                         GreenTokenData {
+// CHECK:                                                                                                                             kind: Dot,
+// CHECK:                                                                                                                             text: ".",
+// CHECK:                                                                                                                             span: <unknown>@259..260,
+// CHECK:                                                                                                                         },
+// CHECK:                                                                                                                         GreenTokenData {
+// CHECK:                                                                                                                             kind: Identifier,
+// CHECK:                                                                                                                             text: "rs2",
+// CHECK:                                                                                                                             span: <unknown>@260..263,
+// CHECK:                                                                                                                         },
+// CHECK:                                                                                                                     ],
+// CHECK:                                                                                                                     span: <unknown>@259..260,
+// CHECK:                                                                                                                 },
+// CHECK:                                                                                                             ],
+// CHECK:                                                                                                             span: <unknown>@259..260,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                     ],
+// CHECK:                                                                                                     span: <unknown>@259..260,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                             ],
+// CHECK:                                                                                             span: <unknown>@253..254,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@253..254,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Whitespace,
+// CHECK:                                                                                     text: " ",
+// CHECK:                                                                                     span: <unknown>@263..264,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprOp,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenTokenData {
+// CHECK:                                                                                             kind: At,
+// CHECK:                                                                                             text: "@",
+// CHECK:                                                                                             span: <unknown>@264..265,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@264..265,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Whitespace,
+// CHECK:                                                                                     text: " ",
+// CHECK:                                                                                     span: <unknown>@265..266,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprRight,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenNodeData {
+// CHECK:                                                                                             kind: LiteralExpr,
+// CHECK:                                                                                             children: [
+// CHECK:                                                                                                 GreenNodeData {
+// CHECK:                                                                                                     kind: StructFieldAccess,
+// CHECK:                                                                                                     children: [
+// CHECK:                                                                                                         GreenTokenData {
+// CHECK:                                                                                                             kind: Identifier,
+// CHECK:                                                                                                             text: "self",
+// CHECK:                                                                                                             span: <unknown>@266..270,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                         GreenTokenData {
+// CHECK:                                                                                                             kind: Dot,
+// CHECK:                                                                                                             text: ".",
+// CHECK:                                                                                                             span: <unknown>@270..271,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                         GreenTokenData {
+// CHECK:                                                                                                             kind: Identifier,
+// CHECK:                                                                                                             text: "rs1",
+// CHECK:                                                                                                             span: <unknown>@271..274,
+// CHECK:                                                                                                         },
+// CHECK:                                                                                                     ],
+// CHECK:                                                                                                     span: <unknown>@270..271,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                             ],
+// CHECK:                                                                                             span: <unknown>@270..271,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@270..271,
+// CHECK:                                                                                 },
+// CHECK:                                                                             ],
+// CHECK:                                                                             span: <unknown>@264..265,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@264..265,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@274..275,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: BinOpExprOp,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: At,
+// CHECK:                                                                             text: "@",
+// CHECK:                                                                             span: <unknown>@275..276,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@275..276,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@276..277,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: BinOpExprRight,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenNodeData {
+// CHECK:                                                                             kind: LiteralExpr,
 // CHECK:                                                                             children: [
 // CHECK:                                                                                 GreenTokenData {
 // CHECK:                                                                                     kind: Identifier,
-// CHECK:                                                                                     text: "self",
-// CHECK:                                                                                     span: <unknown>@255..259,
-// CHECK:                                                                                 },
-// CHECK:                                                                                 GreenTokenData {
-// CHECK:                                                                                     kind: Dot,
-// CHECK:                                                                                     text: ".",
-// CHECK:                                                                                     span: <unknown>@259..260,
-// CHECK:                                                                                 },
-// CHECK:                                                                                 GreenTokenData {
-// CHECK:                                                                                     kind: Identifier,
-// CHECK:                                                                                     text: "rs2",
-// CHECK:                                                                                     span: <unknown>@260..263,
+// CHECK:                                                                                     text: "$funct3",
+// CHECK:                                                                                     span: <unknown>@277..284,
 // CHECK:                                                                                 },
 // CHECK:                                                                             ],
-// CHECK:                                                                             span: <unknown>@259..260,
+// CHECK:                                                                             span: <unknown>@277..284,
 // CHECK:                                                                         },
 // CHECK:                                                                     ],
-// CHECK:                                                                     span: <unknown>@259..260,
+// CHECK:                                                                     span: <unknown>@277..284,
 // CHECK:                                                                 },
 // CHECK:                                                             ],
-// CHECK:                                                             span: <unknown>@253..254,
+// CHECK:                                                             span: <unknown>@275..276,
 // CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Whitespace,
-// CHECK:                                                             text: " ",
-// CHECK:                                                             span: <unknown>@263..264,
-// CHECK:                                                         },
+// CHECK:                                                     ],
+// CHECK:                                                     span: <unknown>@275..276,
+// CHECK:                                                 },
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: Whitespace,
+// CHECK:                                                     text: " ",
+// CHECK:                                                     span: <unknown>@284..285,
+// CHECK:                                                 },
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: BinOpExprOp,
+// CHECK:                                                     children: [
 // CHECK:                                                         GreenTokenData {
 // CHECK:                                                             kind: At,
 // CHECK:                                                             text: "@",
-// CHECK:                                                             span: <unknown>@264..265,
+// CHECK:                                                             span: <unknown>@285..286,
 // CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Whitespace,
-// CHECK:                                                             text: " ",
-// CHECK:                                                             span: <unknown>@265..266,
-// CHECK:                                                         },
+// CHECK:                                                     ],
+// CHECK:                                                     span: <unknown>@285..286,
+// CHECK:                                                 },
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: Whitespace,
+// CHECK:                                                     text: " ",
+// CHECK:                                                     span: <unknown>@286..287,
+// CHECK:                                                 },
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: BinOpExprRight,
+// CHECK:                                                     children: [
 // CHECK:                                                         GreenNodeData {
 // CHECK:                                                             kind: LiteralExpr,
 // CHECK:                                                             children: [
@@ -705,97 +851,29 @@
 // CHECK:                                                                         GreenTokenData {
 // CHECK:                                                                             kind: Identifier,
 // CHECK:                                                                             text: "self",
-// CHECK:                                                                             span: <unknown>@266..270,
+// CHECK:                                                                             span: <unknown>@287..291,
 // CHECK:                                                                         },
 // CHECK:                                                                         GreenTokenData {
 // CHECK:                                                                             kind: Dot,
 // CHECK:                                                                             text: ".",
-// CHECK:                                                                             span: <unknown>@270..271,
+// CHECK:                                                                             span: <unknown>@291..292,
 // CHECK:                                                                         },
 // CHECK:                                                                         GreenTokenData {
 // CHECK:                                                                             kind: Identifier,
-// CHECK:                                                                             text: "rs1",
-// CHECK:                                                                             span: <unknown>@271..274,
+// CHECK:                                                                             text: "rd",
+// CHECK:                                                                             span: <unknown>@292..294,
 // CHECK:                                                                         },
 // CHECK:                                                                     ],
-// CHECK:                                                                     span: <unknown>@270..271,
+// CHECK:                                                                     span: <unknown>@291..292,
 // CHECK:                                                                 },
 // CHECK:                                                             ],
-// CHECK:                                                             span: <unknown>@270..271,
-// CHECK:                                                         },
-// CHECK:                                                     ],
-// CHECK:                                                     span: <unknown>@264..265,
-// CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: Whitespace,
-// CHECK:                                                     text: " ",
-// CHECK:                                                     span: <unknown>@274..275,
-// CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: At,
-// CHECK:                                                     text: "@",
-// CHECK:                                                     span: <unknown>@275..276,
-// CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: Whitespace,
-// CHECK:                                                     text: " ",
-// CHECK:                                                     span: <unknown>@276..277,
-// CHECK:                                                 },
-// CHECK:                                                 GreenNodeData {
-// CHECK:                                                     kind: LiteralExpr,
-// CHECK:                                                     children: [
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Identifier,
-// CHECK:                                                             text: "$funct3",
-// CHECK:                                                             span: <unknown>@277..284,
-// CHECK:                                                         },
-// CHECK:                                                     ],
-// CHECK:                                                     span: <unknown>@277..284,
-// CHECK:                                                 },
-// CHECK:                                             ],
-// CHECK:                                             span: <unknown>@275..276,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Whitespace,
-// CHECK:                                             text: " ",
-// CHECK:                                             span: <unknown>@284..285,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: At,
-// CHECK:                                             text: "@",
-// CHECK:                                             span: <unknown>@285..286,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Whitespace,
-// CHECK:                                             text: " ",
-// CHECK:                                             span: <unknown>@286..287,
-// CHECK:                                         },
-// CHECK:                                         GreenNodeData {
-// CHECK:                                             kind: LiteralExpr,
-// CHECK:                                             children: [
-// CHECK:                                                 GreenNodeData {
-// CHECK:                                                     kind: StructFieldAccess,
-// CHECK:                                                     children: [
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Identifier,
-// CHECK:                                                             text: "self",
-// CHECK:                                                             span: <unknown>@287..291,
-// CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Dot,
-// CHECK:                                                             text: ".",
 // CHECK:                                                             span: <unknown>@291..292,
-// CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Identifier,
-// CHECK:                                                             text: "rd",
-// CHECK:                                                             span: <unknown>@292..294,
 // CHECK:                                                         },
 // CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@291..292,
 // CHECK:                                                 },
 // CHECK:                                             ],
-// CHECK:                                             span: <unknown>@291..292,
+// CHECK:                                             span: <unknown>@285..286,
 // CHECK:                                         },
 // CHECK:                                     ],
 // CHECK:                                     span: <unknown>@285..286,
@@ -805,9 +883,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@294..295,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: BinOpExprOp,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: At,
+// CHECK:                                             text: "@",
+// CHECK:                                             span: <unknown>@295..296,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@295..296,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -816,11 +900,17 @@
 // CHECK:                                     span: <unknown>@296..297,
 // CHECK:                                 },
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     kind: BinOpExprRight,
 // CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: BitLiteral,
-// CHECK:                                             text: "0b0110011",
+// CHECK:                                         GreenNodeData {
+// CHECK:                                             kind: LiteralExpr,
+// CHECK:                                             children: [
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: BitLiteral,
+// CHECK:                                                     text: "0b0110011",
+// CHECK:                                                     span: <unknown>@297..306,
+// CHECK:                                                 },
+// CHECK:                                             ],
 // CHECK:                                             span: <unknown>@297..306,
 // CHECK:                                         },
 // CHECK:                                     ],
@@ -2920,108 +3010,168 @@
 // CHECK:                             kind: BinOpExpr,
 // CHECK:                             children: [
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: BinOpExpr,
+// CHECK:                                     kind: BinOpExprLeft,
 // CHECK:                                     children: [
 // CHECK:                                         GreenNodeData {
 // CHECK:                                             kind: BinOpExpr,
 // CHECK:                                             children: [
 // CHECK:                                                 GreenNodeData {
-// CHECK:                                                     kind: BinOpExpr,
+// CHECK:                                                     kind: BinOpExprLeft,
 // CHECK:                                                     children: [
 // CHECK:                                                         GreenNodeData {
-// CHECK:                                                             kind: LiteralExpr,
+// CHECK:                                                             kind: BinOpExpr,
 // CHECK:                                                             children: [
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: BinOpExprLeft,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenNodeData {
+// CHECK:                                                                             kind: BinOpExpr,
+// CHECK:                                                                             children: [
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprLeft,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenNodeData {
+// CHECK:                                                                                             kind: LiteralExpr,
+// CHECK:                                                                                             children: [
+// CHECK:                                                                                                 GreenTokenData {
+// CHECK:                                                                                                     kind: Identifier,
+// CHECK:                                                                                                     text: "$imm",
+// CHECK:                                                                                                     span: <unknown>@1026..1030,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                             ],
+// CHECK:                                                                                             span: <unknown>@1026..1030,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@1026..1030,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Whitespace,
+// CHECK:                                                                                     text: " ",
+// CHECK:                                                                                     span: <unknown>@1030..1031,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprOp,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenTokenData {
+// CHECK:                                                                                             kind: At,
+// CHECK:                                                                                             text: "@",
+// CHECK:                                                                                             span: <unknown>@1031..1032,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@1031..1032,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Whitespace,
+// CHECK:                                                                                     text: " ",
+// CHECK:                                                                                     span: <unknown>@1032..1033,
+// CHECK:                                                                                 },
+// CHECK:                                                                                 GreenNodeData {
+// CHECK:                                                                                     kind: BinOpExprRight,
+// CHECK:                                                                                     children: [
+// CHECK:                                                                                         GreenNodeData {
+// CHECK:                                                                                             kind: LiteralExpr,
+// CHECK:                                                                                             children: [
+// CHECK:                                                                                                 GreenTokenData {
+// CHECK:                                                                                                     kind: Identifier,
+// CHECK:                                                                                                     text: "$rs1",
+// CHECK:                                                                                                     span: <unknown>@1033..1037,
+// CHECK:                                                                                                 },
+// CHECK:                                                                                             ],
+// CHECK:                                                                                             span: <unknown>@1033..1037,
+// CHECK:                                                                                         },
+// CHECK:                                                                                     ],
+// CHECK:                                                                                     span: <unknown>@1033..1037,
+// CHECK:                                                                                 },
+// CHECK:                                                                             ],
+// CHECK:                                                                             span: <unknown>@1031..1032,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@1031..1032,
+// CHECK:                                                                 },
 // CHECK:                                                                 GreenTokenData {
-// CHECK:                                                                     kind: Identifier,
-// CHECK:                                                                     text: "$imm",
-// CHECK:                                                                     span: <unknown>@1026..1030,
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@1037..1038,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: BinOpExprOp,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenTokenData {
+// CHECK:                                                                             kind: At,
+// CHECK:                                                                             text: "@",
+// CHECK:                                                                             span: <unknown>@1038..1039,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@1038..1039,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Whitespace,
+// CHECK:                                                                     text: " ",
+// CHECK:                                                                     span: <unknown>@1039..1040,
+// CHECK:                                                                 },
+// CHECK:                                                                 GreenNodeData {
+// CHECK:                                                                     kind: BinOpExprRight,
+// CHECK:                                                                     children: [
+// CHECK:                                                                         GreenNodeData {
+// CHECK:                                                                             kind: LiteralExpr,
+// CHECK:                                                                             children: [
+// CHECK:                                                                                 GreenTokenData {
+// CHECK:                                                                                     kind: Identifier,
+// CHECK:                                                                                     text: "$funct3",
+// CHECK:                                                                                     span: <unknown>@1040..1047,
+// CHECK:                                                                                 },
+// CHECK:                                                                             ],
+// CHECK:                                                                             span: <unknown>@1040..1047,
+// CHECK:                                                                         },
+// CHECK:                                                                     ],
+// CHECK:                                                                     span: <unknown>@1040..1047,
 // CHECK:                                                                 },
 // CHECK:                                                             ],
-// CHECK:                                                             span: <unknown>@1026..1030,
-// CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Whitespace,
-// CHECK:                                                             text: " ",
-// CHECK:                                                             span: <unknown>@1030..1031,
-// CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: At,
-// CHECK:                                                             text: "@",
-// CHECK:                                                             span: <unknown>@1031..1032,
-// CHECK:                                                         },
-// CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Whitespace,
-// CHECK:                                                             text: " ",
-// CHECK:                                                             span: <unknown>@1032..1033,
-// CHECK:                                                         },
-// CHECK:                                                         GreenNodeData {
-// CHECK:                                                             kind: LiteralExpr,
-// CHECK:                                                             children: [
-// CHECK:                                                                 GreenTokenData {
-// CHECK:                                                                     kind: Identifier,
-// CHECK:                                                                     text: "$rs1",
-// CHECK:                                                                     span: <unknown>@1033..1037,
-// CHECK:                                                                 },
-// CHECK:                                                             ],
-// CHECK:                                                             span: <unknown>@1033..1037,
+// CHECK:                                                             span: <unknown>@1038..1039,
 // CHECK:                                                         },
 // CHECK:                                                     ],
-// CHECK:                                                     span: <unknown>@1031..1032,
-// CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: Whitespace,
-// CHECK:                                                     text: " ",
-// CHECK:                                                     span: <unknown>@1037..1038,
-// CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: At,
-// CHECK:                                                     text: "@",
 // CHECK:                                                     span: <unknown>@1038..1039,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
 // CHECK:                                                     kind: Whitespace,
 // CHECK:                                                     text: " ",
-// CHECK:                                                     span: <unknown>@1039..1040,
+// CHECK:                                                     span: <unknown>@1047..1048,
 // CHECK:                                                 },
 // CHECK:                                                 GreenNodeData {
-// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     kind: BinOpExprOp,
 // CHECK:                                                     children: [
 // CHECK:                                                         GreenTokenData {
-// CHECK:                                                             kind: Identifier,
-// CHECK:                                                             text: "$funct3",
-// CHECK:                                                             span: <unknown>@1040..1047,
+// CHECK:                                                             kind: At,
+// CHECK:                                                             text: "@",
+// CHECK:                                                             span: <unknown>@1048..1049,
 // CHECK:                                                         },
 // CHECK:                                                     ],
-// CHECK:                                                     span: <unknown>@1040..1047,
+// CHECK:                                                     span: <unknown>@1048..1049,
 // CHECK:                                                 },
-// CHECK:                                             ],
-// CHECK:                                             span: <unknown>@1038..1039,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Whitespace,
-// CHECK:                                             text: " ",
-// CHECK:                                             span: <unknown>@1047..1048,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: At,
-// CHECK:                                             text: "@",
-// CHECK:                                             span: <unknown>@1048..1049,
-// CHECK:                                         },
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: Whitespace,
-// CHECK:                                             text: " ",
-// CHECK:                                             span: <unknown>@1049..1050,
-// CHECK:                                         },
-// CHECK:                                         GreenNodeData {
-// CHECK:                                             kind: LiteralExpr,
-// CHECK:                                             children: [
 // CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: Identifier,
-// CHECK:                                                     text: "$rd",
+// CHECK:                                                     kind: Whitespace,
+// CHECK:                                                     text: " ",
+// CHECK:                                                     span: <unknown>@1049..1050,
+// CHECK:                                                 },
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: BinOpExprRight,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenNodeData {
+// CHECK:                                                             kind: LiteralExpr,
+// CHECK:                                                             children: [
+// CHECK:                                                                 GreenTokenData {
+// CHECK:                                                                     kind: Identifier,
+// CHECK:                                                                     text: "$rd",
+// CHECK:                                                                     span: <unknown>@1050..1053,
+// CHECK:                                                                 },
+// CHECK:                                                             ],
+// CHECK:                                                             span: <unknown>@1050..1053,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@1050..1053,
 // CHECK:                                                 },
 // CHECK:                                             ],
-// CHECK:                                             span: <unknown>@1050..1053,
+// CHECK:                                             span: <unknown>@1048..1049,
 // CHECK:                                         },
 // CHECK:                                     ],
 // CHECK:                                     span: <unknown>@1048..1049,
@@ -3031,9 +3181,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@1053..1054,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: At,
-// CHECK:                                     text: "@",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: BinOpExprOp,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: At,
+// CHECK:                                             text: "@",
+// CHECK:                                             span: <unknown>@1054..1055,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@1054..1055,
 // CHECK:                                 },
 // CHECK:                                 GreenTokenData {
@@ -3042,11 +3198,17 @@
 // CHECK:                                     span: <unknown>@1055..1056,
 // CHECK:                                 },
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     kind: BinOpExprRight,
 // CHECK:                                     children: [
-// CHECK:                                         GreenTokenData {
-// CHECK:                                             kind: BitLiteral,
-// CHECK:                                             text: "0b0010011",
+// CHECK:                                         GreenNodeData {
+// CHECK:                                             kind: LiteralExpr,
+// CHECK:                                             children: [
+// CHECK:                                                 GreenTokenData {
+// CHECK:                                                     kind: BitLiteral,
+// CHECK:                                                     text: "0b0010011",
+// CHECK:                                                     span: <unknown>@1056..1065,
+// CHECK:                                                 },
+// CHECK:                                             ],
 // CHECK:                                             span: <unknown>@1056..1065,
 // CHECK:                                         },
 // CHECK:                                     ],

@@ -474,11 +474,25 @@ fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         |left, ((aliens_left, op), aliens_right), right| {
             let span = op.as_token().span();
             let mut elements = vec![];
-            elements.push(left);
+            let left_span = left.as_node().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::BinOpExprLeft,
+                vec![left],
+                left_span,
+            )));
             elements.extend(aliens_left);
-            elements.push(op);
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::BinOpExprOp,
+                vec![op],
+                span.clone(),
+            )));
             elements.extend(aliens_right);
-            elements.push(right);
+            let right_span = right.as_node().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::BinOpExprRight,
+                vec![right],
+                right_span,
+            )));
             NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BinOpExpr, elements, span))
         },
     )

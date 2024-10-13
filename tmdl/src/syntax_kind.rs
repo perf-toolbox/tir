@@ -107,6 +107,9 @@ pub enum SyntaxKind {
     BlockExpr,
     LiteralExpr,
     BinOpExpr,
+    BinOpExprLeft,
+    BinOpExprRight,
+    BinOpExprOp,
 
     EnumDecl,
     EnumBody,

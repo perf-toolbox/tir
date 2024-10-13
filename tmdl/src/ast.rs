@@ -2,51 +2,45 @@ use core::fmt;
 
 use lpl::{syntax::NodeOrToken, Span};
 
-use crate::{SyntaxKind, SyntaxNode};
+use crate::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 pub trait ASTNode {
     fn syntax(&self) -> &SyntaxNode;
     fn span(&self) -> Span;
 }
 
+pub trait ExprNode {
+    fn ty(&self) -> &Type;
+}
+
 #[derive(Clone)]
 pub enum Type {
     Bits(u16),
     String,
-    Unresolved(SyntaxNode),
+    Integer,
+    Unresolved(SyntaxElement),
 }
 
 #[derive(Clone)]
-pub enum ASTNodeKind {
-    SourceFile(SourceFile),
+pub enum Item {
     InstrTemplateDecl(InstrTemplateDecl),
-    InstrTemplateParameterDecl(InstrTemplateParameterDecl),
     InstrDecl(InstrDecl),
-    InstrTemplateArg(InstrTemplateArg),
-    StructFieldDecl(StructFieldDecl),
-    Expr(Expr),
     EncodingDecl(EncodingDecl),
     AsmDecl(AsmDecl),
     EnumDecl(EnumDecl),
-    EnumVariantDecl(EnumVariantDecl),
-}
-
-#[derive(Clone, Debug)]
-pub enum Expr {
-    Literal,
 }
 
 #[derive(Clone)]
 pub struct SourceFile {
     syntax: SyntaxNode,
-    top_level_decls: Vec<ASTNodeKind>,
+    items: Vec<Item>,
 }
 
 #[derive(Clone)]
 pub struct InstrTemplateDecl {
     syntax: SyntaxNode,
-    params: Vec<ASTNodeKind>,
-    fields: Vec<ASTNodeKind>,
+    params: Vec<InstrTemplateParameterDecl>,
+    fields: Vec<StructFieldDecl>,
 }
 
 #[derive(Clone)]
@@ -57,7 +51,7 @@ pub struct InstrTemplateParameterDecl {
 #[derive(Clone)]
 pub struct InstrDecl {
     syntax: SyntaxNode,
-    template_args: Vec<ASTNodeKind>,
+    template_args: Vec<InstrTemplateArg>,
 }
 
 #[derive(Clone)]
@@ -70,12 +64,14 @@ pub struct InstrTemplateArg {
 pub struct EncodingDecl {
     #[allow(dead_code)]
     syntax: SyntaxNode,
+    body: BlockExpr,
 }
 
 #[derive(Clone)]
 pub struct AsmDecl {
     #[allow(dead_code)]
     syntax: SyntaxNode,
+    body: BlockExpr,
 }
 
 #[derive(Clone)]
@@ -86,12 +82,48 @@ pub struct StructFieldDecl {
 #[derive(Clone)]
 pub struct EnumDecl {
     syntax: SyntaxNode,
-    variants: Vec<ASTNodeKind>,
+    variants: Vec<EnumVariantDecl>,
 }
 
 #[derive(Clone)]
 pub struct EnumVariantDecl {
     syntax: SyntaxNode,
+}
+
+#[derive(Clone)]
+pub enum Expr {
+    Literal(LiteralExpr),
+    Block(BlockExpr),
+    BinOp(BinOpExpr),
+}
+
+#[derive(Clone)]
+pub struct LiteralExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    ty: Type,
+}
+
+#[derive(Clone)]
+pub struct BlockExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    stmts: Vec<Expr>,
+    ty: Type,
+}
+
+#[derive(Clone, Debug)]
+pub enum BinOpKind {
+    BitConcat,
+}
+
+#[derive(Clone)]
+pub struct BinOpExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    kind: BinOpKind,
+    left: Box<Expr>,
+    right: Box<Expr>,
 }
 
 impl Type {
@@ -145,7 +177,7 @@ impl Type {
 
                 Some(Type::Bits(num_bits))
             }
-            _ => Some(Type::Unresolved(syntax)),
+            _ => Some(Type::Unresolved(NodeOrToken::Node(syntax))),
         }
     }
 }
@@ -156,35 +188,80 @@ impl fmt::Debug for Type {
             Type::Unresolved(_) => write!(f, "<unresolved>"),
             Type::String => write!(f, "str"),
             Type::Bits(num) => write!(f, "bits<{}>", num),
+            Type::Integer => write!(f, "int"),
         }
     }
 }
 
+impl fmt::Debug for Item {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Item::InstrTemplateDecl(i) => i.fmt(f),
+            Item::InstrDecl(i) => i.fmt(f),
+            Item::EncodingDecl(i) => i.fmt(f),
+            Item::AsmDecl(i) => i.fmt(f),
+            Item::EnumDecl(i) => i.fmt(f),
+        }
+    }
+}
+
+impl From<InstrTemplateDecl> for Item {
+    fn from(i: InstrTemplateDecl) -> Self {
+        Item::InstrTemplateDecl(i)
+    }
+}
+
+impl From<InstrDecl> for Item {
+    fn from(i: InstrDecl) -> Self {
+        Item::InstrDecl(i)
+    }
+}
+
+impl From<EncodingDecl> for Item {
+    fn from(i: EncodingDecl) -> Self {
+        Item::EncodingDecl(i)
+    }
+}
+
+impl From<AsmDecl> for Item {
+    fn from(i: AsmDecl) -> Self {
+        Item::AsmDecl(i)
+    }
+}
+
+impl From<EnumDecl> for Item {
+    fn from(i: EnumDecl) -> Self {
+        Item::EnumDecl(i)
+    }
+}
+
 impl SourceFile {
-    pub fn cast(root: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(root: SyntaxNode) -> Option<SourceFile> {
         if root.kind() != SyntaxKind::TranslationUnit {
             return None;
         }
 
-        let top_level_decls = root
+        let items = root
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) => match node.kind() {
-                    SyntaxKind::InstrTemplateDecl => InstrTemplateDecl::cast(node.clone()),
-                    SyntaxKind::InstrDecl => InstrDecl::cast(node.clone()),
-                    SyntaxKind::EncodingDecl => EncodingDecl::cast(node.clone()),
-                    SyntaxKind::AsmDecl => AsmDecl::cast(node.clone()),
-                    SyntaxKind::EnumDecl => EnumDecl::cast(node.clone()),
+                    SyntaxKind::InstrTemplateDecl => {
+                        InstrTemplateDecl::new(node.clone()).map(|t| t.into())
+                    }
+                    SyntaxKind::InstrDecl => InstrDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::EncodingDecl => EncodingDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::AsmDecl => AsmDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::EnumDecl => EnumDecl::new(node.clone()).map(|t| t.into()),
                     _ => None,
                 },
                 _ => None,
             })
             .collect();
 
-        Some(ASTNodeKind::SourceFile(SourceFile {
+        Some(SourceFile {
             syntax: root,
-            top_level_decls,
-        }))
+            items,
+        })
     }
 }
 
@@ -201,13 +278,13 @@ impl ASTNode for SourceFile {
 impl fmt::Debug for SourceFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SourceFile")
-            .field("top_level_decls", &self.top_level_decls)
+            .field("items", &self.items)
             .finish()
     }
 }
 
 impl InstrTemplateDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<InstrTemplateDecl> {
         if syntax.kind() != SyntaxKind::InstrTemplateDecl {
             return None;
         }
@@ -224,7 +301,7 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrTemplateSingleParam => {
-                    InstrTemplateParameterDecl::cast(node)
+                    InstrTemplateParameterDecl::new(node)
                 }
                 _ => None,
             })
@@ -240,17 +317,17 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructField => {
-                    StructFieldDecl::cast(node)
+                    StructFieldDecl::new(node)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::InstrTemplateDecl(Self {
+        Some(Self {
             syntax,
             params,
             fields,
-        }))
+        })
     }
 
     pub fn name(&self) -> String {
@@ -281,11 +358,11 @@ impl InstrTemplateDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn parameters(&self) -> &[ASTNodeKind] {
+    pub fn parameters(&self) -> &[InstrTemplateParameterDecl] {
         &self.params
     }
 
-    pub fn fields(&self) -> &[ASTNodeKind] {
+    pub fn fields(&self) -> &[StructFieldDecl] {
         &self.fields
     }
 }
@@ -301,12 +378,12 @@ impl fmt::Debug for InstrTemplateDecl {
 }
 
 impl InstrTemplateParameterDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrTemplateSingleParam {
             return None;
         }
 
-        Some(ASTNodeKind::InstrTemplateParameterDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -355,7 +432,7 @@ impl fmt::Debug for InstrTemplateParameterDecl {
 }
 
 impl InstrDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrDecl {
             return None;
         }
@@ -372,16 +449,16 @@ impl InstrDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplateArg => {
-                    InstrTemplateArg::cast(node)
+                    InstrTemplateArg::new(node)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::InstrDecl(Self {
+        Some(Self {
             syntax,
             template_args,
-        }))
+        })
     }
 
     pub fn name(&self) -> String {
@@ -430,7 +507,7 @@ impl InstrDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn template_args(&self) -> &[ASTNodeKind] {
+    pub fn template_args(&self) -> &[InstrTemplateArg] {
         &self.template_args
     }
 }
@@ -446,12 +523,12 @@ impl fmt::Debug for InstrDecl {
 }
 
 impl InstrTemplateArg {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrParentTemplateArg {
             return None;
         }
 
-        Some(ASTNodeKind::InstrTemplateArg(Self { syntax }))
+        Some(Self { syntax })
     }
 }
 
@@ -462,44 +539,56 @@ impl fmt::Debug for InstrTemplateArg {
 }
 
 impl EncodingDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EncodingDecl {
             return None;
         }
 
-        Some(ASTNodeKind::EncodingDecl(Self { syntax }))
+        let body = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(n) if n.kind() == SyntaxKind::BlockExpr => BlockExpr::new(n),
+            _ => None,
+        })?;
+
+        Some(Self { syntax, body })
     }
 }
 
 impl fmt::Debug for EncodingDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EncodingDecl").finish()
+        f.debug_struct("EncodingDecl")
+            .field("body", &self.body)
+            .finish()
     }
 }
 
 impl AsmDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::AsmDecl {
             return None;
         }
 
-        Some(ASTNodeKind::AsmDecl(Self { syntax }))
+        let body = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(n) if n.kind() == SyntaxKind::BlockExpr => BlockExpr::new(n),
+            _ => None,
+        })?;
+
+        Some(Self { syntax, body })
     }
 }
 
 impl fmt::Debug for AsmDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AsmDecl").finish()
+        f.debug_struct("AsmDecl").field("body", &self.body).finish()
     }
 }
 
 impl StructFieldDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::StructField {
             return None;
         }
 
-        Some(ASTNodeKind::StructFieldDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -535,7 +624,7 @@ impl fmt::Debug for StructFieldDecl {
 }
 
 impl EnumDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EnumDecl {
             return None;
         }
@@ -550,13 +639,13 @@ impl EnumDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(n) if n.kind() == SyntaxKind::EnumVariantDecl => {
-                    EnumVariantDecl::cast(n)
+                    EnumVariantDecl::new(n)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::EnumDecl(Self { syntax, variants }))
+        Some(Self { syntax, variants })
     }
 
     pub fn name(&self) -> String {
@@ -582,12 +671,12 @@ impl fmt::Debug for EnumDecl {
 }
 
 impl EnumVariantDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EnumVariantDecl {
             return None;
         }
 
-        Some(ASTNodeKind::EnumVariantDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -611,20 +700,196 @@ impl fmt::Debug for EnumVariantDecl {
     }
 }
 
-impl fmt::Debug for ASTNodeKind {
+impl From<LiteralExpr> for Expr {
+    fn from(value: LiteralExpr) -> Self {
+        Expr::Literal(value)
+    }
+}
+
+impl From<BlockExpr> for Expr {
+    fn from(value: BlockExpr) -> Self {
+        Expr::Block(value)
+    }
+}
+
+impl From<BinOpExpr> for Expr {
+    fn from(value: BinOpExpr) -> Self {
+        Expr::BinOp(value)
+    }
+}
+
+impl ExprNode for Expr {
+    fn ty(&self) -> &Type {
+        match self {
+            Expr::Literal(l) => l.ty(),
+            Expr::Block(b) => b.ty(),
+            Expr::BinOp(b) => b.ty(),
+        }
+    }
+}
+
+impl fmt::Debug for Expr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ASTNodeKind::AsmDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EncodingDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateParameterDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::SourceFile(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::StructFieldDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateArg(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EnumDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EnumVariantDecl(ref n) => fmt::Debug::fmt(n, f),
-            _ => todo!(),
+            Expr::Literal(l) => l.fmt(f),
+            Expr::Block(b) => b.fmt(f),
+            Expr::BinOp(b) => b.fmt(f),
         }
+    }
+}
+
+impl LiteralExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::LiteralExpr {
+            return None;
+        }
+
+        let ty = syntax.children().find_map(|c| match c {
+            NodeOrToken::Token(token) => {
+                if token.kind() == SyntaxKind::IntegerLiteral {
+                    Some(Type::Integer)
+                } else if token.kind() == SyntaxKind::StringLiteral {
+                    Some(Type::String)
+                } else if token.kind() == SyntaxKind::BitLiteral {
+                    Some(Type::Bits((token.text_len() - 2) as u16))
+                } else if token.kind() == SyntaxKind::Identifier {
+                    Some(Type::Unresolved(NodeOrToken::Token(token)))
+                } else {
+                    None
+                }
+            }
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructFieldAccess => {
+                Some(Type::Unresolved(NodeOrToken::Node(node)))
+            }
+            _ => None,
+        })?;
+
+        Some(Self { syntax, ty })
+    }
+}
+
+impl ExprNode for LiteralExpr {
+    fn ty(&self) -> &Type {
+        &self.ty
+    }
+}
+
+impl fmt::Debug for LiteralExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LiteralExpr")
+            .field("type", &self.ty)
+            .finish()
+    }
+}
+
+impl ExprNode for BlockExpr {
+    fn ty(&self) -> &Type {
+        &self.ty
+    }
+}
+
+impl BlockExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::BlockExpr {
+            return None;
+        }
+
+        let stmts = syntax
+            .children()
+            .filter_map(map_expr)
+            .collect::<Vec<Expr>>();
+
+        let ty = stmts.last().map(|e| e.ty()).cloned()?;
+
+        Some(Self { syntax, stmts, ty })
+    }
+}
+
+impl fmt::Debug for BlockExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BlockExpr")
+            .field("type", &self.ty)
+            .field("stmts", &self.stmts)
+            .finish()
+    }
+}
+
+impl BinOpExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::BinOpExpr {
+            return None;
+        }
+
+        let left: Box<Expr> = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprLeft => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(map_expr)
+            .map(Box::new)
+            .unwrap();
+        let kind: BinOpKind = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprOp => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(|c| match c {
+                NodeOrToken::Token(token) => match token.kind() {
+                    SyntaxKind::At => Some(BinOpKind::BitConcat),
+                    _ => None,
+                },
+                _ => None,
+            })?;
+        let right: Box<Expr> = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprRight => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(map_expr)
+            .map(Box::new)?;
+
+        Some(Self {
+            syntax,
+            kind,
+            left,
+            right,
+        })
+    }
+}
+
+impl fmt::Debug for BinOpExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BinOpExpr")
+            .field("kind", &self.kind)
+            .field("left", &*self.left)
+            .field("right", &*self.right)
+            .finish()
+    }
+}
+
+impl ExprNode for BinOpExpr {
+    fn ty(&self) -> &Type {
+        self.left.ty()
+    }
+}
+
+fn map_expr(element: SyntaxElement) -> Option<Expr> {
+    match element {
+        NodeOrToken::Node(node) => match node.kind() {
+            SyntaxKind::LiteralExpr => LiteralExpr::new(node).map(|e| e.into()),
+            SyntaxKind::BlockExpr => BlockExpr::new(node).map(|e| e.into()),
+            SyntaxKind::BinOpExpr => BinOpExpr::new(node).map(|e| e.into()),
+            _ => None,
+        },
+        _ => None,
     }
 }
