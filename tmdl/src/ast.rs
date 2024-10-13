@@ -132,7 +132,7 @@ impl Type {
                         _ => None,
                     })?;
 
-                let num_bits = u16::from_str_radix(&param, 10).ok()?;
+                let num_bits = param.parse::<u16>().ok()?;
 
                 Some(Type::Bits(num_bits))
             }
@@ -152,7 +152,7 @@ impl fmt::Debug for Type {
 }
 
 impl SourceFile {
-    pub fn new(root: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(root: SyntaxNode) -> Option<ASTNodeKind> {
         if root.kind() != SyntaxKind::TranslationUnit {
             return None;
         }
@@ -161,7 +161,7 @@ impl SourceFile {
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrTemplateDecl => {
-                    InstrTemplateDecl::new(node.clone())
+                    InstrTemplateDecl::cast(node.clone())
                 }
                 _ => None,
             })
@@ -171,7 +171,7 @@ impl SourceFile {
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrDecl => {
-                    InstrDecl::new(node.clone())
+                    InstrDecl::cast(node.clone())
                 }
                 _ => None,
             })
@@ -181,7 +181,7 @@ impl SourceFile {
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::EncodingDecl => {
-                    EncodingDecl::new(node.clone())
+                    EncodingDecl::cast(node.clone())
                 }
                 _ => None,
             })
@@ -191,7 +191,7 @@ impl SourceFile {
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::AsmDecl => {
-                    AsmDecl::new(node.clone())
+                    AsmDecl::cast(node.clone())
                 }
                 _ => None,
             })
@@ -229,7 +229,7 @@ impl fmt::Debug for SourceFile {
 }
 
 impl InstrTemplateDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::InstrTemplateDecl {
             return None;
         }
@@ -246,7 +246,7 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrTemplateSingleParam => {
-                    InstrTemplateParameterDecl::new(node)
+                    InstrTemplateParameterDecl::cast(node)
                 }
                 _ => None,
             })
@@ -262,7 +262,7 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructField => {
-                    StructFieldDecl::new(node)
+                    StructFieldDecl::cast(node)
                 }
                 _ => None,
             })
@@ -289,8 +289,7 @@ impl InstrTemplateDecl {
                 _ => None,
             })
             .iter()
-            .map(|node| node.children())
-            .flatten()
+            .flat_map(|node| node.children())
             .find_map(|child| match child {
                 crate::SyntaxElement::Token(token) => {
                     if token.kind() == SyntaxKind::Identifier {
@@ -304,11 +303,11 @@ impl InstrTemplateDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn parameters<'a>(&'a self) -> &'a [ASTNodeKind] {
+    pub fn parameters(&self) -> &[ASTNodeKind] {
         &self.params
     }
 
-    pub fn fields<'a>(&'a self) -> &'a [ASTNodeKind] {
+    pub fn fields(&self) -> &[ASTNodeKind] {
         &self.fields
     }
 }
@@ -324,7 +323,7 @@ impl fmt::Debug for InstrTemplateDecl {
 }
 
 impl InstrTemplateParameterDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::InstrTemplateSingleParam {
             return None;
         }
@@ -344,8 +343,7 @@ impl InstrTemplateParameterDecl {
                 _ => None,
             })
             .iter()
-            .map(|node| node.children())
-            .flatten()
+            .flat_map(|node| node.children())
             .find_map(|child| match child {
                 crate::SyntaxElement::Token(token) if token.kind() == SyntaxKind::Identifier => {
                     Some(token.text().to_string())
@@ -379,7 +377,7 @@ impl fmt::Debug for InstrTemplateParameterDecl {
 }
 
 impl InstrDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::InstrDecl {
             return None;
         }
@@ -396,7 +394,7 @@ impl InstrDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplateArg => {
-                    InstrTemplateArg::new(node)
+                    InstrTemplateArg::cast(node)
                 }
                 _ => None,
             })
@@ -454,7 +452,7 @@ impl InstrDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn template_args<'a>(&'a self) -> &'a [ASTNodeKind] {
+    pub fn template_args(&self) -> &[ASTNodeKind] {
         &self.template_args
     }
 }
@@ -470,7 +468,7 @@ impl fmt::Debug for InstrDecl {
 }
 
 impl InstrTemplateArg {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::InstrParentTemplateArg {
             return None;
         }
@@ -486,7 +484,7 @@ impl fmt::Debug for InstrTemplateArg {
 }
 
 impl EncodingDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::EncodingDecl {
             return None;
         }
@@ -502,7 +500,7 @@ impl fmt::Debug for EncodingDecl {
 }
 
 impl AsmDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::AsmDecl {
             return None;
         }
@@ -518,7 +516,7 @@ impl fmt::Debug for AsmDecl {
 }
 
 impl StructFieldDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
         if syntax.kind() != SyntaxKind::StructField {
             return None;
         }
