@@ -65,8 +65,56 @@
 // CHECK:                     },
 // CHECK:                 ],
 // CHECK:             },
-// CHECK:             EncodingDecl,
-// CHECK:             AsmDecl,
+// CHECK:             EncodingDecl {
+// CHECK:                 body: BlockExpr {
+// CHECK:                     type: <unresolved>,
+// CHECK:                     stmts: [
+// CHECK:                         BinOpExpr {
+// CHECK:                             kind: BitConcat,
+// CHECK:                             left: BinOpExpr {
+// CHECK:                                 kind: BitConcat,
+// CHECK:                                 left: BinOpExpr {
+// CHECK:                                     kind: BitConcat,
+// CHECK:                                     left: BinOpExpr {
+// CHECK:                                         kind: BitConcat,
+// CHECK:                                         left: BinOpExpr {
+// CHECK:                                             kind: BitConcat,
+// CHECK:                                             left: LiteralExpr {
+// CHECK:                                                 type: <unresolved>,
+// CHECK:                                             },
+// CHECK:                                             right: LiteralExpr {
+// CHECK:                                                 type: <unresolved>,
+// CHECK:                                             },
+// CHECK:                                         },
+// CHECK:                                         right: LiteralExpr {
+// CHECK:                                             type: <unresolved>,
+// CHECK:                                         },
+// CHECK:                                     },
+// CHECK:                                     right: LiteralExpr {
+// CHECK:                                         type: <unresolved>,
+// CHECK:                                     },
+// CHECK:                                 },
+// CHECK:                                 right: LiteralExpr {
+// CHECK:                                     type: <unresolved>,
+// CHECK:                                 },
+// CHECK:                             },
+// CHECK:                             right: LiteralExpr {
+// CHECK:                                 type: bits<7>,
+// CHECK:                             },
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                 },
+// CHECK:             },
+// CHECK:             AsmDecl {
+// CHECK:                 body: BlockExpr {
+// CHECK:                     type: str,
+// CHECK:                     stmts: [
+// CHECK:                         LiteralExpr {
+// CHECK:                             type: str,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                 },
+// CHECK:             },
 // CHECK:             InstrDecl {
 // CHECK:                 name: "ADD",
 // CHECK:                 parent_template_name: "RInstr",
@@ -196,8 +244,50 @@
 // CHECK:                     },
 // CHECK:                 ],
 // CHECK:             },
-// CHECK:             EncodingDecl,
-// CHECK:             AsmDecl,
+// CHECK:             EncodingDecl {
+// CHECK:                 body: BlockExpr {
+// CHECK:                     type: <unresolved>,
+// CHECK:                     stmts: [
+// CHECK:                         BinOpExpr {
+// CHECK:                             kind: BitConcat,
+// CHECK:                             left: BinOpExpr {
+// CHECK:                                 kind: BitConcat,
+// CHECK:                                 left: BinOpExpr {
+// CHECK:                                     kind: BitConcat,
+// CHECK:                                     left: BinOpExpr {
+// CHECK:                                         kind: BitConcat,
+// CHECK:                                         left: LiteralExpr {
+// CHECK:                                             type: <unresolved>,
+// CHECK:                                         },
+// CHECK:                                         right: LiteralExpr {
+// CHECK:                                             type: <unresolved>,
+// CHECK:                                         },
+// CHECK:                                     },
+// CHECK:                                     right: LiteralExpr {
+// CHECK:                                         type: <unresolved>,
+// CHECK:                                     },
+// CHECK:                                 },
+// CHECK:                                 right: LiteralExpr {
+// CHECK:                                     type: <unresolved>,
+// CHECK:                                 },
+// CHECK:                             },
+// CHECK:                             right: LiteralExpr {
+// CHECK:                                 type: bits<7>,
+// CHECK:                             },
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                 },
+// CHECK:             },
+// CHECK:             AsmDecl {
+// CHECK:                 body: BlockExpr {
+// CHECK:                     type: str,
+// CHECK:                     stmts: [
+// CHECK:                         LiteralExpr {
+// CHECK:                             type: str,
+// CHECK:                         },
+// CHECK:                     ],
+// CHECK:                 },
+// CHECK:             },
 // CHECK:         ],
 // CHECK:     },
 // CHECK: )
