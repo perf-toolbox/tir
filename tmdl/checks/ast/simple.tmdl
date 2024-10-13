@@ -4,7 +4,36 @@
 
 // CHECK: Some(
 // CHECK:     SourceFile {
-// CHECK:         instr_templates: [
+// CHECK:         top_level_decls: [
+// CHECK:             EnumDecl {
+// CHECK:                 name: "GPR",
+// CHECK:                 variants: [
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X0",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X1",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X2",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X3",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X4",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X5",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X6",
+// CHECK:                     },
+// CHECK:                     EnumVariantDecl {
+// CHECK:                         name: "X7",
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:             },
 // CHECK:             InstrTemplateDecl {
 // CHECK:                 name: "RInstr",
 // CHECK:                 params: [
@@ -36,47 +65,8 @@
 // CHECK:                     },
 // CHECK:                 ],
 // CHECK:             },
-// CHECK:             InstrTemplateDecl {
-// CHECK:                 name: "IInstr",
-// CHECK:                 params: [
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$imm",
-// CHECK:                         type: bits<12>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$rs1",
-// CHECK:                         type: bits<5>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct3",
-// CHECK:                         type: bits<3>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$rd",
-// CHECK:                         type: bits<5>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$mnemonic",
-// CHECK:                         type: str,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 fields: [
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rd",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rs1",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "imm",
-// CHECK:                         type: bits<12>,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:         ],
-// CHECK:         instructions: [
+// CHECK:             EncodingDecl,
+// CHECK:             AsmDecl,
 // CHECK:             InstrDecl {
 // CHECK:                 name: "ADD",
 // CHECK:                 parent_template_name: "RInstr",
@@ -167,13 +157,46 @@
 // CHECK:                     InstrTemplateArg,
 // CHECK:                 ],
 // CHECK:             },
-// CHECK:         ],
-// CHECK:         encodings: [
+// CHECK:             InstrTemplateDecl {
+// CHECK:                 name: "IInstr",
+// CHECK:                 params: [
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$imm",
+// CHECK:                         type: bits<12>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$rs1",
+// CHECK:                         type: bits<5>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$funct3",
+// CHECK:                         type: bits<3>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$rd",
+// CHECK:                         type: bits<5>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$mnemonic",
+// CHECK:                         type: str,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:                 fields: [
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rd",
+// CHECK:                         type: <unresolved>,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rs1",
+// CHECK:                         type: <unresolved>,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "imm",
+// CHECK:                         type: bits<12>,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:             },
 // CHECK:             EncodingDecl,
-// CHECK:             EncodingDecl,
-// CHECK:         ],
-// CHECK:         asm_decls: [
-// CHECK:             AsmDecl,
 // CHECK:             AsmDecl,
 // CHECK:         ],
 // CHECK:     },
