@@ -1,13 +1,13 @@
 use lpl::syntax::GreenNodeData;
 use lpl::{combinators::*, ParserError, Span};
 use lpl::{
-    syntax::{GreenElement, GreenNode, NodeOrToken},
+    syntax::{GreenElement, NodeOrToken},
     ParseStream, Parser,
 };
 
-use crate::{SyntaxKind, TokenStream};
+use crate::{ImmElement, ImmNode, SyntaxKind, TokenStream};
 
-pub fn parse(tokens: &[GreenElement<SyntaxKind>]) -> GreenNode<SyntaxKind> {
+pub fn parse(tokens: &[ImmElement]) -> ImmNode {
     let stream = TokenStream::new(tokens);
 
     let top_level_decl = parse_instr_template_decl()
@@ -21,7 +21,7 @@ pub fn parse(tokens: &[GreenElement<SyntaxKind>]) -> GreenNode<SyntaxKind> {
     GreenNodeData::new(SyntaxKind::TranslationUnit, result.0, Span::empty())
 }
 
-fn catch_all<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn catch_all<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     move |tokens: TokenStream<'a>| {
         if tokens.len() > 0 {
             return Ok((tokens.nth(0).unwrap(), tokens.slice(1..)));
@@ -30,9 +30,7 @@ fn catch_all<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>>
     }
 }
 
-fn eat_until<'a>(
-    kind: SyntaxKind,
-) -> impl Parser<'a, TokenStream<'a>, Vec<GreenElement<SyntaxKind>>> {
+fn eat_until<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, Vec<ImmElement>> {
     move |tokens: TokenStream<'a>| {
         let mut alien_tokens = vec![];
         for i in 0..tokens.len() {
@@ -54,7 +52,7 @@ fn eat_until<'a>(
     }
 }
 
-fn eat_whitespace<'a>() -> impl Parser<'a, TokenStream<'a>, Vec<GreenElement<SyntaxKind>>> {
+fn eat_whitespace<'a>() -> impl Parser<'a, TokenStream<'a>, Vec<ImmElement>> {
     move |tokens: TokenStream<'a>| {
         let mut alien_tokens = vec![];
         for i in 0..tokens.len() {
@@ -75,7 +73,7 @@ fn eat_whitespace<'a>() -> impl Parser<'a, TokenStream<'a>, Vec<GreenElement<Syn
 
 fn eat_until_one_of<'a>(
     kinds: &'static [SyntaxKind],
-) -> impl Parser<'a, TokenStream<'a>, Vec<GreenElement<SyntaxKind>>> {
+) -> impl Parser<'a, TokenStream<'a>, Vec<ImmElement>> {
     move |tokens: TokenStream<'a>| {
         let mut alien_tokens = vec![];
         for i in 0..tokens.len() {
@@ -94,7 +92,7 @@ fn eat_until_one_of<'a>(
     }
 }
 
-fn token<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn token<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     move |tokens: TokenStream<'a>| {
         if let Some(element) = tokens.nth(0) {
             if let NodeOrToken::Token(token) = &element {
@@ -111,9 +109,7 @@ fn token<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, GreenElement<
     }
 }
 
-fn token_of<'a>(
-    kinds: &'static [SyntaxKind],
-) -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn token_of<'a>(kinds: &'static [SyntaxKind]) -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     move |tokens: TokenStream<'a>| {
         if let Some(element) = tokens.nth(0) {
             if let NodeOrToken::Token(token) = &element {
@@ -127,7 +123,7 @@ fn token_of<'a>(
     }
 }
 
-fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::InstrTemplateKw)
         .and_then(eat_until(SyntaxKind::Identifier))
         .and_then(token(SyntaxKind::Identifier))
@@ -164,7 +160,7 @@ fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode
         })
 }
 
-fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     token(SyntaxKind::Identifier)
         .and_then(optional(
             token(SyntaxKind::LeftAngle)
@@ -176,7 +172,13 @@ fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>
                 .and_then(token(SyntaxKind::RightAngle))
                 .map(|((angle_start, lit), angle_end)| {
                     let span = angle_start.as_token().span();
-                    let elements = vec![angle_start, lit, angle_end];
+                    let lit_span = lit.as_token().span();
+                    let lit_expr = NodeOrToken::Node(GreenNodeData::new(
+                        SyntaxKind::LiteralExpr,
+                        vec![lit],
+                        lit_span,
+                    ));
+                    let elements = vec![angle_start, lit_expr, angle_end];
                     NodeOrToken::Node(GreenNodeData::new(SyntaxKind::TypeParams, elements, span))
                 }),
         ))
@@ -190,8 +192,7 @@ fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>
         })
 }
 
-fn parse_single_template_parameter<'a>(
-) -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_single_template_parameter<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until(SyntaxKind::Identifier)
         .and_then(token(SyntaxKind::Identifier))
         .and_then(eat_until(SyntaxKind::Colon))
@@ -215,7 +216,7 @@ fn parse_single_template_parameter<'a>(
             let span = name.as_token().span();
             elements.extend(aliens0);
             elements.push(NodeOrToken::Node(GreenNodeData::new(
-                SyntaxKind::StructFieldName,
+                SyntaxKind::InstrTemplateSingleParamName,
                 vec![name],
                 span.clone(),
             )));
@@ -232,8 +233,7 @@ fn parse_single_template_parameter<'a>(
         })
 }
 
-fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>>
-{
+fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::LeftAngle)
         .and_then(eat_until(SyntaxKind::Identifier))
         .and_then(separated(
@@ -259,7 +259,7 @@ fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, Gre
         })
 }
 
-fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until_one_of(&[SyntaxKind::Identifier, SyntaxKind::RightBrace])
         .and_then(token(SyntaxKind::Identifier))
         .and_then(eat_until_one_of(&[
@@ -301,7 +301,7 @@ fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Syn
         })
 }
 
-fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::LeftBrace)
         .and_then(optional(separated(
             parse_struct_field(),
@@ -323,7 +323,7 @@ fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxK
         })
 }
 
-fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     token(SyntaxKind::LeftBrace)
         .and_then(eat_whitespace())
         .and_then(zero_or_more(parse_expr()))
@@ -347,7 +347,7 @@ fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Syntax
         })
 }
 
-fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::EncodingKw)
         .and_then(eat_until(SyntaxKind::ForKw))
         .and_then(token(SyntaxKind::ForKw))
@@ -384,7 +384,7 @@ fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind
         })
 }
 
-fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
+fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::AsmKw)
         .and_then(eat_until(SyntaxKind::ForKw))
         .and_then(token(SyntaxKind::ForKw))
@@ -421,11 +421,11 @@ fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
         })
 }
 
-fn parse_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     parse_binary_expr().or_else(parse_atom_expr())
 }
 
-fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     let operator_atom = token(SyntaxKind::At);
     let operator = eat_until_one_of(&[
         SyntaxKind::At,
@@ -458,7 +458,7 @@ fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Synt
     )
 }
 
-fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     fold_left(
         token(SyntaxKind::Identifier),
         token(SyntaxKind::Dot),
@@ -473,7 +473,7 @@ fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Syn
     )
 }
 
-fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     let lit_atom = token(SyntaxKind::IntegerLiteral)
         .or_else(token(SyntaxKind::BitLiteral))
         .or_else(token(SyntaxKind::StringLiteral))
@@ -499,8 +499,8 @@ fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<Syntax
     })
 }
 
-fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKind>> {
-    token(SyntaxKind::Identifier)
+fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+    token(SyntaxKind::InstrKw)
         .and_then(eat_until(SyntaxKind::Identifier))
         .and_then(token(SyntaxKind::Identifier))
         .map(|((instr_kw, aliens1), name)| (instr_kw, aliens1, name))
@@ -560,8 +560,7 @@ fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, GreenNode<SyntaxKi
         )
 }
 
-fn parse_template_instantiation_param<'a>(
-) -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>> {
+fn parse_template_instantiation_param<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until_one_of(&[
         SyntaxKind::StringLiteral,
         SyntaxKind::IntegerLiteral,
@@ -580,7 +579,13 @@ fn parse_template_instantiation_param<'a>(
         let mut elements = vec![];
         let span = lit.as_token().span();
         elements.extend(aliens0);
-        elements.push(lit);
+        let lit_span = lit.as_token().span();
+        let lit_expr = NodeOrToken::Node(GreenNodeData::new(
+            SyntaxKind::LiteralExpr,
+            vec![lit],
+            lit_span,
+        ));
+        elements.push(lit_expr);
         elements.extend(aliens1);
         NodeOrToken::Node(GreenNodeData::new(
             SyntaxKind::InstrParentTemplateArg,
@@ -590,8 +595,7 @@ fn parse_template_instantiation_param<'a>(
     })
 }
 
-fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, GreenElement<SyntaxKind>>
-{
+fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     token(SyntaxKind::Identifier)
         .and_then(eat_until(SyntaxKind::LeftAngle))
         .and_then(token(SyntaxKind::LeftAngle))

@@ -41,7 +41,7 @@
 // CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     kind: InstrTemplateSingleParamName,
 // CHECK:                                     children: [
 // CHECK:                                         GreenTokenData {
 // CHECK:                                             kind: Identifier,
@@ -77,9 +77,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@35..36,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "7",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "7",
+// CHECK:                                                             span: <unknown>@36..37,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@36..37,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -105,7 +111,7 @@
 // CHECK:                                     span: <unknown>@39..40,
 // CHECK:                                 },
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     kind: InstrTemplateSingleParamName,
 // CHECK:                                     children: [
 // CHECK:                                         GreenTokenData {
 // CHECK:                                             kind: Identifier,
@@ -141,9 +147,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@53..54,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "3",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "3",
+// CHECK:                                                             span: <unknown>@54..55,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@54..55,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -169,7 +181,7 @@
 // CHECK:                                     span: <unknown>@57..58,
 // CHECK:                                 },
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     kind: InstrTemplateSingleParamName,
 // CHECK:                                     children: [
 // CHECK:                                         GreenTokenData {
 // CHECK:                                             kind: Identifier,
@@ -392,7 +404,7 @@
 // CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     kind: InstrTemplateSingleParamName,
 // CHECK:                                     children: [
 // CHECK:                                         GreenTokenData {
 // CHECK:                                             kind: Identifier,
@@ -499,7 +511,7 @@
 // CHECK:                             kind: InstrTemplateSingleParam,
 // CHECK:                             children: [
 // CHECK:                                 GreenNodeData {
-// CHECK:                                     kind: StructFieldName,
+// CHECK:                                     kind: InstrTemplateSingleParamName,
 // CHECK:                                     children: [
 // CHECK:                                         GreenTokenData {
 // CHECK:                                             kind: Identifier,

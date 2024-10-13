@@ -1,6 +1,7 @@
 use core::fmt::Debug;
 use std::fmt;
 use std::iter;
+use std::rc::Rc;
 use std::sync::Arc;
 
 use crate::Span;
@@ -8,6 +9,9 @@ use crate::Span;
 pub type GreenToken<SK> = Arc<GreenTokenData<SK>>;
 pub type GreenNode<SK> = Arc<GreenNodeData<SK>>;
 pub type GreenElement<SK> = NodeOrToken<GreenNode<SK>, GreenToken<SK>>;
+pub type RedToken<SK> = Rc<RedTokenData<SK>>;
+pub type RedNode<SK> = Rc<RedNodeData<SK>>;
+pub type RedElement<SK> = NodeOrToken<RedNode<SK>, RedToken<SK>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GreenTokenData<SK>
@@ -17,6 +21,40 @@ where
     kind: SK,
     text: String,
     span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct GreenNodeData<SK>
+where
+    SK: Copy + Clone + Debug + PartialEq,
+{
+    kind: SK,
+    children: Vec<GreenElement<SK>>,
+    span: Span,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum NodeOrToken<N, T> {
+    Node(N),
+    Token(T),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RedTokenData<SK>
+where
+    SK: Copy + Clone + Debug + PartialEq,
+{
+    parent: Option<RedNode<SK>>,
+    green: GreenToken<SK>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RedNodeData<SK>
+where
+    SK: Copy + Clone + Debug + PartialEq,
+{
+    parent: Option<RedNode<SK>>,
+    green: GreenNode<SK>,
 }
 
 impl<SK> GreenTokenData<SK>
@@ -65,16 +103,6 @@ where
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub struct GreenNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
-    kind: SK,
-    children: Vec<GreenElement<SK>>,
-    span: Span,
-}
-
 impl<SK> GreenNodeData<SK>
 where
     SK: Copy + Clone + Debug + PartialEq,
@@ -97,6 +125,10 @@ where
 
     pub fn span(&self) -> Span {
         self.span.clone()
+    }
+
+    pub fn text_len(&self) -> usize {
+        0
     }
 
     pub fn replace_child(&self, index: usize, new_child: GreenElement<SK>) -> GreenNode<SK> {
@@ -122,12 +154,6 @@ where
         }
         Ok(())
     }
-}
-
-#[derive(Clone, Copy, PartialEq)]
-pub enum NodeOrToken<N, T> {
-    Node(N),
-    Token(T),
 }
 
 impl<N, T> NodeOrToken<N, T> {
@@ -169,6 +195,87 @@ where
             NodeOrToken::Node(node) => fmt::Debug::fmt(node, f),
             NodeOrToken::Token(token) => fmt::Debug::fmt(token, f),
         }
+    }
+}
+
+impl<SK> RedTokenData<SK>
+where
+    SK: Copy + Clone + Debug + PartialEq,
+{
+    pub fn new(green: GreenToken<SK>) -> RedToken<SK> {
+        Rc::new(RedTokenData {
+            parent: None,
+            green,
+        })
+    }
+
+    fn green(&self) -> &GreenToken<SK> {
+        &self.green
+    }
+
+    pub fn kind(&self) -> SK {
+        self.green().kind()
+    }
+
+    pub fn text_len(&self) -> usize {
+        self.green().text_len()
+    }
+
+    pub fn text(&self) -> &str {
+        self.green().text()
+    }
+
+    pub fn span(&self) -> Span {
+        self.green().span()
+    }
+
+    pub fn parent(&self) -> Option<&RedNode<SK>> {
+        self.parent.as_ref()
+    }
+}
+
+impl<SK> RedNodeData<SK>
+where
+    SK: Copy + Clone + Debug + PartialEq,
+{
+    pub fn new(green: GreenNode<SK>) -> RedNode<SK> {
+        Rc::new(RedNodeData {
+            parent: None,
+            green,
+        })
+    }
+
+    fn green(&self) -> &GreenNode<SK> {
+        &self.green
+    }
+
+    pub fn kind(&self) -> SK {
+        self.green().kind()
+    }
+
+    pub fn text_len(&self) -> usize {
+        self.green().text_len()
+    }
+
+    pub fn parent(&self) -> Option<&RedNode<SK>> {
+        self.parent.as_ref()
+    }
+
+    pub fn span(&self) -> Span {
+        self.green().span()
+    }
+
+    pub fn children<'a>(self: &'a RedNode<SK>) -> impl Iterator<Item = RedElement<SK>> + 'a {
+        self.green().children().iter().map(|c| match c {
+            NodeOrToken::Node(n) => NodeOrToken::Node(Rc::new(RedNodeData {
+                parent: Some(self.clone()),
+                green: Arc::clone(n),
+            })),
+            NodeOrToken::Token(t) => NodeOrToken::Token(Rc::new(RedTokenData {
+                parent: Some(self.clone()),
+                green: Arc::clone(t),
+            })),
+        })
     }
 }
 

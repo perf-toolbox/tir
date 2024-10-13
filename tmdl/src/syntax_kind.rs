@@ -1,12 +1,21 @@
 use std::ops::RangeBounds;
 
 use lpl::{
-    syntax::{GreenElement, GreenToken, GreenTokenData},
+    syntax::{
+        GreenElement, GreenNode, GreenNodeData, GreenToken, GreenTokenData, RedElement, RedNode,
+        RedNodeData,
+    },
     ParseStream, Span,
 };
 
 pub type Token = GreenToken<SyntaxKind>;
 pub type TokenData = GreenTokenData<SyntaxKind>;
+pub type ImmNode = GreenNode<SyntaxKind>;
+pub type ImmNodeData = GreenNodeData<SyntaxKind>;
+pub type ImmElement = GreenElement<SyntaxKind>;
+pub type SyntaxElement = RedElement<SyntaxKind>;
+pub type SyntaxNode = RedNode<SyntaxKind>;
+pub type SyntaxNodeData = RedNodeData<SyntaxKind>;
 
 /// A piece of syntax in the TMDL language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -71,6 +80,7 @@ pub enum SyntaxKind {
     InstrTemplateName,
     InstrTemplateParams,
     InstrTemplateSingleParam,
+    InstrTemplateSingleParamName,
     InstrTemplateBody,
 
     InstrDecl,
