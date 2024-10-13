@@ -18,9 +18,8 @@ jobs:
     - uses: dtolnay/rust-toolchain@stable
       with:
         components: llvm-tools-preview
+    - uses: taiki-e/install-action@nextest
     - uses: Swatinem/rust-cache@v2
-    - name: Install cargo-make
-      run: cargo install cargo-make
     - name: Build
       run: cargo build --verbose
       env:
@@ -28,7 +27,7 @@ jobs:
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
         RUSTDOCFLAGS: '-C instrument-coverage'
     - name: Run cargo tests
-      run: cargo test --verbose
+      run: cargo nextest r -v
       env:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
@@ -39,8 +38,7 @@ jobs:
         CARGO_INCREMENTAL: '0'
         RUSTFLAGS: '-C instrument-coverage --deny warnings'
         RUSTDOCFLAGS: '-C instrument-coverage'
-    - name: Install grcov
-      run: if [[ ! -e ~/.cargo/bin/grcov ]]; then cargo install grcov; fi
+    - uses: taiki-e/install-action@grcov
     - name: Run grcov
       run: |
         grcov . --binary-path target/debug/ -s . -t lcov --branch --llvm \
@@ -49,6 +47,7 @@ jobs:
             --ignore 'macros/*' \
             --ignore 'fuzz/*' \
             --ignore 'utils/*' \
+            --ignore 'xtask/*' \
             --ignore 'target/**/build/litcheck-filecheck-*/**' \
             --ignore '**/tests/**' \
             -o lcov.info
