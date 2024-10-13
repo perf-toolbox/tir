@@ -2,18 +2,23 @@ use core::fmt;
 
 use lpl::{syntax::NodeOrToken, Span};
 
-use crate::{SyntaxKind, SyntaxNode};
+use crate::{SyntaxElement, SyntaxKind, SyntaxNode};
 
 pub trait ASTNode {
     fn syntax(&self) -> &SyntaxNode;
     fn span(&self) -> Span;
 }
 
+pub trait ExprNode {
+    fn ty(&self) -> &Type;
+}
+
 #[derive(Clone)]
 pub enum Type {
     Bits(u16),
     String,
-    Unresolved(SyntaxNode),
+    Integer,
+    Unresolved(SyntaxElement),
 }
 
 #[derive(Clone)]
@@ -23,11 +28,6 @@ pub enum Item {
     EncodingDecl(EncodingDecl),
     AsmDecl(AsmDecl),
     EnumDecl(EnumDecl),
-}
-
-#[derive(Clone, Debug)]
-pub enum Expr {
-    Literal,
 }
 
 #[derive(Clone)]
@@ -64,12 +64,14 @@ pub struct InstrTemplateArg {
 pub struct EncodingDecl {
     #[allow(dead_code)]
     syntax: SyntaxNode,
+    body: BlockExpr,
 }
 
 #[derive(Clone)]
 pub struct AsmDecl {
     #[allow(dead_code)]
     syntax: SyntaxNode,
+    body: BlockExpr,
 }
 
 #[derive(Clone)]
@@ -86,6 +88,42 @@ pub struct EnumDecl {
 #[derive(Clone)]
 pub struct EnumVariantDecl {
     syntax: SyntaxNode,
+}
+
+#[derive(Clone)]
+pub enum Expr {
+    Literal(LiteralExpr),
+    Block(BlockExpr),
+    BinOp(BinOpExpr),
+}
+
+#[derive(Clone)]
+pub struct LiteralExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    ty: Type,
+}
+
+#[derive(Clone)]
+pub struct BlockExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    stmts: Vec<Expr>,
+    ty: Type,
+}
+
+#[derive(Clone, Debug)]
+pub enum BinOpKind {
+    BitConcat,
+}
+
+#[derive(Clone)]
+pub struct BinOpExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    kind: BinOpKind,
+    left: Box<Expr>,
+    right: Box<Expr>,
 }
 
 impl Type {
@@ -139,7 +177,7 @@ impl Type {
 
                 Some(Type::Bits(num_bits))
             }
-            _ => Some(Type::Unresolved(syntax)),
+            _ => Some(Type::Unresolved(NodeOrToken::Node(syntax))),
         }
     }
 }
@@ -150,6 +188,7 @@ impl fmt::Debug for Type {
             Type::Unresolved(_) => write!(f, "<unresolved>"),
             Type::String => write!(f, "str"),
             Type::Bits(num) => write!(f, "bits<{}>", num),
+            Type::Integer => write!(f, "int"),
         }
     }
 }
@@ -505,13 +544,20 @@ impl EncodingDecl {
             return None;
         }
 
-        Some(Self { syntax })
+        let body = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(n) if n.kind() == SyntaxKind::BlockExpr => BlockExpr::new(n),
+            _ => None,
+        })?;
+
+        Some(Self { syntax, body })
     }
 }
 
 impl fmt::Debug for EncodingDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EncodingDecl").finish()
+        f.debug_struct("EncodingDecl")
+            .field("body", &self.body)
+            .finish()
     }
 }
 
@@ -521,13 +567,18 @@ impl AsmDecl {
             return None;
         }
 
-        Some(Self { syntax })
+        let body = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(n) if n.kind() == SyntaxKind::BlockExpr => BlockExpr::new(n),
+            _ => None,
+        })?;
+
+        Some(Self { syntax, body })
     }
 }
 
 impl fmt::Debug for AsmDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AsmDecl").finish()
+        f.debug_struct("AsmDecl").field("body", &self.body).finish()
     }
 }
 
@@ -646,5 +697,199 @@ impl fmt::Debug for EnumVariantDecl {
         f.debug_struct("EnumVariantDecl")
             .field("name", &self.name())
             .finish()
+    }
+}
+
+impl From<LiteralExpr> for Expr {
+    fn from(value: LiteralExpr) -> Self {
+        Expr::Literal(value)
+    }
+}
+
+impl From<BlockExpr> for Expr {
+    fn from(value: BlockExpr) -> Self {
+        Expr::Block(value)
+    }
+}
+
+impl From<BinOpExpr> for Expr {
+    fn from(value: BinOpExpr) -> Self {
+        Expr::BinOp(value)
+    }
+}
+
+impl ExprNode for Expr {
+    fn ty(&self) -> &Type {
+        match self {
+            Expr::Literal(l) => l.ty(),
+            Expr::Block(b) => b.ty(),
+            Expr::BinOp(b) => b.ty(),
+        }
+    }
+}
+
+impl fmt::Debug for Expr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Expr::Literal(l) => l.fmt(f),
+            Expr::Block(b) => b.fmt(f),
+            Expr::BinOp(b) => b.fmt(f),
+        }
+    }
+}
+
+impl LiteralExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::LiteralExpr {
+            return None;
+        }
+
+        let ty = syntax.children().find_map(|c| match c {
+            NodeOrToken::Token(token) => {
+                if token.kind() == SyntaxKind::IntegerLiteral {
+                    Some(Type::Integer)
+                } else if token.kind() == SyntaxKind::StringLiteral {
+                    Some(Type::String)
+                } else if token.kind() == SyntaxKind::BitLiteral {
+                    Some(Type::Bits((token.text_len() - 2) as u16))
+                } else if token.kind() == SyntaxKind::Identifier {
+                    Some(Type::Unresolved(NodeOrToken::Token(token)))
+                } else {
+                    None
+                }
+            }
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructFieldAccess => {
+                Some(Type::Unresolved(NodeOrToken::Node(node)))
+            }
+            _ => None,
+        })?;
+
+        Some(Self { syntax, ty })
+    }
+}
+
+impl ExprNode for LiteralExpr {
+    fn ty(&self) -> &Type {
+        &self.ty
+    }
+}
+
+impl fmt::Debug for LiteralExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LiteralExpr")
+            .field("type", &self.ty)
+            .finish()
+    }
+}
+
+impl ExprNode for BlockExpr {
+    fn ty(&self) -> &Type {
+        &self.ty
+    }
+}
+
+impl BlockExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::BlockExpr {
+            return None;
+        }
+
+        let stmts = syntax
+            .children()
+            .filter_map(map_expr)
+            .collect::<Vec<Expr>>();
+
+        let ty = stmts.last().map(|e| e.ty()).cloned()?;
+
+        Some(Self { syntax, stmts, ty })
+    }
+}
+
+impl fmt::Debug for BlockExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BlockExpr")
+            .field("type", &self.ty)
+            .field("stmts", &self.stmts)
+            .finish()
+    }
+}
+
+impl BinOpExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::BinOpExpr {
+            return None;
+        }
+
+        let left: Box<Expr> = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprLeft => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(map_expr)
+            .map(Box::new)
+            .unwrap();
+        let kind: BinOpKind = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprOp => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(|c| match c {
+                NodeOrToken::Token(token) => match token.kind() {
+                    SyntaxKind::At => Some(BinOpKind::BitConcat),
+                    _ => None,
+                },
+                _ => None,
+            })?;
+        let right: Box<Expr> = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BinOpExprRight => Some(n),
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .find_map(map_expr)
+            .map(Box::new)?;
+
+        Some(Self {
+            syntax,
+            kind,
+            left,
+            right,
+        })
+    }
+}
+
+impl fmt::Debug for BinOpExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BinOpExpr")
+            .field("kind", &self.kind)
+            .field("left", &*self.left)
+            .field("right", &*self.right)
+            .finish()
+    }
+}
+
+impl ExprNode for BinOpExpr {
+    fn ty(&self) -> &Type {
+        self.left.ty()
+    }
+}
+
+fn map_expr(element: SyntaxElement) -> Option<Expr> {
+    match element {
+        NodeOrToken::Node(node) => match node.kind() {
+            SyntaxKind::LiteralExpr => LiteralExpr::new(node).map(|e| e.into()),
+            SyntaxKind::BlockExpr => BlockExpr::new(node).map(|e| e.into()),
+            SyntaxKind::BinOpExpr => BinOpExpr::new(node).map(|e| e.into()),
+            _ => None,
+        },
+        _ => None,
     }
 }
