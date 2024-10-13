@@ -87,9 +87,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@57..58,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "7",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "7",
+// CHECK:                                                             span: <unknown>@58..59,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@58..59,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -151,9 +157,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@75..76,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "3",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "3",
+// CHECK:                                                             span: <unknown>@76..77,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@76..77,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -803,9 +815,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@340..349,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@340..349,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -819,9 +837,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@350..351,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b000",
+// CHECK:                                             span: <unknown>@351..356,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@351..356,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -835,9 +859,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@357..358,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"add\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"add\"",
+// CHECK:                                             span: <unknown>@358..363,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@358..363,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -925,9 +955,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0100000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0100000",
+// CHECK:                                             span: <unknown>@385..394,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@385..394,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -941,9 +977,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@395..396,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b000",
+// CHECK:                                             span: <unknown>@396..401,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@396..401,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -957,9 +999,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@402..403,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sub\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"sub\"",
+// CHECK:                                             span: <unknown>@403..408,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@403..408,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1047,9 +1095,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@430..439,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@430..439,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1063,9 +1117,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@440..441,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b001",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b001",
+// CHECK:                                             span: <unknown>@441..446,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@441..446,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1079,9 +1139,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@447..448,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sll\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"sll\"",
+// CHECK:                                             span: <unknown>@448..453,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@448..453,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1169,9 +1235,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@475..484,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@475..484,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1185,9 +1257,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@485..486,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b010",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b010",
+// CHECK:                                             span: <unknown>@486..491,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@486..491,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1201,9 +1279,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@492..493,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"slt\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"slt\"",
+// CHECK:                                             span: <unknown>@493..498,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@493..498,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1291,9 +1375,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@521..530,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@521..530,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1307,9 +1397,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@531..532,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b011",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b011",
+// CHECK:                                             span: <unknown>@532..537,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@532..537,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1323,9 +1419,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@538..539,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sltu\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"sltu\"",
+// CHECK:                                             span: <unknown>@539..545,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@539..545,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1413,9 +1515,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@567..576,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@567..576,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1429,9 +1537,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@577..578,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b100",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b100",
+// CHECK:                                             span: <unknown>@578..583,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@578..583,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1445,9 +1559,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@584..585,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"xor\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"xor\"",
+// CHECK:                                             span: <unknown>@585..590,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@585..590,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1535,9 +1655,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@612..621,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@612..621,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1551,9 +1677,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@622..623,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b101",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b101",
+// CHECK:                                             span: <unknown>@623..628,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@623..628,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1567,9 +1699,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@629..630,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"srl\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"srl\"",
+// CHECK:                                             span: <unknown>@630..635,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@630..635,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1657,9 +1795,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0100000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0100000",
+// CHECK:                                             span: <unknown>@657..666,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@657..666,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1673,9 +1817,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@667..668,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b101",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b101",
+// CHECK:                                             span: <unknown>@668..673,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@668..673,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1689,9 +1839,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@674..675,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"sra\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"sra\"",
+// CHECK:                                             span: <unknown>@675..680,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@675..680,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1779,9 +1935,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@701..710,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@701..710,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1795,9 +1957,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@711..712,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b110",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b110",
+// CHECK:                                             span: <unknown>@712..717,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@712..717,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1811,9 +1979,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@718..719,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"or\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"or\"",
+// CHECK:                                             span: <unknown>@719..723,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@719..723,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1901,9 +2075,15 @@
 // CHECK:                         GreenNodeData {
 // CHECK:                             kind: InstrParentTemplateArg,
 // CHECK:                             children: [
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b0000000",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b0000000",
+// CHECK:                                             span: <unknown>@745..754,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@745..754,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1917,9 +2097,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@755..756,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: BitLiteral,
-// CHECK:                                     text: "0b111",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: BitLiteral,
+// CHECK:                                             text: "0b111",
+// CHECK:                                             span: <unknown>@756..761,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@756..761,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -1933,9 +2119,15 @@
 // CHECK:                                     text: " ",
 // CHECK:                                     span: <unknown>@762..763,
 // CHECK:                                 },
-// CHECK:                                 GreenTokenData {
-// CHECK:                                     kind: StringLiteral,
-// CHECK:                                     text: "\"and\"",
+// CHECK:                                 GreenNodeData {
+// CHECK:                                     kind: LiteralExpr,
+// CHECK:                                     children: [
+// CHECK:                                         GreenTokenData {
+// CHECK:                                             kind: StringLiteral,
+// CHECK:                                             text: "\"and\"",
+// CHECK:                                             span: <unknown>@763..768,
+// CHECK:                                         },
+// CHECK:                                     ],
 // CHECK:                                     span: <unknown>@763..768,
 // CHECK:                                 },
 // CHECK:                             ],
@@ -2034,9 +2226,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@804..805,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "12",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "12",
+// CHECK:                                                             span: <unknown>@805..807,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@805..807,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -2098,9 +2296,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@820..821,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "5",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "5",
+// CHECK:                                                             span: <unknown>@821..822,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@821..822,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -2162,9 +2366,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@838..839,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "3",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "3",
+// CHECK:                                                             span: <unknown>@839..840,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@839..840,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -2226,9 +2436,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@852..853,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "5",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "5",
+// CHECK:                                                             span: <unknown>@853..854,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@853..854,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {
@@ -2422,9 +2638,15 @@
 // CHECK:                                                     text: "<",
 // CHECK:                                                     span: <unknown>@925..926,
 // CHECK:                                                 },
-// CHECK:                                                 GreenTokenData {
-// CHECK:                                                     kind: IntegerLiteral,
-// CHECK:                                                     text: "12",
+// CHECK:                                                 GreenNodeData {
+// CHECK:                                                     kind: LiteralExpr,
+// CHECK:                                                     children: [
+// CHECK:                                                         GreenTokenData {
+// CHECK:                                                             kind: IntegerLiteral,
+// CHECK:                                                             text: "12",
+// CHECK:                                                             span: <unknown>@926..928,
+// CHECK:                                                         },
+// CHECK:                                                     ],
 // CHECK:                                                     span: <unknown>@926..928,
 // CHECK:                                                 },
 // CHECK:                                                 GreenTokenData {

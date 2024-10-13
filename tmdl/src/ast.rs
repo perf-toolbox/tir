@@ -9,7 +9,7 @@ pub type TranslationUnit = AstNode<TranslationUnitKind>;
 pub type InstrTemplateDecl = AstNode<InstrTemplateDeclKind>;
 pub type InstrTemplateParameterDecl = AstNode<InstrTemplateParameterDeclKind>;
 pub type InstrDecl = AstNode<InstrDeclKind>;
-pub type InstrTemplateArgDecl = AstNode<InstrTemplateArgDeclKind>;
+pub type InstrTemplateArg = AstNode<InstrTemplateArgKind>;
 pub type StructFieldDecl = AstNode<StructFieldDeclKind>;
 pub type BlockExpr = AstNode<BlockExprKind>;
 pub type LiteralExpr = AstNode<LiteralExprKind>;
@@ -158,7 +158,7 @@ impl InstrDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn template_args<'a>(&'a self) -> impl Iterator<Item = InstrTemplateArgDecl> + 'a {
+    pub fn template_args<'a>(&'a self) -> impl Iterator<Item = InstrTemplateArg> + 'a {
         self.syntax_node
             .children()
             .filter_map(|child| match child {
@@ -173,7 +173,7 @@ impl InstrDecl {
                 NodeOrToken::Node(child_node)
                     if child_node.kind() == SyntaxKind::InstrParentTemplateArg =>
                 {
-                    Some(InstrTemplateArgDecl::new(child_node.clone()))
+                    Some(InstrTemplateArg::new(child_node.clone()))
                 }
                 _ => None,
             })
@@ -190,11 +190,50 @@ impl fmt::Debug for InstrDecl {
     }
 }
 
-impl fmt::Debug for InstrTemplateArgDecl {
+impl InstrTemplateArg {
+    pub fn expr<'a>(&'a self) -> LiteralExpr {
+        self.syntax_node
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::LiteralExpr => {
+                    Some(LiteralExpr::new(node))
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+}
+
+impl fmt::Debug for InstrTemplateArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("InstrTemplateArgDecl")
-            .field("name", &"TODO")
-            .field("type", &"TODO")
+        f.debug_struct("InstrTemplateArg")
+            .field("expr", &self.expr())
+            .finish()
+    }
+}
+
+impl LiteralExpr {
+    pub fn value<'a>(&'a self) -> String {
+        self.syntax_node
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Token(token)
+                    if token.kind() == SyntaxKind::BitLiteral
+                        || token.kind() == SyntaxKind::IntegerLiteral
+                        || token.kind() == SyntaxKind::StringLiteral =>
+                {
+                    Some(token.text().to_string())
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+}
+
+impl fmt::Debug for LiteralExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LiteralExpr")
+            .field("value", &self.value())
             .finish()
     }
 }
@@ -298,9 +337,9 @@ impl AstNodeKind for InstrDeclKind {
     }
 }
 
-pub enum InstrTemplateArgDeclKind {}
+pub enum InstrTemplateArgKind {}
 
-impl AstNodeKind for InstrTemplateArgDeclKind {
+impl AstNodeKind for InstrTemplateArgKind {
     fn get_syntax_kind() -> SyntaxKind {
         SyntaxKind::InstrParentTemplateArg
     }
