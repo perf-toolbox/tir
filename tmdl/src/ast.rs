@@ -11,9 +11,9 @@ pub trait ASTNode {
 
 #[derive(Clone)]
 pub enum Type {
-    Register,
     Bits(u16),
     String,
+    Unresolved(SyntaxNode),
 }
 
 #[derive(Clone)]
@@ -105,7 +105,6 @@ impl Type {
 
         match ident.as_ref() {
             "str" => Some(Type::String),
-            "Register" => Some(Type::Register),
             "bits" => {
                 let param = syntax
                     .children()
@@ -136,7 +135,7 @@ impl Type {
 
                 Some(Type::Bits(num_bits))
             }
-            _ => unreachable!("Unknown type `{}`", ident),
+            _ => Some(Type::Unresolved(syntax)),
         }
     }
 }
@@ -144,7 +143,7 @@ impl Type {
 impl fmt::Debug for Type {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Type::Register => write!(f, "Register"),
+            Type::Unresolved(_) => write!(f, "<unresolved>"),
             Type::String => write!(f, "str"),
             Type::Bits(num) => write!(f, "bits<{}>", num),
         }

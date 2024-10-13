@@ -35,6 +35,8 @@ pub enum SyntaxKind {
     LetKw,
     /// `instr`
     InstrKw,
+    /// `enum`
+    EnumKw,
 
     // Identifiers and literals
     Identifier,
@@ -104,6 +106,10 @@ pub enum SyntaxKind {
     BlockExpr,
     LiteralExpr,
     BinOpExpr,
+
+    EnumDecl,
+    EnumBody,
+    EnumVariantDecl,
 }
 
 #[derive(Debug, Clone)]

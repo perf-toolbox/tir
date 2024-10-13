@@ -13,7 +13,8 @@ pub fn parse(tokens: &[ImmElement]) -> ImmNode {
     let top_level_decl = parse_instr_template_decl()
         .or_else(parse_instr_decl())
         .or_else(parse_encoding())
-        .or_else(parse_asm());
+        .or_else(parse_asm())
+        .or_else(parse_enum());
     let parser = zero_or_more(top_level_decl.map(NodeOrToken::Node).or_else(catch_all()));
 
     let result = parser.parse(stream).unwrap();
@@ -667,4 +668,79 @@ fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmEle
                 ))
             },
         )
+}
+
+fn parse_enum_single_variant<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+    isolate_until(
+        token(SyntaxKind::RightBrace)
+            .or_else(token(SyntaxKind::Comma))
+            .void(),
+        eat_until(SyntaxKind::Identifier)
+            .and_then(token(SyntaxKind::Identifier))
+            .and_then(eat_all())
+            .map(|((aliens0, name), aliens1)| {
+                let span = name.as_token().span();
+                let mut elements = vec![];
+                elements.extend(aliens0);
+                elements.push(name);
+                elements.extend(aliens1);
+
+                NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::EnumVariantDecl,
+                    elements,
+                    span,
+                ))
+            }),
+    )
+}
+
+fn parse_enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+    isolate_block(
+        token(SyntaxKind::LeftBrace).void(),
+        token(SyntaxKind::RightBrace).void(),
+        token(SyntaxKind::LeftBrace)
+            .and_then(optional(separated(
+                parse_enum_single_variant(),
+                token(SyntaxKind::Comma).void(),
+            )))
+            .and_then(eat_until(SyntaxKind::RightBrace))
+            .and_then(token(SyntaxKind::RightBrace))
+            .map(|(((left_brace, fields), aliens), right_brace)| {
+                let span = left_brace.as_token().span();
+                let mut elements = vec![];
+                elements.push(left_brace);
+                if let Some(fields) = fields {
+                    elements.extend(fields);
+                }
+                elements.extend(aliens);
+                elements.push(right_brace);
+
+                NodeOrToken::Node(GreenNodeData::new(SyntaxKind::EnumBody, elements, span))
+            }),
+    )
+}
+
+fn parse_enum<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+    isolate_until(
+        token(SyntaxKind::LeftBrace).void(),
+        token(SyntaxKind::EnumKw)
+            .and_then(eat_until(SyntaxKind::Identifier))
+            .and_then(token(SyntaxKind::Identifier))
+            .map(move |((kw, aliens), name)| (kw, aliens, name))
+            .and_then(eat_all())
+            .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2)),
+    )
+    .and_then(parse_enum_variants())
+    .map(|((kw, aliens1, name, aliens2), variants)| {
+        let span = kw.as_token().span();
+
+        let mut elements = vec![];
+        elements.push(kw);
+        elements.extend(aliens1);
+        elements.push(name);
+        elements.extend(aliens2);
+        elements.push(variants);
+
+        GreenNodeData::new(SyntaxKind::EnumDecl, elements, span)
+    })
 }

@@ -24,15 +24,15 @@
 // CHECK:                 fields: [
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "rd",
-// CHECK:                         type: Register,
+// CHECK:                         type: <unresolved>,
 // CHECK:                     },
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "rs1",
-// CHECK:                         type: Register,
+// CHECK:                         type: <unresolved>,
 // CHECK:                     },
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "rs2",
-// CHECK:                         type: Register,
+// CHECK:                         type: <unresolved>,
 // CHECK:                     },
 // CHECK:                 ],
 // CHECK:             },
@@ -63,11 +63,11 @@
 // CHECK:                 fields: [
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "rd",
-// CHECK:                         type: Register,
+// CHECK:                         type: <unresolved>,
 // CHECK:                     },
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "rs1",
-// CHECK:                         type: Register,
+// CHECK:                         type: <unresolved>,
 // CHECK:                     },
 // CHECK:                     StructFieldDecl {
 // CHECK:                         name: "imm",
