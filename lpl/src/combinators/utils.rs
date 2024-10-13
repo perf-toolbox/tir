@@ -1,4 +1,4 @@
-use crate::{ParseResult, ParseStream, Parser, ParserError};
+use crate::{InternalError, ParseResult, ParseStream, Parser};
 
 pub fn todo<'a, Input, Output>() -> impl Parser<'a, Input, Output>
 where
@@ -15,7 +15,7 @@ where
         if input.len() == 0 {
             Ok(((), Some(input)))
         } else {
-            Err(ParserError::new("Expected end of input", input.span()))
+            Err(InternalError::ExpectedEof(input.span()).into())
         }
     }
 }
@@ -68,10 +68,7 @@ where
         }
 
         if depth != 0 {
-            return Err(ParserError::new(
-                "failed to match end and start",
-                input.span(),
-            ));
+            return Err(InternalError::UnmatchedPair(input.span()).into());
         }
 
         let span = input.span();
@@ -86,10 +83,7 @@ where
         let (result, remainder) = parser.parse(isolated_input)?;
 
         if remainder.map(|r| r.len()).unwrap_or_default() > 0 {
-            return Err(ParserError::new(
-                "nested parser did not consume all of its input",
-                span,
-            ));
+            return Err(InternalError::ExpectedEof(span).into());
         }
 
         Ok((result, next_input))
@@ -119,7 +113,7 @@ where
         }
 
         if next_input.is_none() && !found {
-            return Err(ParserError::new("predicate not found", input.span()));
+            return Err(InternalError::PredNotSatisfied(input.span()).into());
         }
 
         let span = input.span();
@@ -133,10 +127,7 @@ where
         let (result, remainder) = parser.parse(isolated)?;
 
         if remainder.map(|r| r.len()).unwrap_or_default() > 0 {
-            return Err(ParserError::new(
-                "nested parser did not consume all of its input",
-                span,
-            ));
+            return Err(InternalError::ExpectedEof(span).into());
         }
 
         Ok((result, next_input))

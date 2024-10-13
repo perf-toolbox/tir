@@ -5,9 +5,8 @@ use lpl::combinators::{
     literal, zero_or_more,
 };
 use lpl::syntax::GreenElement;
-use lpl::Parser;
-use lpl::ParserError;
 use lpl::StrStream;
+use lpl::{Diagnostic, Parser};
 
 use crate::{SyntaxKind, Token, TokenData};
 
@@ -28,9 +27,9 @@ use crate::{SyntaxKind, Token, TokenData};
 ///
 /// # Returns
 ///
-/// * `Result<TokenStream<'a>, ParserError>` - A Result containing either a TokenStream on success,
-///   or a ParserError if lexing fails.
-pub fn lex(input: &str) -> Result<Vec<GreenElement<SyntaxKind>>, ParserError> {
+/// * `Result<TokenStream<'a>, Diagnostic>` - A Result containing either a TokenStream on success,
+///   or a Diagnostic if lexing fails.
+pub fn lex(input: &str) -> Result<Vec<GreenElement<SyntaxKind>>, Diagnostic> {
     let stream: StrStream = input.into();
 
     let token = lex_keyword()

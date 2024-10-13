@@ -1,4 +1,4 @@
-use crate::{ParseStream, Parser, ParserError};
+use crate::{InternalError, ParseStream, Parser};
 
 pub fn one_or_more<'a, P, Input: ParseStream<'a> + 'a, Output>(
     parser: P,
@@ -11,11 +11,14 @@ where
 
         let mut next_input: Option<Input>;
 
-        if let Ok((first_item, ni)) = parser.parse(input.clone()) {
-            next_input = ni;
-            result.push(first_item);
-        } else {
-            return Err(ParserError::new("none found", input.span()));
+        match parser.parse(input.clone()) {
+            Ok((first_item, ni)) => {
+                next_input = ni;
+                result.push(first_item);
+            }
+            Err(err) => {
+                return Err(err);
+            }
         }
 
         while let Some(ref inp) = next_input {
@@ -117,7 +120,7 @@ where
         }
 
         if result.is_empty() {
-            return Err(ParserError::new("no items could be parserd", input.span()));
+            return Err(InternalError::EmptyList(input.span()).into());
         }
 
         Ok((result, next_input))

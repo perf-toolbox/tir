@@ -1,3 +1,4 @@
+use core::fmt;
 use std::ops::RangeBounds;
 
 use lpl::{
@@ -110,6 +111,12 @@ pub enum SyntaxKind {
     EnumDecl,
     EnumBody,
     EnumVariantDecl,
+}
+
+impl fmt::Display for SyntaxKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Debug, Clone)]

@@ -1,10 +1,10 @@
 pub mod combinators;
 pub mod syntax;
 
-mod err;
+mod diagnostic;
 mod parse_stream;
 
-pub use err::*;
+pub use diagnostic::*;
 pub use parse_stream::*;
 
 use core::fmt;
@@ -70,7 +70,7 @@ impl fmt::Debug for Span {
 
 pub type Spanned<Type> = (Type, Span);
 
-pub type ParseResult<Input, Output> = Result<(Output, Option<Input>), ParserError>;
+pub type ParseResult<Input, Output> = Result<(Output, Option<Input>), Diagnostic>;
 
 pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
     fn parse(&self, input: Input) -> ParseResult<Input, Output>;

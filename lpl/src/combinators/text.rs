@@ -1,11 +1,11 @@
-use crate::{parse_stream::ParseStream, ParseResult, Parser, ParserError};
+use crate::{parse_stream::ParseStream, InternalError, ParseResult, Parser};
 
 pub fn any_char<'a, Input>(input: Input) -> ParseResult<Input, char>
 where
     Input: ParseStream<'a>,
 {
     if !input.is_string_like() {
-        return Err(ParserError::new("Expected string-like input", input.span()));
+        return Err(InternalError::NotStringLike(input.span()).into());
     }
 
     match input.chars().next() {
@@ -13,10 +13,7 @@ where
             let next_input: Option<Input> = input.slice(next.len_utf8()..input.len());
             Ok((next, next_input))
         }
-        _ => Err(ParserError::new(
-            "Expected a char, got end of string",
-            input.span(),
-        )),
+        _ => Err(InternalError::UnexpectedEof(input.span()).into()),
     }
 }
 
@@ -27,7 +24,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new("Expected string-like input", input.span()));
+            return Err(InternalError::NotStringLike(input.span()).into());
         }
 
         let mut last = 0;
@@ -42,7 +39,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new("", input.span()));
+            return Err(InternalError::PredNotSatisfied(input.span()).into());
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());
@@ -74,17 +71,13 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new("Expected string-like input", input.span()));
+            return Err(InternalError::NotStringLike(input.span()).into());
         }
 
         if !input.starts_with(config.string_separator) {
-            return Err(ParserError::new(
-                format!(
-                    "Expected string literal to start with `{}`",
-                    config.string_separator
-                ),
-                input.span(),
-            ));
+            return Err(
+                InternalError::UnexpectedPrefix(config.string_separator, input.span()).into(),
+            );
         }
 
         let last = || {
@@ -109,10 +102,7 @@ where
             Ok(last) => Ok((input.substr(0..last).unwrap(), input.slice(last..))),
             Err(pos) => {
                 let span = crate::Span::new(input.span().filename.clone(), pos, pos);
-                Err(ParserError::new(
-                    format!("Expected '{}'", config.string_separator),
-                    span,
-                ))
+                Err(InternalError::UnexpectedEof(span).into())
             }
         }
     }

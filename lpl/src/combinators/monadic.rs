@@ -1,4 +1,4 @@
-use crate::{ParseStream, Parser, ParserError, Span, Spanned};
+use crate::{InternalError, ParseStream, Parser, Span, Spanned};
 
 pub fn map<'a, P, F, Input, Output1, Output2>(
     parser: P,
@@ -48,7 +48,7 @@ where
                 Some(next_input) => parser2
                     .parse(next_input)
                     .map(|(out2, next_input)| ((out, out2), next_input)),
-                None => Err(ParserError::new("no more input to parse", input.span())),
+                None => Err(InternalError::UnexpectedEof(input.span()).into()),
             })
     }
 }

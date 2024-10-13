@@ -1,7 +1,7 @@
 use crate::{
     combinators::{literal, reset, text::take_while},
     parse_stream::ParseStream,
-    Parser, ParserError,
+    InternalError, Parser,
 };
 
 pub fn line_comment<'a, Input>(comment_start: &'static str) -> impl Parser<'a, Input, &'a str>
@@ -46,7 +46,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new("Expected string-like input", input.span()));
+            return Err(InternalError::NotStringLike(input.span()).into());
         }
 
         let mut last = 0;
@@ -54,17 +54,11 @@ where
         let mut chars = input.chars().peekable();
 
         if input.len() == 0 {
-            return Err(ParserError::new(
-                "Expected at least one character",
-                input.span(),
-            ));
+            return Err(InternalError::UnexpectedEof(input.span()).into());
         }
 
         if !chars.peek().unwrap().is_alphabetic() && !predicate(*chars.peek().unwrap()) {
-            return Err(ParserError::new(
-                "Identifier must start with an alphabetic character or satisfy a predicate",
-                input.span(),
-            ));
+            return Err(InternalError::PredNotSatisfied(input.span()).into());
         }
 
         for c in chars {
@@ -75,7 +69,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new("Expected identifier", input.span()));
+            return Err(InternalError::PredNotSatisfied(input.span()).into());
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());
@@ -122,7 +116,7 @@ where
         if parsed_int.is_ok() {
             Ok((substr, next_input))
         } else {
-            Err(ParserError::new("Expected integer literal", input.span()))
+            Err(InternalError::PredNotSatisfied(input.span()).into())
         }
     }
 }
