@@ -173,7 +173,11 @@ fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
                 .map(|((angle_start, lit), angle_end)| {
                     let span = angle_start.as_token().span();
                     let lit_span = lit.as_token().span();
-                    let lit_expr = NodeOrToken::Node(GreenNodeData::new(SyntaxKind::LiteralExpr, vec![lit], lit_span));
+                    let lit_expr = NodeOrToken::Node(GreenNodeData::new(
+                        SyntaxKind::LiteralExpr,
+                        vec![lit],
+                        lit_span,
+                    ));
                     let elements = vec![angle_start, lit_expr, angle_end];
                     NodeOrToken::Node(GreenNodeData::new(SyntaxKind::TypeParams, elements, span))
                 }),
@@ -576,7 +580,11 @@ fn parse_template_instantiation_param<'a>() -> impl Parser<'a, TokenStream<'a>, 
         let span = lit.as_token().span();
         elements.extend(aliens0);
         let lit_span = lit.as_token().span();
-        let lit_expr = NodeOrToken::Node(GreenNodeData::new(SyntaxKind::LiteralExpr, vec![lit], lit_span));
+        let lit_expr = NodeOrToken::Node(GreenNodeData::new(
+            SyntaxKind::LiteralExpr,
+            vec![lit],
+            lit_span,
+        ));
         elements.push(lit_expr);
         elements.extend(aliens1);
         NodeOrToken::Node(GreenNodeData::new(
