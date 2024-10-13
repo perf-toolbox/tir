@@ -111,6 +111,14 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
     {
         BoxedParser::new(combinators::and_then(self, parser2))
     }
+
+    fn void(self) -> BoxedParser<'a, Input, ()>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+    {
+        BoxedParser::new(combinators::map(self, |_| ()))
+    }
 }
 
 impl<'a, F, Input, Output> Parser<'a, Input, Output> for F
