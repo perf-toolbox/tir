@@ -4,7 +4,7 @@
 
 // CHECK: Some(
 // CHECK:     SourceFile {
-// CHECK:         top_level_decls: [
+// CHECK:         items: [
 // CHECK:             EnumDecl {
 // CHECK:                 name: "GPR",
 // CHECK:                 variants: [

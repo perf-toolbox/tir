@@ -17,18 +17,12 @@ pub enum Type {
 }
 
 #[derive(Clone)]
-pub enum ASTNodeKind {
-    SourceFile(SourceFile),
+pub enum Item {
     InstrTemplateDecl(InstrTemplateDecl),
-    InstrTemplateParameterDecl(InstrTemplateParameterDecl),
     InstrDecl(InstrDecl),
-    InstrTemplateArg(InstrTemplateArg),
-    StructFieldDecl(StructFieldDecl),
-    Expr(Expr),
     EncodingDecl(EncodingDecl),
     AsmDecl(AsmDecl),
     EnumDecl(EnumDecl),
-    EnumVariantDecl(EnumVariantDecl),
 }
 
 #[derive(Clone, Debug)]
@@ -39,14 +33,14 @@ pub enum Expr {
 #[derive(Clone)]
 pub struct SourceFile {
     syntax: SyntaxNode,
-    top_level_decls: Vec<ASTNodeKind>,
+    items: Vec<Item>,
 }
 
 #[derive(Clone)]
 pub struct InstrTemplateDecl {
     syntax: SyntaxNode,
-    params: Vec<ASTNodeKind>,
-    fields: Vec<ASTNodeKind>,
+    params: Vec<InstrTemplateParameterDecl>,
+    fields: Vec<StructFieldDecl>,
 }
 
 #[derive(Clone)]
@@ -57,7 +51,7 @@ pub struct InstrTemplateParameterDecl {
 #[derive(Clone)]
 pub struct InstrDecl {
     syntax: SyntaxNode,
-    template_args: Vec<ASTNodeKind>,
+    template_args: Vec<InstrTemplateArg>,
 }
 
 #[derive(Clone)]
@@ -86,7 +80,7 @@ pub struct StructFieldDecl {
 #[derive(Clone)]
 pub struct EnumDecl {
     syntax: SyntaxNode,
-    variants: Vec<ASTNodeKind>,
+    variants: Vec<EnumVariantDecl>,
 }
 
 #[derive(Clone)]
@@ -160,31 +154,75 @@ impl fmt::Debug for Type {
     }
 }
 
+impl fmt::Debug for Item {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Item::InstrTemplateDecl(i) => i.fmt(f),
+            Item::InstrDecl(i) => i.fmt(f),
+            Item::EncodingDecl(i) => i.fmt(f),
+            Item::AsmDecl(i) => i.fmt(f),
+            Item::EnumDecl(i) => i.fmt(f),
+        }
+    }
+}
+
+impl From<InstrTemplateDecl> for Item {
+    fn from(i: InstrTemplateDecl) -> Self {
+        Item::InstrTemplateDecl(i)
+    }
+}
+
+impl From<InstrDecl> for Item {
+    fn from(i: InstrDecl) -> Self {
+        Item::InstrDecl(i)
+    }
+}
+
+impl From<EncodingDecl> for Item {
+    fn from(i: EncodingDecl) -> Self {
+        Item::EncodingDecl(i)
+    }
+}
+
+impl From<AsmDecl> for Item {
+    fn from(i: AsmDecl) -> Self {
+        Item::AsmDecl(i)
+    }
+}
+
+impl From<EnumDecl> for Item {
+    fn from(i: EnumDecl) -> Self {
+        Item::EnumDecl(i)
+    }
+}
+
 impl SourceFile {
-    pub fn cast(root: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(root: SyntaxNode) -> Option<SourceFile> {
         if root.kind() != SyntaxKind::TranslationUnit {
             return None;
         }
 
-        let top_level_decls = root
+        let items = root
             .children()
             .filter_map(|child| match child {
                 NodeOrToken::Node(node) => match node.kind() {
-                    SyntaxKind::InstrTemplateDecl => InstrTemplateDecl::cast(node.clone()),
-                    SyntaxKind::InstrDecl => InstrDecl::cast(node.clone()),
-                    SyntaxKind::EncodingDecl => EncodingDecl::cast(node.clone()),
-                    SyntaxKind::AsmDecl => AsmDecl::cast(node.clone()),
-                    SyntaxKind::EnumDecl => EnumDecl::cast(node.clone()),
+                    SyntaxKind::InstrTemplateDecl => {
+                        InstrTemplateDecl::new(node.clone()).map(|t| t.into())
+                    }
+                    SyntaxKind::InstrDecl => InstrDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::EncodingDecl => EncodingDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::AsmDecl => AsmDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::EnumDecl => EnumDecl::new(node.clone()).map(|t| t.into()),
                     _ => None,
                 },
                 _ => None,
             })
             .collect();
 
-        Some(ASTNodeKind::SourceFile(SourceFile {
+        Some(SourceFile {
             syntax: root,
-            top_level_decls,
-        }))
+            items,
+        })
     }
 }
 
@@ -201,13 +239,13 @@ impl ASTNode for SourceFile {
 impl fmt::Debug for SourceFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SourceFile")
-            .field("top_level_decls", &self.top_level_decls)
+            .field("items", &self.items)
             .finish()
     }
 }
 
 impl InstrTemplateDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<InstrTemplateDecl> {
         if syntax.kind() != SyntaxKind::InstrTemplateDecl {
             return None;
         }
@@ -224,7 +262,7 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrTemplateSingleParam => {
-                    InstrTemplateParameterDecl::cast(node)
+                    InstrTemplateParameterDecl::new(node)
                 }
                 _ => None,
             })
@@ -240,17 +278,17 @@ impl InstrTemplateDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructField => {
-                    StructFieldDecl::cast(node)
+                    StructFieldDecl::new(node)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::InstrTemplateDecl(Self {
+        Some(Self {
             syntax,
             params,
             fields,
-        }))
+        })
     }
 
     pub fn name(&self) -> String {
@@ -281,11 +319,11 @@ impl InstrTemplateDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn parameters(&self) -> &[ASTNodeKind] {
+    pub fn parameters(&self) -> &[InstrTemplateParameterDecl] {
         &self.params
     }
 
-    pub fn fields(&self) -> &[ASTNodeKind] {
+    pub fn fields(&self) -> &[StructFieldDecl] {
         &self.fields
     }
 }
@@ -301,12 +339,12 @@ impl fmt::Debug for InstrTemplateDecl {
 }
 
 impl InstrTemplateParameterDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrTemplateSingleParam {
             return None;
         }
 
-        Some(ASTNodeKind::InstrTemplateParameterDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -355,7 +393,7 @@ impl fmt::Debug for InstrTemplateParameterDecl {
 }
 
 impl InstrDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrDecl {
             return None;
         }
@@ -372,16 +410,16 @@ impl InstrDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplateArg => {
-                    InstrTemplateArg::cast(node)
+                    InstrTemplateArg::new(node)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::InstrDecl(Self {
+        Some(Self {
             syntax,
             template_args,
-        }))
+        })
     }
 
     pub fn name(&self) -> String {
@@ -430,7 +468,7 @@ impl InstrDecl {
             .unwrap_or("unknown".to_string())
     }
 
-    pub fn template_args(&self) -> &[ASTNodeKind] {
+    pub fn template_args(&self) -> &[InstrTemplateArg] {
         &self.template_args
     }
 }
@@ -446,12 +484,12 @@ impl fmt::Debug for InstrDecl {
 }
 
 impl InstrTemplateArg {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::InstrParentTemplateArg {
             return None;
         }
 
-        Some(ASTNodeKind::InstrTemplateArg(Self { syntax }))
+        Some(Self { syntax })
     }
 }
 
@@ -462,12 +500,12 @@ impl fmt::Debug for InstrTemplateArg {
 }
 
 impl EncodingDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EncodingDecl {
             return None;
         }
 
-        Some(ASTNodeKind::EncodingDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 }
 
@@ -478,12 +516,12 @@ impl fmt::Debug for EncodingDecl {
 }
 
 impl AsmDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::AsmDecl {
             return None;
         }
 
-        Some(ASTNodeKind::AsmDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 }
 
@@ -494,12 +532,12 @@ impl fmt::Debug for AsmDecl {
 }
 
 impl StructFieldDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::StructField {
             return None;
         }
 
-        Some(ASTNodeKind::StructFieldDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -535,7 +573,7 @@ impl fmt::Debug for StructFieldDecl {
 }
 
 impl EnumDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EnumDecl {
             return None;
         }
@@ -550,13 +588,13 @@ impl EnumDecl {
             .flat_map(|n| n.children())
             .filter_map(|c| match c {
                 NodeOrToken::Node(n) if n.kind() == SyntaxKind::EnumVariantDecl => {
-                    EnumVariantDecl::cast(n)
+                    EnumVariantDecl::new(n)
                 }
                 _ => None,
             })
             .collect::<Vec<_>>();
 
-        Some(ASTNodeKind::EnumDecl(Self { syntax, variants }))
+        Some(Self { syntax, variants })
     }
 
     pub fn name(&self) -> String {
@@ -582,12 +620,12 @@ impl fmt::Debug for EnumDecl {
 }
 
 impl EnumVariantDecl {
-    pub fn cast(syntax: SyntaxNode) -> Option<ASTNodeKind> {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
         if syntax.kind() != SyntaxKind::EnumVariantDecl {
             return None;
         }
 
-        Some(ASTNodeKind::EnumVariantDecl(Self { syntax }))
+        Some(Self { syntax })
     }
 
     pub fn name(&self) -> String {
@@ -608,23 +646,5 @@ impl fmt::Debug for EnumVariantDecl {
         f.debug_struct("EnumVariantDecl")
             .field("name", &self.name())
             .finish()
-    }
-}
-
-impl fmt::Debug for ASTNodeKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ASTNodeKind::AsmDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EncodingDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateParameterDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::SourceFile(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::StructFieldDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::InstrTemplateArg(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EnumDecl(ref n) => fmt::Debug::fmt(n, f),
-            ASTNodeKind::EnumVariantDecl(ref n) => fmt::Debug::fmt(n, f),
-            _ => todo!(),
-        }
     }
 }
