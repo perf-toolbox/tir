@@ -216,7 +216,7 @@ fn parse_single_template_parameter<'a>() -> impl Parser<'a, TokenStream<'a>, Imm
             let span = name.as_token().span();
             elements.extend(aliens0);
             elements.push(NodeOrToken::Node(GreenNodeData::new(
-                SyntaxKind::StructFieldName,
+                SyntaxKind::InstrTemplateSingleParamName,
                 vec![name],
                 span.clone(),
             )));

@@ -80,6 +80,7 @@ pub enum SyntaxKind {
     InstrTemplateName,
     InstrTemplateParams,
     InstrTemplateSingleParam,
+    InstrTemplateSingleParamName,
     InstrTemplateBody,
 
     InstrDecl,

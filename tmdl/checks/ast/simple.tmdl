@@ -1,0 +1,180 @@
+// This file was generated with ./utils/scripts/update_tmdlc_checks.py. Do not modify CHECKs manually.
+
+// RUN: tmdlc --action=emit-ast %S/../Inputs/simple.tmdl -o - | filecheck %s
+
+// CHECK: Some(
+// CHECK:     SourceFile {
+// CHECK:         instr_templates: [
+// CHECK:             InstrTemplateDecl {
+// CHECK:                 name: "RInstr",
+// CHECK:                 params: [
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$funct7",
+// CHECK:                         type: bits<7>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$funct3",
+// CHECK:                         type: bits<3>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$mnemonic",
+// CHECK:                         type: str,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:                 fields: [
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rd",
+// CHECK:                         type: Register,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rs1",
+// CHECK:                         type: Register,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rs2",
+// CHECK:                         type: Register,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrTemplateDecl {
+// CHECK:                 name: "IInstr",
+// CHECK:                 params: [
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$imm",
+// CHECK:                         type: bits<12>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$rs1",
+// CHECK:                         type: bits<5>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$funct3",
+// CHECK:                         type: bits<3>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$rd",
+// CHECK:                         type: bits<5>,
+// CHECK:                     },
+// CHECK:                     InstrTemplateParameterDecl {
+// CHECK:                         name: "$mnemonic",
+// CHECK:                         type: str,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:                 fields: [
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rd",
+// CHECK:                         type: Register,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "rs1",
+// CHECK:                         type: Register,
+// CHECK:                     },
+// CHECK:                     StructFieldDecl {
+// CHECK:                         name: "imm",
+// CHECK:                         type: bits<12>,
+// CHECK:                     },
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:         ],
+// CHECK:         instructions: [
+// CHECK:             InstrDecl {
+// CHECK:                 name: "ADD",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SUB",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SLL",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SLT",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SLTU",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "XOR",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SRL",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "SRA",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "OR",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:             InstrDecl {
+// CHECK:                 name: "AND",
+// CHECK:                 parent_template_name: "RInstr",
+// CHECK:                 parent_template_args: [
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                     InstrTemplateArg,
+// CHECK:                 ],
+// CHECK:             },
+// CHECK:         ],
+// CHECK:         encodings: [
+// CHECK:             EncodingDecl,
+// CHECK:             EncodingDecl,
+// CHECK:         ],
+// CHECK:         asm_decls: [
+// CHECK:             AsmDecl,
+// CHECK:             AsmDecl,
+// CHECK:         ],
+// CHECK:     },
+// CHECK: )

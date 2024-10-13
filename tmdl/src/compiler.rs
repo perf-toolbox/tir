@@ -40,7 +40,7 @@ pub fn compiler_main(args: Option<&ArgMatches>) -> Result<(), Box<dyn std::error
             let tokens = lex(&source).unwrap();
             let root = parse(&tokens);
             let red_root = SyntaxNodeData::new(root);
-            let translation_unit = ast::build(red_root);
+            let translation_unit = ast::SourceFile::new(red_root);
             println!("{:#?}", translation_unit);
         }
     }

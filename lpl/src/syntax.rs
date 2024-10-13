@@ -39,6 +39,7 @@ pub enum NodeOrToken<N, T> {
     Token(T),
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct RedTokenData<SK>
 where
     SK: Copy + Clone + Debug + PartialEq,
@@ -47,6 +48,7 @@ where
     green: GreenToken<SK>,
 }
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct RedNodeData<SK>
 where
     SK: Copy + Clone + Debug + PartialEq,
