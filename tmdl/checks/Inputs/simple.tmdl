@@ -1,8 +1,20 @@
 // Some nice comments
+
+reg_class GPR {
+    X0,
+    X1,
+    X2,
+    X3,
+    X4,
+    X5,
+    X6,
+    X7
+}
+
 instr_template RInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str> {
-   rd: Register,
-   rs1: Register,
-   rs2: Register,
+   rd: GPR,
+   rs1: GPR,
+   rs2: GPR,
 }
 
 encoding for ALUInstr {
