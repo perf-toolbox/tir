@@ -74,6 +74,7 @@ fn lex_keyword<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
         .or_else(literal("instr").map(|kw| TokenData::new(SyntaxKind::InstrKw, kw.to_owned())))
         .or_else(literal("for").map(|kw| TokenData::new(SyntaxKind::ForKw, kw.to_owned())))
         .or_else(literal("let").map(|kw| TokenData::new(SyntaxKind::LetKw, kw.to_owned())))
+        .or_else(literal("reg_class").map(|kw| TokenData::new(SyntaxKind::RegClassKw, kw.to_owned())))
 }
 
 fn lex_punctuation<'a>() -> impl Parser<'a, StrStream<'a>, Token> {

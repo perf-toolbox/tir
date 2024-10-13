@@ -35,6 +35,8 @@ pub enum SyntaxKind {
     LetKw,
     /// `instr`
     InstrKw,
+    /// `reg_class`
+    RegClassKw,
 
     // Identifiers and literals
     Identifier,
