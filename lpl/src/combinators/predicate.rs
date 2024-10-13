@@ -1,4 +1,4 @@
-use crate::{parse_stream::ParseStream, Parser, ParserError};
+use crate::{parse_stream::ParseStream, InternalError, Parser};
 
 pub fn pred<'a, Input, Output, P, F>(parser: P, predicate: F) -> impl Parser<'a, Input, Output>
 where
@@ -11,7 +11,7 @@ where
             if predicate(&value) {
                 Ok((value, next_input))
             } else {
-                Err(ParserError::new("TODO error message", input.span()))
+                Err(InternalError::PredNotSatisfied(input.span()).into())
             }
         }
         Err(err) => Err(err),

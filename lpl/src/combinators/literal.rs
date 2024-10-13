@@ -1,4 +1,4 @@
-use crate::{ParseStream, Parser, ParserError};
+use crate::{InternalError, ParseStream, Parser};
 
 pub fn literal<'a, Input: ParseStream<'a> + 'a>(
     expected: &'static str,
@@ -8,10 +8,7 @@ where
 {
     move |input: Input| match input.get(0..expected.len()) {
         Some(next) if next == expected => Ok((expected, input.slice(expected.len()..input.len()))),
-        _ => Err(ParserError::new(
-            format!("Expected `{:?}` not found", expected),
-            input.span(),
-        )),
+        _ => Err(InternalError::ExpectedNotFound(expected, input.span()).into()),
     }
 }
 

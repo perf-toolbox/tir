@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 lpl = { path = "../lpl" }
 clap = "4.5.9"
+thiserror = "1.0"
 
 [[bin]]
 name = "tmdlc"

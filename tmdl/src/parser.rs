@@ -1,10 +1,11 @@
 use lpl::syntax::GreenNodeData;
-use lpl::{combinators::*, ParserError, Span};
+use lpl::{combinators::*, Span};
 use lpl::{
     syntax::{GreenElement, NodeOrToken},
     ParseStream, Parser,
 };
 
+use crate::diagnostic::DiagKind;
 use crate::{ImmElement, ImmNode, SyntaxKind, TokenStream};
 
 pub fn parse(tokens: &[ImmElement]) -> ImmNode {
@@ -27,7 +28,7 @@ fn catch_all<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         if tokens.len() > 0 {
             return Ok((tokens.nth(0).unwrap(), tokens.slice(1..)));
         }
-        Err(ParserError::new("end of file", Span::empty()))
+        Err(DiagKind::UnexpectedEof(tokens.span()).into())
     }
 }
 
@@ -59,10 +60,7 @@ fn eat_until<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, Vec<ImmEl
             }
         }
 
-        Err(ParserError::new(
-            format!("Expected `{:?}` not found", kind),
-            tokens.span(),
-        ))
+        Err(DiagKind::TokenNotFound(kind, tokens.span()).into())
     }
 }
 
@@ -102,7 +100,7 @@ fn eat_until_one_of<'a>(
             }
         }
 
-        Err(ParserError::new("Expected tokens not found", tokens.span()))
+        Err(DiagKind::MultipleTokensNotFound(tokens.span()).into())
     }
 }
 
@@ -116,10 +114,7 @@ fn token<'a>(kind: SyntaxKind) -> impl Parser<'a, TokenStream<'a>, ImmElement> {
             }
         }
 
-        Err(ParserError::new(
-            format!("Expected `{:?}` not found", kind),
-            tokens.span(),
-        ))
+        Err(DiagKind::TokenNotFound(kind, tokens.span()).into())
     }
 }
 
@@ -133,7 +128,7 @@ fn token_of<'a>(kinds: &'static [SyntaxKind]) -> impl Parser<'a, TokenStream<'a>
             }
         }
 
-        Err(ParserError::new("Expected tokens not found", tokens.span()))
+        Err(DiagKind::MultipleTokensNotFound(tokens.span()).into())
     }
 }
 
