@@ -118,7 +118,7 @@ where
             next_input = next_input.unwrap().slice(1..);
         }
 
-        if next_input.is_none() && found == false {
+        if next_input.is_none() && !found {
             return Err(ParserError::new("predicate not found", input.span()));
         }
 
