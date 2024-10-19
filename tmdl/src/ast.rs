@@ -41,6 +41,8 @@ pub struct InstrTemplateDecl {
     syntax: SyntaxNode,
     params: Vec<InstrTemplateParameterDecl>,
     fields: Vec<StructFieldDecl>,
+    parent_template: Option<SyntaxNode>,
+    parent_template_args: Vec<InstrTemplateArg>,
 }
 
 #[derive(Clone)]
@@ -323,10 +325,34 @@ impl InstrTemplateDecl {
             })
             .collect::<Vec<_>>();
 
+        let parent_template = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => Some(node),
+            _ => None,
+        });
+        let parent_template_args = syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => {
+                    Some(node)
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|n| n.children())
+            .filter_map(|c| match c {
+                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplateArg => {
+                    InstrTemplateArg::new(node)
+                }
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+
         Some(Self {
             syntax,
             params,
             fields,
+            parent_template,
+            parent_template_args,
         })
     }
 
@@ -365,6 +391,38 @@ impl InstrTemplateDecl {
     pub fn fields(&self) -> &[StructFieldDecl] {
         &self.fields
     }
+
+    pub fn has_parent_template(&self) -> bool {
+        self.parent_template.is_some()
+    }
+
+    pub fn parent_template_name(&self) -> Option<String> {
+        self.parent_template
+            .iter()
+            .flat_map(|c| c.children())
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) => {
+                    if node.kind() == SyntaxKind::InstrParentTemplateName {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+    }
 }
 
 impl fmt::Debug for InstrTemplateDecl {
@@ -373,6 +431,8 @@ impl fmt::Debug for InstrTemplateDecl {
             .field("name", &self.name())
             .field("params", &self.parameters())
             .field("fields", &self.fields())
+            .field("parent_template_name", &self.parent_template_name())
+            .field("parent_template_args", &self.parent_template_args)
             .finish()
     }
 }

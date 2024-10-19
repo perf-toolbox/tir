@@ -11,41 +11,45 @@ enum GPR {
     X7
 }
 
-instr_template RInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str> {
+instr_template RInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str, $opcode: bits<7>> {
    rd: GPR,
    rs1: GPR,
    rs2: GPR,
 }
 
-encoding for ALUInstr {
-    $funct7 @ self.rs2 @ self.rs1 @ $funct3 @ self.rd @ 0b0110011
+encoding for RInstr {
+    $funct7 @ self.rs2 @ self.rs1 @ $funct3 @ self.rd @ $opcode
 }
 
-asm for ALUInstr {
+asm for RInstr {
     "{$mnemonic} {self.rd}, {self.rs1}, {self.rs2}"
 }
 
-instr ADD : RInstr<0b0000000, 0b000, "add">;
-instr SUB : RInstr<0b0100000, 0b000, "sub">;
-instr SLL : RInstr<0b0000000, 0b001, "sll">;
-instr SLT : RInstr<0b0000000, 0b010, "slt">;
-instr SLTU : RInstr<0b0000000, 0b011, "sltu">;
-instr XOR : RInstr<0b0000000, 0b100, "xor">;
-instr SRL : RInstr<0b0000000, 0b101, "srl">;
-instr SRA : RInstr<0b0100000, 0b101, "sra">;
-instr OR : RInstr<0b0000000, 0b110, "or">;
-instr AND : RInstr<0b0000000, 0b111, "and">;
+instr_template ALUInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str> : RInstr<$funct7, $funct3, $mnemonic, 0b0110011> {}
 
-instr_template IInstr<$imm: bits<12>, $rs1: bits<5>, $funct3: bits<3>, $rd: bits<5>, $mnemonic: str> {
+instr ADD : ALUInstr<0b0000000, 0b000, "add">;
+instr SUB : ALUInstr<0b0100000, 0b000, "sub">;
+instr SLL : ALUInstr<0b0000000, 0b001, "sll">;
+instr SLT : ALUInstr<0b0000000, 0b010, "slt">;
+instr SLTU : ALUInstr<0b0000000, 0b011, "sltu">;
+instr XOR : ALUInstr<0b0000000, 0b100, "xor">;
+instr SRL : ALUInstr<0b0000000, 0b101, "srl">;
+instr SRA : ALUInstr<0b0100000, 0b101, "sra">;
+instr OR : ALUInstr<0b0000000, 0b110, "or">;
+instr AND : ALUInstr<0b0000000, 0b111, "and">;
+
+instr_template IInstr<$imm: bits<12>, $rs1: bits<5>, $funct3: bits<3>, $rd: bits<5>, $mnemonic: str, $opcode: bits<7>> {
     rd: Register,
     rs1: Register,
     imm: bits<12>,
 }
 
-encoding for IALUInstr {
-    $imm @ $rs1 @ $funct3 @ $rd @ 0b0010011
+encoding for IInstr {
+    $imm @ $rs1 @ $funct3 @ $rd @ $opcode 
 }
 
-asm for IALUInstr {
+asm for IInstr {
     "{$mnemonic} {self.rd}, {self.rs1}, {self.imm}"
 }
+
+instr_template IALUInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str> : IInstr<$funct7, $funct3, $mnemonic, 0b0010011> {}

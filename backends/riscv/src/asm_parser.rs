@@ -31,6 +31,7 @@ fn asm_instr(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
     Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
 }
 
+#[allow(clippy::result_large_err)]
 pub fn parse_asm<'a>(
     context: &ContextRef,
     input: &'a str,
