@@ -269,7 +269,7 @@ fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, Imm
         .and_then(eat_until(SyntaxKind::Identifier))
         .and_then(separated(
             parse_single_template_parameter(),
-            token(SyntaxKind::Comma).map(|_| ()),
+            token(SyntaxKind::Comma),
         ))
         .map(|((angle, aliens), params)| (angle, aliens, params))
         .and_then(eat_until(SyntaxKind::RightAngle))
@@ -339,7 +339,7 @@ fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
         token(SyntaxKind::LeftBrace)
             .and_then(optional(separated(
                 parse_struct_field(),
-                token(SyntaxKind::Comma).map(|_| ()),
+                token(SyntaxKind::Comma),
             )))
             .and_then(eat_until(SyntaxKind::RightBrace))
             .and_then(token(SyntaxKind::RightBrace))
@@ -663,7 +663,7 @@ fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmEle
         .map(|((ident, aliens1), left_angle)| (ident, aliens1, left_angle))
         .and_then(separated(
             parse_template_instantiation_param(),
-            token(SyntaxKind::Comma).map(|_| ()),
+            token(SyntaxKind::Comma),
         ))
         .map(|((ident, aliens1, left_angle), params)| (ident, aliens1, left_angle, params))
         .and_then(eat_until(SyntaxKind::RightAngle))
@@ -731,7 +731,7 @@ fn parse_enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         token(SyntaxKind::LeftBrace)
             .and_then(optional(separated(
                 parse_enum_single_variant(),
-                token(SyntaxKind::Comma).void(),
+                token(SyntaxKind::Comma),
             )))
             .and_then(eat_until(SyntaxKind::RightBrace))
             .and_then(token(SyntaxKind::RightBrace))

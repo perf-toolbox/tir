@@ -89,11 +89,12 @@ where
     }
 }
 
-pub fn separated<'a, P1, P2, Input: ParseStream<'a> + 'a, Output>(
+pub fn separated_ignore<'a, P1, P2, Input, Output>(
     parser: P1,
     ignored: P2,
 ) -> impl Parser<'a, Input, Vec<Output>>
 where
+    Input: ParseStream<'a> + 'a,
     P1: Parser<'a, Input, Output>,
     P2: Parser<'a, Input, ()>,
 {
@@ -127,6 +128,46 @@ where
     }
 }
 
+pub fn separated<'a, P1, P2, Input, Output>(
+    parser: P1,
+    separator: P2,
+) -> impl Parser<'a, Input, Vec<Output>>
+where
+    Input: ParseStream<'a> + 'a,
+    P1: Parser<'a, Input, Output>,
+    P2: Parser<'a, Input, Output>,
+{
+    move |input: Input| {
+        let mut result = Vec::new();
+
+        let mut next_input: Option<Input> = Some(input.clone());
+
+        while let Some(ref inp) = next_input.clone() {
+            if let Ok((next_item, ni)) = parser.parse(inp.clone()) {
+                next_input = ni;
+                result.push(next_item);
+            } else {
+                break;
+            }
+
+            if let Some(ref inp) = next_input.clone() {
+                if let Ok((next_item, ni)) = separator.parse(inp.clone()) {
+                    next_input = ni;
+                    result.push(next_item);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if result.is_empty() {
+            return Err(InternalError::EmptyList(input.span()).into());
+        }
+
+        Ok((result, next_input))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::combinators::literal;
@@ -144,8 +185,8 @@ mod tests {
         let stream2: StrStream = input2.into();
         let stream3: StrStream = input3.into();
 
-        let matcher1 = interleaved(literal("test"), literal(",").map(|_| ()));
-        let matcher2 = separated(literal("test"), literal(",").map(|_| ()));
+        let matcher1 = interleaved(literal("test"), literal(",").void());
+        let matcher2 = separated_ignore(literal("test"), literal(",").void());
 
         assert!(matcher1.parse(stream1.clone()).is_ok());
         assert!(matcher1.parse(stream2.clone()).is_ok());
