@@ -4,6 +4,7 @@ pub mod syntax;
 mod diagnostic;
 mod parse_stream;
 
+use combinators::Flatten;
 pub use diagnostic::*;
 pub use parse_stream::*;
 
@@ -118,6 +119,15 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         Output: 'a,
     {
         BoxedParser::new(combinators::map(self, |_| ()))
+    }
+
+    fn flat<NewOutput>(self) -> BoxedParser<'a, Input, NewOutput>
+    where
+        Self: Sized + 'a,
+        NewOutput: 'a,
+        Output: Flatten<Output = NewOutput> + 'a,
+    {
+        BoxedParser::new(combinators::flat(self))
     }
 }
 

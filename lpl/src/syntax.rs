@@ -4,6 +4,7 @@ use std::iter;
 use std::rc::Rc;
 use std::sync::Arc;
 
+use crate::combinators::NotTuple;
 use crate::Span;
 
 pub type GreenToken<SK> = Arc<GreenTokenData<SK>>;
@@ -94,6 +95,8 @@ where
     }
 }
 
+impl<SK> NotTuple for GreenTokenData<SK> where SK: Copy + Clone + Debug + PartialEq {}
+
 impl<SK> fmt::Display for GreenTokenData<SK>
 where
     SK: Copy + Clone + Debug + PartialEq,
@@ -102,6 +105,8 @@ where
         fmt::Display::fmt(&self.text, f)
     }
 }
+
+impl<SK> NotTuple for GreenNodeData<SK> where SK: Copy + Clone + Debug + PartialEq {}
 
 impl<SK> GreenNodeData<SK>
 where
@@ -155,6 +160,8 @@ where
         Ok(())
     }
 }
+
+impl<N, T> NotTuple for NodeOrToken<N, T> {}
 
 impl<N, T> NodeOrToken<N, T> {
     pub fn as_node(&self) -> &N {

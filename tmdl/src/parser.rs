@@ -11,11 +11,11 @@ use crate::{ImmElement, ImmNode, SyntaxKind, TokenStream};
 pub fn parse(tokens: &[ImmElement]) -> ImmNode {
     let stream = TokenStream::new(tokens);
 
-    let top_level_decl = parse_instr_template_decl()
-        .or_else(parse_instr_decl())
-        .or_else(parse_encoding())
-        .or_else(parse_asm())
-        .or_else(parse_enum());
+    let top_level_decl = instr_template_decl()
+        .or_else(instr_decl())
+        .or_else(encoding())
+        .or_else(asm_())
+        .or_else(enum_());
     let parser = zero_or_more(top_level_decl.map(NodeOrToken::Node).or_else(catch_all()));
 
     let result = parser.parse(stream).unwrap();
@@ -154,38 +154,30 @@ fn token_of<'a>(kinds: &'static [SyntaxKind]) -> impl Parser<'a, TokenStream<'a>
     }
 }
 
-fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     attached_comment()
         .and_then(isolate_until(
             token(SyntaxKind::LeftBrace).void(),
             token(SyntaxKind::InstrTemplateKw)
                 .and_then(eat_until(SyntaxKind::Identifier))
                 .and_then(token(SyntaxKind::Identifier))
-                .map(move |((kw, aliens), name)| (kw, aliens, name))
                 .and_then(eat_until(SyntaxKind::LeftAngle))
-                .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2))
-                .and_then(parse_instr_template_parameters())
-                .map(|((kw, aliens1, name, aliens2), params)| (kw, aliens1, name, aliens2, params))
+                .and_then(instr_template_parameters())
                 .and_then(optional(
                     eat_until(SyntaxKind::Colon)
                         .and_then(token(SyntaxKind::Colon))
                         .and_then(eat_until(SyntaxKind::Identifier))
-                        .and_then(parse_template_instantiation()),
+                        .and_then(template_instantiation()),
                 ))
-                .map(|((kw, aliens1, name, aliens2, params), parent)| {
-                    (kw, aliens1, name, aliens2, params, parent)
-                })
                 .and_then(eat_all())
-                .map(|((kw, aliens1, name, aliens2, params, parent), aliens3)| {
-                    (kw, aliens1, name, aliens2, params, parent, aliens3)
-                }),
+                .flat(),
         ))
         .map(
             |(comment, (kw, aliens1, name, aliens2, params, parent, aliens3))| {
                 (comment, kw, aliens1, name, aliens2, params, parent, aliens3)
             },
         )
-        .and_then(parse_struct_body())
+        .and_then(struct_body())
         .map(
             |((comment, kw, aliens1, name, aliens2, params, parent, aliens3), body)| {
                 (
@@ -225,7 +217,7 @@ fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> 
         )
 }
 
-fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn ty<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     token(SyntaxKind::Identifier)
         .and_then(optional(
             token(SyntaxKind::LeftAngle)
@@ -257,25 +249,18 @@ fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         })
 }
 
-fn parse_single_template_parameter<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn single_template_parameter<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until(SyntaxKind::Identifier)
         .and_then(token(SyntaxKind::Identifier))
         .and_then(eat_until(SyntaxKind::Colon))
         .and_then(token(SyntaxKind::Colon))
-        .map(|(((aliens0, name), aliens1), colon)| (aliens0, name, aliens1, colon))
         .and_then(eat_until(SyntaxKind::Identifier))
-        .map(|((aliens0, name, aliens1, colon), aliens2)| (aliens0, name, aliens1, colon, aliens2))
-        .and_then(parse_type())
-        .map(|((aliens0, name, aliens1, colon, aliens2), ty)| {
-            (aliens0, name, aliens1, colon, aliens2, ty)
-        })
+        .and_then(ty())
         .and_then(eat_until_one_of(&[
             SyntaxKind::Comma,
             SyntaxKind::RightAngle,
         ]))
-        .map(|((aliens0, name, aliens1, colon, aliens2, ty), aliens3)| {
-            (aliens0, name, aliens1, colon, aliens2, ty, aliens3)
-        })
+        .flat()
         .map(|(aliens0, name, aliens1, colon, aliens2, ty, aliens3)| {
             let mut elements = vec![];
             let span = name.as_token().span();
@@ -298,20 +283,16 @@ fn parse_single_template_parameter<'a>() -> impl Parser<'a, TokenStream<'a>, Imm
         })
 }
 
-fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     token(SyntaxKind::LeftAngle)
         .and_then(eat_until(SyntaxKind::Identifier))
         .and_then(separated(
-            parse_single_template_parameter(),
+            single_template_parameter(),
             token(SyntaxKind::Comma),
         ))
-        .map(|((angle, aliens), params)| (angle, aliens, params))
         .and_then(eat_until(SyntaxKind::RightAngle))
-        .map(|((angle, aliens1, params), aliens2)| (angle, aliens1, params, aliens2))
         .and_then(token(SyntaxKind::RightAngle))
-        .map(|((angle_start, aliens1, params, aliens2), angle_end)| {
-            (angle_start, aliens1, params, aliens2, angle_end)
-        })
+        .flat()
         .map(|(angle_start, aliens1, params, aliens2, angle_end)| {
             let mut elements = vec![];
             let span = angle_start.as_token().span();
@@ -324,7 +305,7 @@ fn parse_instr_template_parameters<'a>() -> impl Parser<'a, TokenStream<'a>, Imm
         })
 }
 
-fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until_one_of(&[SyntaxKind::Identifier, SyntaxKind::RightBrace])
         .and_then(token(SyntaxKind::Identifier))
         .and_then(eat_until_one_of(&[
@@ -333,24 +314,17 @@ fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
             SyntaxKind::Comma,
         ]))
         .and_then(token(SyntaxKind::Colon))
-        .map(|(((aliens0, name), aliens1), colon)| (aliens0, name, aliens1, colon))
         .and_then(eat_until_one_of(&[
             SyntaxKind::Identifier,
             SyntaxKind::RightBrace,
             SyntaxKind::Comma,
         ]))
-        .map(|((aliens0, name, aliens1, colon), aliens2)| (aliens0, name, aliens1, colon, aliens2))
-        .and_then(parse_type())
-        .map(|((aliens0, name, aliens1, colon, aliens2), ty)| {
-            (aliens0, name, aliens1, colon, aliens2, ty)
-        })
+        .and_then(ty())
         .and_then(eat_until_one_of(&[
             SyntaxKind::Comma,
             SyntaxKind::RightBrace,
         ]))
-        .map(|((aliens0, name, aliens1, colon, aliens2, ty), aliens3)| {
-            (aliens0, name, aliens1, colon, aliens2, ty, aliens3)
-        })
+        .flat()
         .map(|(aliens0, name, aliens1, colon, aliens2, ty, aliens3)| {
             let span = name.as_token().span();
             let mut elements = vec![];
@@ -366,13 +340,13 @@ fn parse_struct_field<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         })
 }
 
-fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     isolate_block(
         token(SyntaxKind::LeftBrace).void(),
         token(SyntaxKind::RightBrace).void(),
         token(SyntaxKind::LeftBrace)
             .and_then(optional(separated(
-                parse_struct_field(),
+                struct_field(),
                 token(SyntaxKind::Comma),
             )))
             .and_then(eat_until(SyntaxKind::RightBrace))
@@ -392,20 +366,16 @@ fn parse_struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     )
 }
 
-fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn func_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     isolate_block(
         token(SyntaxKind::LeftBrace).void(),
         token(SyntaxKind::RightBrace).void(),
         token(SyntaxKind::LeftBrace)
             .and_then(eat_whitespace())
-            .and_then(zero_or_more(parse_expr()))
-            .map(|((left_brace, aliens), exprs)| (left_brace, aliens, exprs))
+            .and_then(zero_or_more(expr()))
             .and_then(eat_until(SyntaxKind::RightBrace))
-            .map(|((left_brace, aliens1, exprs), aliens2)| (left_brace, aliens1, exprs, aliens2))
             .and_then(token(SyntaxKind::RightBrace))
-            .map(|((left_brace, aliens1, exprs, aliens2), right_brace)| {
-                (left_brace, aliens1, exprs, aliens2, right_brace)
-            })
+            .flat()
             .map(|(left_brace, aliens1, exprs, aliens2, right_brace)| {
                 let mut elements = vec![];
                 let span = left_brace.as_token().span();
@@ -420,23 +390,21 @@ fn parse_func_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     )
 }
 
-fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     isolate_until(
         token(SyntaxKind::LeftBrace).void(),
         token(SyntaxKind::EncodingKw)
             .and_then(eat_until(SyntaxKind::ForKw))
             .and_then(token(SyntaxKind::ForKw))
-            .map(|((enc, aliens1), for_)| (enc, aliens1, for_))
             .and_then(eat_until(SyntaxKind::Identifier))
-            .map(|((enc, aliens1, for_), aliens2)| (enc, aliens1, for_, aliens2))
             .and_then(token(SyntaxKind::Identifier))
-            .map(|((enc, aliens1, for_, aliens2), name)| (enc, aliens1, for_, aliens2, name))
+            .flat()
             .and_then(eat_all()),
     )
     .map(|((enc, aliens1, for_, aliens2, name), aliens3)| {
         (enc, aliens1, for_, aliens2, name, aliens3)
     })
-    .and_then(parse_func_body())
+    .and_then(func_body())
     .map(|((enc, aliens1, for_, aliens2, name, aliens3), body)| {
         (enc, aliens1, for_, aliens2, name, aliens3, body)
     })
@@ -460,23 +428,18 @@ fn parse_encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     })
 }
 
-fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn asm_<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     isolate_until(
         token(SyntaxKind::LeftBrace).void(),
         token(SyntaxKind::AsmKw)
             .and_then(eat_until(SyntaxKind::ForKw))
             .and_then(token(SyntaxKind::ForKw))
-            .map(|((asm_, aliens1), for_)| (asm_, aliens1, for_))
             .and_then(eat_until(SyntaxKind::Identifier))
-            .map(|((asm_, aliens1, for_), aliens2)| (asm_, aliens1, for_, aliens2))
             .and_then(token(SyntaxKind::Identifier))
-            .map(|((asm_, aliens1, for_, aliens2), name)| (asm_, aliens1, for_, aliens2, name))
             .and_then(eat_all())
-            .map(|((asm_, aliens1, for_, aliens2, name), aliens3)| {
-                (asm_, aliens1, for_, aliens2, name, aliens3)
-            }),
+            .flat(),
     )
-    .and_then(parse_func_body())
+    .and_then(func_body())
     .map(|((asm_, aliens1, for_, aliens2, name, aliens3), body)| {
         (asm_, aliens1, for_, aliens2, name, aliens3, body)
     })
@@ -500,11 +463,11 @@ fn parse_asm<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     })
 }
 
-fn parse_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
-    parse_binary_expr().or_else(parse_atom_expr())
+fn expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+    binary_expr().or_else(atom_expr())
 }
 
-fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     let operator_atom = token(SyntaxKind::At);
     let operator = eat_until_one_of(&[
         SyntaxKind::At,
@@ -522,7 +485,7 @@ fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         SyntaxKind::RightBrace,
     ]));
     fold_left(
-        parse_atom_expr(),
+        atom_expr(),
         operator,
         |left, ((aliens_left, op), aliens_right), right| {
             let span = op.as_token().span();
@@ -551,7 +514,7 @@ fn parse_binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     )
 }
 
-fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn field_access<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     fold_left(
         token(SyntaxKind::Identifier),
         token(SyntaxKind::Dot),
@@ -566,11 +529,11 @@ fn parse_field_access<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     )
 }
 
-fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     let lit_atom = token(SyntaxKind::IntegerLiteral)
         .or_else(token(SyntaxKind::BitLiteral))
         .or_else(token(SyntaxKind::StringLiteral))
-        .or_else(parse_field_access())
+        .or_else(field_access())
         .or_else(token(SyntaxKind::Identifier));
     eat_until_one_of(&[
         SyntaxKind::IntegerLiteral,
@@ -592,55 +555,18 @@ fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     })
 }
 
-fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     attached_comment()
         .and_then(token(SyntaxKind::InstrKw))
         .and_then(eat_until(SyntaxKind::Identifier))
-        .map(|((comment, kw), aliens1)| (comment, kw, aliens1))
         .and_then(token(SyntaxKind::Identifier))
-        .map(|((comment, instr_kw, aliens1), name)| (comment, instr_kw, aliens1, name))
         .and_then(eat_until(SyntaxKind::Colon))
-        .map(|((comment, instr_kw, aliens1, name), aliens2)| {
-            (comment, instr_kw, aliens1, name, aliens2)
-        })
         .and_then(token(SyntaxKind::Colon))
-        .map(|((comment, instr_kw, aliens1, name, aliens2), colon)| {
-            (comment, instr_kw, aliens1, name, aliens2, colon)
-        })
         .and_then(eat_until(SyntaxKind::Identifier))
-        .map(
-            |((comment, instr_kw, aliens1, name, aliens2, colon), aliens3)| {
-                (comment, instr_kw, aliens1, name, aliens2, colon, aliens3)
-            },
-        )
-        .and_then(parse_template_instantiation())
-        .map(
-            |((comment, instr_kw, aliens1, name, aliens2, colon, aliens3), template)| {
-                (
-                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template,
-                )
-            },
-        )
+        .and_then(template_instantiation())
         .and_then(eat_until(SyntaxKind::Semicolon))
-        .map(
-            |((comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template), aliens4)| {
-                (
-                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
-                )
-            },
-        )
         .and_then(token(SyntaxKind::Semicolon))
-        .map(
-            |(
-                (comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4),
-                semicolon,
-            )| {
-                (
-                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
-                    semicolon,
-                )
-            },
-        )
+        .flat()
         .map(
             |(
                 comment,
@@ -680,7 +606,7 @@ fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
         )
 }
 
-fn parse_template_instantiation_param<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn template_instantiation_param<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     eat_until_one_of(&[
         SyntaxKind::StringLiteral,
         SyntaxKind::IntegerLiteral,
@@ -717,26 +643,17 @@ fn parse_template_instantiation_param<'a>() -> impl Parser<'a, TokenStream<'a>, 
     })
 }
 
-fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     token(SyntaxKind::Identifier)
         .and_then(eat_until(SyntaxKind::LeftAngle))
         .and_then(token(SyntaxKind::LeftAngle))
-        .map(|((ident, aliens1), left_angle)| (ident, aliens1, left_angle))
         .and_then(separated(
-            parse_template_instantiation_param(),
+            template_instantiation_param(),
             token(SyntaxKind::Comma),
         ))
-        .map(|((ident, aliens1, left_angle), params)| (ident, aliens1, left_angle, params))
         .and_then(eat_until(SyntaxKind::RightAngle))
-        .map(|((ident, aliens1, left_angle, params), aliens2)| {
-            (ident, aliens1, left_angle, params, aliens2)
-        })
         .and_then(token(SyntaxKind::RightAngle))
-        .map(
-            |((ident, aliens1, left_angle, params, aliens2), right_angle)| {
-                (ident, aliens1, left_angle, params, aliens2, right_angle)
-            },
-        )
+        .flat()
         .map(
             |(ident, aliens1, left_angle, params, aliens2, right_angle)| {
                 let mut elements = vec![];
@@ -761,7 +678,7 @@ fn parse_template_instantiation<'a>() -> impl Parser<'a, TokenStream<'a>, ImmEle
         )
 }
 
-fn parse_enum_single_variant<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn enum_single_variant<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     isolate_until(
         token(SyntaxKind::RightBrace)
             .or_else(token(SyntaxKind::Comma))
@@ -785,13 +702,13 @@ fn parse_enum_single_variant<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElemen
     )
 }
 
-fn parse_enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+fn enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     isolate_block(
         token(SyntaxKind::LeftBrace).void(),
         token(SyntaxKind::RightBrace).void(),
         token(SyntaxKind::LeftBrace)
             .and_then(optional(separated(
-                parse_enum_single_variant(),
+                enum_single_variant(),
                 token(SyntaxKind::Comma),
             )))
             .and_then(eat_until(SyntaxKind::RightBrace))
@@ -811,19 +728,18 @@ fn parse_enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     )
 }
 
-fn parse_enum<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+fn enum_<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     attached_comment()
         .and_then(isolate_until(
             token(SyntaxKind::LeftBrace).void(),
             token(SyntaxKind::EnumKw)
                 .and_then(eat_until(SyntaxKind::Identifier))
                 .and_then(token(SyntaxKind::Identifier))
-                .map(move |((kw, aliens), name)| (kw, aliens, name))
                 .and_then(eat_all())
-                .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2)),
+                .flat(),
         ))
         .map(|(comment, (kw, aliens1, name, aliens2))| (comment, kw, aliens1, name, aliens2))
-        .and_then(parse_enum_variants())
+        .and_then(enum_variants())
         .map(|((comment, kw, aliens1, name, aliens2), variants)| {
             let span = kw.as_token().span();
 
