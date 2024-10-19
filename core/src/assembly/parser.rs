@@ -230,6 +230,7 @@ pub fn single_op(input: &mut ParseStream) -> AsmPResult<OpRef> {
     trace("op body", parser).parse_next(input)
 }
 
+#[allow(clippy::result_large_err)]
 pub fn parse_ir(
     context: ContextRef,
     input: &str,
