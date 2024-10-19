@@ -325,14 +325,10 @@ impl InstrTemplateDecl {
             })
             .collect::<Vec<_>>();
 
-        let parent_template = syntax
-            .children()
-            .find_map(|c| match c {
-                NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => {
-                    Some(node)
-                }
-                _ => None,
-            });
+        let parent_template = syntax.children().find_map(|c| match c {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::InstrParentTemplate => Some(node),
+            _ => None,
+        });
         let parent_template_args = syntax
             .children()
             .find_map(|c| match c {
