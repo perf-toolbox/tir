@@ -23,6 +23,28 @@ pub fn parse(tokens: &[ImmElement]) -> ImmNode {
     GreenNodeData::new(SyntaxKind::TranslationUnit, result.0, Span::empty())
 }
 
+fn attached_comment<'a>() -> impl Parser<'a, TokenStream<'a>, Option<(ImmElement, ImmElement)>> {
+    move |tokens: TokenStream<'a>| {
+        if tokens.len() < 2 {
+            return Err(DiagKind::UnexpectedEof(tokens.span()).into());
+        }
+
+        let maybe_comment = tokens.nth(0).unwrap();
+        if maybe_comment.as_token().kind() != SyntaxKind::Comment {
+            return Ok((None, Some(tokens)));
+        }
+
+        let maybe_newline = tokens.nth(1).unwrap();
+        if maybe_newline.as_token().kind() != SyntaxKind::Whitespace
+            && maybe_newline.as_token().text() != "\n"
+        {
+            return Err(DiagKind::TokenNotFound(SyntaxKind::Whitespace, tokens.span()).into());
+        }
+
+        Ok((Some((maybe_comment, maybe_newline)), tokens.slice(2..)))
+    }
+}
+
 fn catch_all<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     move |tokens: TokenStream<'a>| {
         if tokens.len() > 0 {
@@ -133,62 +155,74 @@ fn token_of<'a>(kinds: &'static [SyntaxKind]) -> impl Parser<'a, TokenStream<'a>
 }
 
 fn parse_instr_template_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
-    isolate_until(
-        token(SyntaxKind::LeftBrace).void(),
-        token(SyntaxKind::InstrTemplateKw)
-            .and_then(eat_until(SyntaxKind::Identifier))
-            .and_then(token(SyntaxKind::Identifier))
-            .map(move |((kw, aliens), name)| (kw, aliens, name))
-            .and_then(eat_until(SyntaxKind::LeftAngle))
-            .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2))
-            .and_then(parse_instr_template_parameters())
-            .map(|((kw, aliens1, name, aliens2), params)| (kw, aliens1, name, aliens2, params))
-            .and_then(optional(
-                eat_until(SyntaxKind::Colon)
-                    .and_then(token(SyntaxKind::Colon))
-                    .and_then(eat_until(SyntaxKind::Identifier))
-                    .and_then(parse_template_instantiation()),
-            ))
-            .map(|((kw, aliens1, name, aliens2, params), parent)| {
-                (kw, aliens1, name, aliens2, params, parent)
-            })
-            .and_then(eat_all()),
-    )
-    .map(|((kw, aliens1, name, aliens2, params, parent), aliens3)| {
-        (kw, aliens1, name, aliens2, params, parent, aliens3)
-    })
-    .and_then(parse_struct_body())
-    .map(
-        |((kw, aliens1, name, aliens2, params, parent, aliens3), body)| {
-            (kw, aliens1, name, aliens2, params, parent, aliens3, body)
-        },
-    )
-    .map(
-        |(kw, aliens1, name, aliens2, params, parent, aliens3, body)| {
-            let mut elements = vec![];
-            let kw_span = kw.as_token().span();
-            elements.push(kw);
-            elements.extend(aliens1);
-            let name_span = name.as_token().span();
-            elements.push(GreenElement::Node(GreenNodeData::new(
-                SyntaxKind::InstrTemplateName,
-                vec![name],
-                name_span,
-            )));
-            elements.extend(aliens2);
-            elements.push(NodeOrToken::Node(params));
-            if let Some((((aliens_parent1, colon), aliens_parent2), parent_inst)) = parent {
-                elements.extend(aliens_parent1);
-                elements.push(colon);
-                elements.extend(aliens_parent2);
-                elements.push(parent_inst);
-            }
-            elements.extend(aliens3);
-            elements.push(NodeOrToken::Node(body));
+    attached_comment()
+        .and_then(isolate_until(
+            token(SyntaxKind::LeftBrace).void(),
+            token(SyntaxKind::InstrTemplateKw)
+                .and_then(eat_until(SyntaxKind::Identifier))
+                .and_then(token(SyntaxKind::Identifier))
+                .map(move |((kw, aliens), name)| (kw, aliens, name))
+                .and_then(eat_until(SyntaxKind::LeftAngle))
+                .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2))
+                .and_then(parse_instr_template_parameters())
+                .map(|((kw, aliens1, name, aliens2), params)| (kw, aliens1, name, aliens2, params))
+                .and_then(optional(
+                    eat_until(SyntaxKind::Colon)
+                        .and_then(token(SyntaxKind::Colon))
+                        .and_then(eat_until(SyntaxKind::Identifier))
+                        .and_then(parse_template_instantiation()),
+                ))
+                .map(|((kw, aliens1, name, aliens2, params), parent)| {
+                    (kw, aliens1, name, aliens2, params, parent)
+                })
+                .and_then(eat_all())
+                .map(|((kw, aliens1, name, aliens2, params, parent), aliens3)| {
+                    (kw, aliens1, name, aliens2, params, parent, aliens3)
+                }),
+        ))
+        .map(
+            |(comment, (kw, aliens1, name, aliens2, params, parent, aliens3))| {
+                (comment, kw, aliens1, name, aliens2, params, parent, aliens3)
+            },
+        )
+        .and_then(parse_struct_body())
+        .map(
+            |((comment, kw, aliens1, name, aliens2, params, parent, aliens3), body)| {
+                (
+                    comment, kw, aliens1, name, aliens2, params, parent, aliens3, body,
+                )
+            },
+        )
+        .map(
+            |(comment, kw, aliens1, name, aliens2, params, parent, aliens3, body)| {
+                let mut elements = vec![];
+                if let Some((comment, space)) = comment {
+                    elements.push(comment);
+                    elements.push(space);
+                }
+                let kw_span = kw.as_token().span();
+                elements.push(kw);
+                elements.extend(aliens1);
+                let name_span = name.as_token().span();
+                elements.push(GreenElement::Node(GreenNodeData::new(
+                    SyntaxKind::InstrTemplateName,
+                    vec![name],
+                    name_span,
+                )));
+                elements.extend(aliens2);
+                elements.push(NodeOrToken::Node(params));
+                if let Some((((aliens_parent1, colon), aliens_parent2), parent_inst)) = parent {
+                    elements.extend(aliens_parent1);
+                    elements.push(colon);
+                    elements.extend(aliens_parent2);
+                    elements.push(parent_inst);
+                }
+                elements.extend(aliens3);
+                elements.push(NodeOrToken::Node(body));
 
-            GreenNodeData::new(SyntaxKind::InstrTemplateDecl, elements, kw_span)
-        },
-    )
+                GreenNodeData::new(SyntaxKind::InstrTemplateDecl, elements, kw_span)
+            },
+        )
 }
 
 fn parse_type<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
@@ -559,45 +593,72 @@ fn parse_atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
 }
 
 fn parse_instr_decl<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
-    token(SyntaxKind::InstrKw)
+    attached_comment()
+        .and_then(token(SyntaxKind::InstrKw))
         .and_then(eat_until(SyntaxKind::Identifier))
+        .map(|((comment, kw), aliens1)| (comment, kw, aliens1))
         .and_then(token(SyntaxKind::Identifier))
-        .map(|((instr_kw, aliens1), name)| (instr_kw, aliens1, name))
+        .map(|((comment, instr_kw, aliens1), name)| (comment, instr_kw, aliens1, name))
         .and_then(eat_until(SyntaxKind::Colon))
-        .map(|((instr_kw, aliens1, name), aliens2)| (instr_kw, aliens1, name, aliens2))
+        .map(|((comment, instr_kw, aliens1, name), aliens2)| {
+            (comment, instr_kw, aliens1, name, aliens2)
+        })
         .and_then(token(SyntaxKind::Colon))
-        .map(|((instr_kw, aliens1, name, aliens2), colon)| {
-            (instr_kw, aliens1, name, aliens2, colon)
+        .map(|((comment, instr_kw, aliens1, name, aliens2), colon)| {
+            (comment, instr_kw, aliens1, name, aliens2, colon)
         })
         .and_then(eat_until(SyntaxKind::Identifier))
-        .map(|((instr_kw, aliens1, name, aliens2, colon), aliens3)| {
-            (instr_kw, aliens1, name, aliens2, colon, aliens3)
-        })
+        .map(
+            |((comment, instr_kw, aliens1, name, aliens2, colon), aliens3)| {
+                (comment, instr_kw, aliens1, name, aliens2, colon, aliens3)
+            },
+        )
         .and_then(parse_template_instantiation())
         .map(
-            |((instr_kw, aliens1, name, aliens2, colon, aliens3), template)| {
-                (instr_kw, aliens1, name, aliens2, colon, aliens3, template)
+            |((comment, instr_kw, aliens1, name, aliens2, colon, aliens3), template)| {
+                (
+                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template,
+                )
             },
         )
         .and_then(eat_until(SyntaxKind::Semicolon))
         .map(
-            |((instr_kw, aliens1, name, aliens2, colon, aliens3, template), aliens4)| {
+            |((comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template), aliens4)| {
                 (
-                    instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
+                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
                 )
             },
         )
         .and_then(token(SyntaxKind::Semicolon))
         .map(
-            |((instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4), semicolon)| {
+            |(
+                (comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4),
+                semicolon,
+            )| {
                 (
-                    instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4, semicolon,
+                    comment, instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4,
+                    semicolon,
                 )
             },
         )
         .map(
-            |(instr_kw, aliens1, name, aliens2, colon, aliens3, template, aliens4, semicolon)| {
+            |(
+                comment,
+                instr_kw,
+                aliens1,
+                name,
+                aliens2,
+                colon,
+                aliens3,
+                template,
+                aliens4,
+                semicolon,
+            )| {
                 let mut elements = vec![];
+                if let Some((comment, space)) = comment {
+                    elements.push(comment);
+                    elements.push(space);
+                }
                 let span = instr_kw.as_token().span();
                 elements.push(instr_kw);
                 elements.extend(aliens1);
@@ -751,26 +812,34 @@ fn parse_enum_variants<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
 }
 
 fn parse_enum<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
-    isolate_until(
-        token(SyntaxKind::LeftBrace).void(),
-        token(SyntaxKind::EnumKw)
-            .and_then(eat_until(SyntaxKind::Identifier))
-            .and_then(token(SyntaxKind::Identifier))
-            .map(move |((kw, aliens), name)| (kw, aliens, name))
-            .and_then(eat_all())
-            .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2)),
-    )
-    .and_then(parse_enum_variants())
-    .map(|((kw, aliens1, name, aliens2), variants)| {
-        let span = kw.as_token().span();
+    attached_comment()
+        .and_then(isolate_until(
+            token(SyntaxKind::LeftBrace).void(),
+            token(SyntaxKind::EnumKw)
+                .and_then(eat_until(SyntaxKind::Identifier))
+                .and_then(token(SyntaxKind::Identifier))
+                .map(move |((kw, aliens), name)| (kw, aliens, name))
+                .and_then(eat_all())
+                .map(|((kw, aliens1, name), aliens2)| (kw, aliens1, name, aliens2)),
+        ))
+        .map(|(comment, (kw, aliens1, name, aliens2))| (comment, kw, aliens1, name, aliens2))
+        .and_then(parse_enum_variants())
+        .map(|((comment, kw, aliens1, name, aliens2), variants)| {
+            let span = kw.as_token().span();
 
-        let mut elements = vec![];
-        elements.push(kw);
-        elements.extend(aliens1);
-        elements.push(name);
-        elements.extend(aliens2);
-        elements.push(variants);
+            let mut elements = vec![];
 
-        GreenNodeData::new(SyntaxKind::EnumDecl, elements, span)
-    })
+            if let Some((comment, space)) = comment {
+                elements.push(comment);
+                elements.push(space);
+            }
+
+            elements.push(kw);
+            elements.extend(aliens1);
+            elements.push(name);
+            elements.extend(aliens2);
+            elements.push(variants);
+
+            GreenNodeData::new(SyntaxKind::EnumDecl, elements, span)
+        })
 }
