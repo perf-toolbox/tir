@@ -484,6 +484,7 @@ fn binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         SyntaxKind::StringLiteral,
         SyntaxKind::Semicolon,
         SyntaxKind::RightBrace,
+        SyntaxKind::SelfKw,
     ]));
     fold_left(
         atom_expr(),
@@ -517,7 +518,7 @@ fn binary_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
 
 fn field_access<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
     fold_left(
-        token(SyntaxKind::Identifier),
+        token_of(&[SyntaxKind::Identifier, SyntaxKind::SelfKw]),
         token(SyntaxKind::Dot),
         |left, dot, right| {
             let span = dot.as_token().span();
@@ -535,7 +536,8 @@ fn atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         .or_else(token(SyntaxKind::BitLiteral))
         .or_else(token(SyntaxKind::StringLiteral))
         .or_else(field_access())
-        .or_else(token(SyntaxKind::Identifier));
+        .or_else(token(SyntaxKind::Identifier))
+        .or_else(token(SyntaxKind::SelfKw));
     eat_until_one_of(&[
         SyntaxKind::IntegerLiteral,
         SyntaxKind::BitLiteral,
@@ -543,6 +545,7 @@ fn atom_expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
         SyntaxKind::Identifier,
         SyntaxKind::Semicolon,
         SyntaxKind::RightBrace,
+        SyntaxKind::SelfKw,
     ])
     .and_then(lit_atom)
     .map(|(aliens, lit)| {
