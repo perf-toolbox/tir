@@ -909,7 +909,7 @@
 // CHECK-NEXT:                                                                                                                     kind: StructFieldAccess,
 // CHECK-NEXT:                                                                                                                     children: [
 // CHECK-NEXT:                                                                                                                         GreenTokenData {
-// CHECK-NEXT:                                                                                                                             kind: Identifier,
+// CHECK-NEXT:                                                                                                                             kind: SelfKw,
 // CHECK-NEXT:                                                                                                                             text: "self",
 // CHECK-NEXT:                                                                                                                             span: <unknown>@317..321,
 // CHECK-NEXT:                                                                                                                         },
@@ -969,7 +969,7 @@
 // CHECK-NEXT:                                                                                                     kind: StructFieldAccess,
 // CHECK-NEXT:                                                                                                     children: [
 // CHECK-NEXT:                                                                                                         GreenTokenData {
-// CHECK-NEXT:                                                                                                             kind: Identifier,
+// CHECK-NEXT:                                                                                                             kind: SelfKw,
 // CHECK-NEXT:                                                                                                             text: "self",
 // CHECK-NEXT:                                                                                                             span: <unknown>@328..332,
 // CHECK-NEXT:                                                                                                         },
@@ -1073,7 +1073,7 @@
 // CHECK-NEXT:                                                                     kind: StructFieldAccess,
 // CHECK-NEXT:                                                                     children: [
 // CHECK-NEXT:                                                                         GreenTokenData {
-// CHECK-NEXT:                                                                             kind: Identifier,
+// CHECK-NEXT:                                                                             kind: SelfKw,
 // CHECK-NEXT:                                                                             text: "self",
 // CHECK-NEXT:                                                                             span: <unknown>@349..353,
 // CHECK-NEXT:                                                                         },

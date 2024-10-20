@@ -589,7 +589,7 @@
 // CHECK-NEXT:         span: <unknown>@316..317,
 // CHECK-NEXT:     },
 // CHECK-NEXT:     GreenTokenData {
-// CHECK-NEXT:         kind: Identifier,
+// CHECK-NEXT:         kind: SelfKw,
 // CHECK-NEXT:         text: "self",
 // CHECK-NEXT:         span: <unknown>@317..321,
 // CHECK-NEXT:     },
@@ -619,7 +619,7 @@
 // CHECK-NEXT:         span: <unknown>@327..328,
 // CHECK-NEXT:     },
 // CHECK-NEXT:     GreenTokenData {
-// CHECK-NEXT:         kind: Identifier,
+// CHECK-NEXT:         kind: SelfKw,
 // CHECK-NEXT:         text: "self",
 // CHECK-NEXT:         span: <unknown>@328..332,
 // CHECK-NEXT:     },
@@ -669,7 +669,7 @@
 // CHECK-NEXT:         span: <unknown>@348..349,
 // CHECK-NEXT:     },
 // CHECK-NEXT:     GreenTokenData {
-// CHECK-NEXT:         kind: Identifier,
+// CHECK-NEXT:         kind: SelfKw,
 // CHECK-NEXT:         text: "self",
 // CHECK-NEXT:         span: <unknown>@349..353,
 // CHECK-NEXT:     },

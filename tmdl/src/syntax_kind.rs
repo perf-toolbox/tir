@@ -40,6 +40,8 @@ pub enum SyntaxKind {
     EnumKw,
     /// `impl`
     ImplKw,
+    /// `self`
+    SelfKw,
 
     // Identifiers and literals
     Identifier,
