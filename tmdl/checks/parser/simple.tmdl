@@ -806,7 +806,7 @@
 // CHECK-NEXT:                     span: <unknown>@293..294,
 // CHECK-NEXT:                 },
 // CHECK-NEXT:                 GreenNodeData {
-// CHECK-NEXT:                     kind: InstrTemplateName,
+// CHECK-NEXT:                     kind: ImplTargetName,
 // CHECK-NEXT:                     children: [
 // CHECK-NEXT:                         GreenTokenData {
 // CHECK-NEXT:                             kind: Identifier,
@@ -1188,7 +1188,7 @@
 // CHECK-NEXT:                     span: <unknown>@377..378,
 // CHECK-NEXT:                 },
 // CHECK-NEXT:                 GreenNodeData {
-// CHECK-NEXT:                     kind: InstrTemplateName,
+// CHECK-NEXT:                     kind: ImplTargetName,
 // CHECK-NEXT:                     children: [
 // CHECK-NEXT:                         GreenTokenData {
 // CHECK-NEXT:                             kind: Identifier,
@@ -3809,7 +3809,7 @@
 // CHECK-NEXT:                     span: <unknown>@1234..1235,
 // CHECK-NEXT:                 },
 // CHECK-NEXT:                 GreenNodeData {
-// CHECK-NEXT:                     kind: InstrTemplateName,
+// CHECK-NEXT:                     kind: ImplTargetName,
 // CHECK-NEXT:                     children: [
 // CHECK-NEXT:                         GreenTokenData {
 // CHECK-NEXT:                             kind: Identifier,
@@ -4093,7 +4093,7 @@
 // CHECK-NEXT:                     span: <unknown>@1297..1298,
 // CHECK-NEXT:                 },
 // CHECK-NEXT:                 GreenNodeData {
-// CHECK-NEXT:                     kind: InstrTemplateName,
+// CHECK-NEXT:                     kind: ImplTargetName,
 // CHECK-NEXT:                     children: [
 // CHECK-NEXT:                         GreenTokenData {
 // CHECK-NEXT:                             kind: Identifier,

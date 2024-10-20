@@ -647,7 +647,7 @@ impl EncodingDecl {
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) => {
-                    if node.kind() == SyntaxKind::InstrTemplateName {
+                    if node.kind() == SyntaxKind::ImplTargetName {
                         Some(node)
                     } else {
                         None
@@ -674,6 +674,7 @@ impl EncodingDecl {
 impl fmt::Debug for EncodingDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EncodingDecl")
+            .field("target_name", &self.target_name())
             .field("body", &self.body)
             .finish()
     }
@@ -698,7 +699,7 @@ impl AsmDecl {
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) => {
-                    if node.kind() == SyntaxKind::InstrTemplateName {
+                    if node.kind() == SyntaxKind::ImplTargetName {
                         Some(node)
                     } else {
                         None
@@ -724,7 +725,10 @@ impl AsmDecl {
 
 impl fmt::Debug for AsmDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AsmDecl").field("body", &self.body).finish()
+        f.debug_struct("AsmDecl")
+            .field("target_name", &self.target_name())
+            .field("body", &self.body)
+            .finish()
     }
 }
 
