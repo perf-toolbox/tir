@@ -15,7 +15,8 @@ pub fn parse(tokens: &[ImmElement]) -> ImmNode {
         .or_else(instr_decl())
         .or_else(encoding())
         .or_else(asm_())
-        .or_else(enum_());
+        .or_else(enum_())
+        .or_else(impl_());
     let parser = zero_or_more(top_level_decl.map(NodeOrToken::Node).or_else(catch_all()));
 
     let result = parser.parse(stream).unwrap();
@@ -758,4 +759,61 @@ fn enum_<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
 
             GreenNodeData::new(SyntaxKind::EnumDecl, elements, span)
         })
+}
+
+fn impl_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
+    token(SyntaxKind::LeftBrace)
+        .and_then(token(SyntaxKind::RightBrace))
+        .map(|(left, right)| {
+            let mut elements = vec![];
+            let span = left.as_token().span();
+            elements.push(left);
+            elements.push(right);
+            NodeOrToken::Node(GreenNodeData::new(SyntaxKind::ImplBody, elements, span))
+        })
+}
+
+fn impl_<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
+    isolate_until(
+        token(SyntaxKind::LeftBrace).void(),
+        token(SyntaxKind::ImplKw)
+            .and_then(eat_until(SyntaxKind::Identifier))
+            .and_then(token(SyntaxKind::Identifier))
+            .and_then(eat_until(SyntaxKind::ForKw))
+            .and_then(token(SyntaxKind::ForKw))
+            .and_then(eat_until(SyntaxKind::Identifier))
+            .and_then(token(SyntaxKind::Identifier))
+            .and_then(eat_all())
+            .flat(),
+    )
+    .and_then(impl_body())
+    .map(
+        |((kw, aliens1, trait_name, aliens2, for_kw, aliens3, target_ident, aliens4), body)| {
+            let span = kw.as_token().span();
+
+            let mut elements = vec![];
+
+            elements.push(kw);
+            elements.extend(aliens1);
+            let name_span = trait_name.as_token().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::ImplTraitName,
+                vec![trait_name],
+                name_span,
+            )));
+            elements.extend(aliens2);
+            elements.push(for_kw);
+            elements.extend(aliens3);
+            let target_span = target_ident.as_token().span();
+            elements.push(NodeOrToken::Node(GreenNodeData::new(
+                SyntaxKind::ImplTargetName,
+                vec![target_ident],
+                target_span,
+            )));
+            elements.extend(aliens4);
+            elements.push(body);
+
+            GreenNodeData::new(SyntaxKind::ImplDecl, elements, span)
+        },
+    )
 }

@@ -28,6 +28,7 @@ pub enum Item {
     EncodingDecl(EncodingDecl),
     AsmDecl(AsmDecl),
     EnumDecl(EnumDecl),
+    ImplDecl(ImplDecl),
 }
 
 #[derive(Clone)]
@@ -74,6 +75,12 @@ pub struct AsmDecl {
     #[allow(dead_code)]
     syntax: SyntaxNode,
     body: BlockExpr,
+}
+
+#[derive(Clone)]
+pub struct ImplDecl {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
 }
 
 #[derive(Clone)]
@@ -214,6 +221,7 @@ impl fmt::Debug for Item {
             Item::EncodingDecl(i) => i.fmt(f),
             Item::AsmDecl(i) => i.fmt(f),
             Item::EnumDecl(i) => i.fmt(f),
+            Item::ImplDecl(i) => i.fmt(f),
         }
     }
 }
@@ -248,6 +256,12 @@ impl From<EnumDecl> for Item {
     }
 }
 
+impl From<ImplDecl> for Item {
+    fn from(i: ImplDecl) -> Self {
+        Item::ImplDecl(i)
+    }
+}
+
 impl SourceFile {
     pub fn new(root: SyntaxNode) -> Option<SourceFile> {
         if root.kind() != SyntaxKind::TranslationUnit {
@@ -265,6 +279,7 @@ impl SourceFile {
                     SyntaxKind::EncodingDecl => EncodingDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::AsmDecl => AsmDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::EnumDecl => EnumDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::ImplDecl => ImplDecl::new(node.clone()).map(|t| t.into()),
                     _ => None,
                 },
                 _ => None,
@@ -710,6 +725,81 @@ impl AsmDecl {
 impl fmt::Debug for AsmDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AsmDecl").field("body", &self.body).finish()
+    }
+}
+
+impl ImplDecl {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::ImplDecl {
+            return None;
+        }
+
+        Some(Self { syntax })
+    }
+
+    pub fn target_name(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) => {
+                    if node.kind() == SyntaxKind::ImplTargetName {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
+
+    pub fn trait_name(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) => {
+                    if node.kind() == SyntaxKind::ImplTraitName {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
+}
+
+impl fmt::Debug for ImplDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ImplDecl")
+            .field("trait_name", &self.trait_name())
+            .field("target_name", &self.target_name())
+            .finish()
     }
 }
 
