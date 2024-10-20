@@ -3,357 +3,361 @@
 // RUN: tmdlc --action=emit-ast %S/../Inputs/simple.tmdl -o - | filecheck %s
 
 // CHECK: Some(
-// CHECK:     SourceFile {
-// CHECK:         items: [
-// CHECK:             EnumDecl {
-// CHECK:                 name: "GPR",
-// CHECK:                 variants: [
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X0",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X1",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X2",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X3",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X4",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X5",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X6",
-// CHECK:                     },
-// CHECK:                     EnumVariantDecl {
-// CHECK:                         name: "X7",
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrTemplateDecl {
-// CHECK:                 name: "RInstr",
-// CHECK:                 params: [
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct7",
-// CHECK:                         type: bits<7>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct3",
-// CHECK:                         type: bits<3>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$mnemonic",
-// CHECK:                         type: str,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$opcode",
-// CHECK:                         type: bits<7>,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 fields: [
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rd",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rs1",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rs2",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 parent_template_name: None,
-// CHECK:                 parent_template_args: [],
-// CHECK:             },
-// CHECK:             EncodingDecl {
-// CHECK:                 body: BlockExpr {
-// CHECK:                     type: <unresolved>,
-// CHECK:                     stmts: [
-// CHECK:                         BinOpExpr {
-// CHECK:                             kind: BitConcat,
-// CHECK:                             left: BinOpExpr {
-// CHECK:                                 kind: BitConcat,
-// CHECK:                                 left: BinOpExpr {
-// CHECK:                                     kind: BitConcat,
-// CHECK:                                     left: BinOpExpr {
-// CHECK:                                         kind: BitConcat,
-// CHECK:                                         left: BinOpExpr {
-// CHECK:                                             kind: BitConcat,
-// CHECK:                                             left: LiteralExpr {
-// CHECK:                                                 type: <unresolved>,
-// CHECK:                                             },
-// CHECK:                                             right: LiteralExpr {
-// CHECK:                                                 type: <unresolved>,
-// CHECK:                                             },
-// CHECK:                                         },
-// CHECK:                                         right: LiteralExpr {
-// CHECK:                                             type: <unresolved>,
-// CHECK:                                         },
-// CHECK:                                     },
-// CHECK:                                     right: LiteralExpr {
-// CHECK:                                         type: <unresolved>,
-// CHECK:                                     },
-// CHECK:                                 },
-// CHECK:                                 right: LiteralExpr {
-// CHECK:                                     type: <unresolved>,
-// CHECK:                                 },
-// CHECK:                             },
-// CHECK:                             right: LiteralExpr {
-// CHECK:                                 type: <unresolved>,
-// CHECK:                             },
-// CHECK:                         },
-// CHECK:                     ],
-// CHECK:                 },
-// CHECK:             },
-// CHECK:             AsmDecl {
-// CHECK:                 body: BlockExpr {
-// CHECK:                     type: str,
-// CHECK:                     stmts: [
-// CHECK:                         LiteralExpr {
-// CHECK:                             type: str,
-// CHECK:                         },
-// CHECK:                     ],
-// CHECK:                 },
-// CHECK:             },
-// CHECK:             InstrTemplateDecl {
-// CHECK:                 name: "ALUInstr",
-// CHECK:                 params: [
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct7",
-// CHECK:                         type: bits<7>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct3",
-// CHECK:                         type: bits<3>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$mnemonic",
-// CHECK:                         type: str,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 fields: [],
-// CHECK:                 parent_template_name: Some(
-// CHECK:                     "RInstr",
-// CHECK:                 ),
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "ADD",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SUB",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SLL",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SLT",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SLTU",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "XOR",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SRL",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "SRA",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "OR",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrDecl {
-// CHECK:                 name: "AND",
-// CHECK:                 parent_template_name: "ALUInstr",
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:             InstrTemplateDecl {
-// CHECK:                 name: "IInstr",
-// CHECK:                 params: [
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$imm",
-// CHECK:                         type: bits<12>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$rs1",
-// CHECK:                         type: bits<5>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct3",
-// CHECK:                         type: bits<3>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$rd",
-// CHECK:                         type: bits<5>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$mnemonic",
-// CHECK:                         type: str,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$opcode",
-// CHECK:                         type: bits<7>,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 fields: [
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rd",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "rs1",
-// CHECK:                         type: <unresolved>,
-// CHECK:                     },
-// CHECK:                     StructFieldDecl {
-// CHECK:                         name: "imm",
-// CHECK:                         type: bits<12>,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 parent_template_name: None,
-// CHECK:                 parent_template_args: [],
-// CHECK:             },
-// CHECK:             EncodingDecl {
-// CHECK:                 body: BlockExpr {
-// CHECK:                     type: <unresolved>,
-// CHECK:                     stmts: [
-// CHECK:                         BinOpExpr {
-// CHECK:                             kind: BitConcat,
-// CHECK:                             left: BinOpExpr {
-// CHECK:                                 kind: BitConcat,
-// CHECK:                                 left: BinOpExpr {
-// CHECK:                                     kind: BitConcat,
-// CHECK:                                     left: BinOpExpr {
-// CHECK:                                         kind: BitConcat,
-// CHECK:                                         left: LiteralExpr {
-// CHECK:                                             type: <unresolved>,
-// CHECK:                                         },
-// CHECK:                                         right: LiteralExpr {
-// CHECK:                                             type: <unresolved>,
-// CHECK:                                         },
-// CHECK:                                     },
-// CHECK:                                     right: LiteralExpr {
-// CHECK:                                         type: <unresolved>,
-// CHECK:                                     },
-// CHECK:                                 },
-// CHECK:                                 right: LiteralExpr {
-// CHECK:                                     type: <unresolved>,
-// CHECK:                                 },
-// CHECK:                             },
-// CHECK:                             right: LiteralExpr {
-// CHECK:                                 type: <unresolved>,
-// CHECK:                             },
-// CHECK:                         },
-// CHECK:                     ],
-// CHECK:                 },
-// CHECK:             },
-// CHECK:             AsmDecl {
-// CHECK:                 body: BlockExpr {
-// CHECK:                     type: str,
-// CHECK:                     stmts: [
-// CHECK:                         LiteralExpr {
-// CHECK:                             type: str,
-// CHECK:                         },
-// CHECK:                     ],
-// CHECK:                 },
-// CHECK:             },
-// CHECK:             InstrTemplateDecl {
-// CHECK:                 name: "IALUInstr",
-// CHECK:                 params: [
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct7",
-// CHECK:                         type: bits<7>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$funct3",
-// CHECK:                         type: bits<3>,
-// CHECK:                     },
-// CHECK:                     InstrTemplateParameterDecl {
-// CHECK:                         name: "$mnemonic",
-// CHECK:                         type: str,
-// CHECK:                     },
-// CHECK:                 ],
-// CHECK:                 fields: [],
-// CHECK:                 parent_template_name: Some(
-// CHECK:                     "IInstr",
-// CHECK:                 ),
-// CHECK:                 parent_template_args: [
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                     InstrTemplateArg,
-// CHECK:                 ],
-// CHECK:             },
-// CHECK:         ],
-// CHECK:     },
-// CHECK: )
+// CHECK-NEXT:     SourceFile {
+// CHECK-NEXT:         items: [
+// CHECK-NEXT:             EnumDecl {
+// CHECK-NEXT:                 name: "GPR",
+// CHECK-NEXT:                 variants: [
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X0",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X1",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X2",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X3",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X4",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X5",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X6",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     EnumVariantDecl {
+// CHECK-NEXT:                         name: "X7",
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             ImplDecl {
+// CHECK-NEXT:                 trait_name: "Register",
+// CHECK-NEXT:                 target_name: "GPR",
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrTemplateDecl {
+// CHECK-NEXT:                 name: "RInstr",
+// CHECK-NEXT:                 params: [
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct7",
+// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct3",
+// CHECK-NEXT:                         type: bits<3>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                         type: str,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$opcode",
+// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 fields: [
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "rd",
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "rs1",
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "rs2",
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 parent_template_name: None,
+// CHECK-NEXT:                 parent_template_args: [],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             EncodingDecl {
+// CHECK-NEXT:                 body: BlockExpr {
+// CHECK-NEXT:                     type: <unresolved>,
+// CHECK-NEXT:                     stmts: [
+// CHECK-NEXT:                         BinOpExpr {
+// CHECK-NEXT:                             kind: BitConcat,
+// CHECK-NEXT:                             left: BinOpExpr {
+// CHECK-NEXT:                                 kind: BitConcat,
+// CHECK-NEXT:                                 left: BinOpExpr {
+// CHECK-NEXT:                                     kind: BitConcat,
+// CHECK-NEXT:                                     left: BinOpExpr {
+// CHECK-NEXT:                                         kind: BitConcat,
+// CHECK-NEXT:                                         left: BinOpExpr {
+// CHECK-NEXT:                                             kind: BitConcat,
+// CHECK-NEXT:                                             left: LiteralExpr {
+// CHECK-NEXT:                                                 type: <unresolved>,
+// CHECK-NEXT:                                             },
+// CHECK-NEXT:                                             right: LiteralExpr {
+// CHECK-NEXT:                                                 type: <unresolved>,
+// CHECK-NEXT:                                             },
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                         right: LiteralExpr {
+// CHECK-NEXT:                                             type: <unresolved>,
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                     right: LiteralExpr {
+// CHECK-NEXT:                                         type: <unresolved>,
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 right: LiteralExpr {
+// CHECK-NEXT:                                     type: <unresolved>,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                             right: LiteralExpr {
+// CHECK-NEXT:                                 type: <unresolved>,
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:             },
+// CHECK-NEXT:             AsmDecl {
+// CHECK-NEXT:                 body: BlockExpr {
+// CHECK-NEXT:                     type: str,
+// CHECK-NEXT:                     stmts: [
+// CHECK-NEXT:                         LiteralExpr {
+// CHECK-NEXT:                             type: str,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrTemplateDecl {
+// CHECK-NEXT:                 name: "ALUInstr",
+// CHECK-NEXT:                 params: [
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct7",
+// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct3",
+// CHECK-NEXT:                         type: bits<3>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                         type: str,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 fields: [],
+// CHECK-NEXT:                 parent_template_name: Some(
+// CHECK-NEXT:                     "RInstr",
+// CHECK-NEXT:                 ),
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "ADD",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SUB",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SLL",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SLT",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SLTU",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "XOR",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SRL",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "SRA",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "OR",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrDecl {
+// CHECK-NEXT:                 name: "AND",
+// CHECK-NEXT:                 parent_template_name: "ALUInstr",
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrTemplateDecl {
+// CHECK-NEXT:                 name: "IInstr",
+// CHECK-NEXT:                 params: [
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$imm",
+// CHECK-NEXT:                         type: bits<12>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$rs1",
+// CHECK-NEXT:                         type: bits<5>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct3",
+// CHECK-NEXT:                         type: bits<3>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$rd",
+// CHECK-NEXT:                         type: bits<5>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                         type: str,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$opcode",
+// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 fields: [
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "rd",
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "rs1",
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     StructFieldDecl {
+// CHECK-NEXT:                         name: "imm",
+// CHECK-NEXT:                         type: bits<12>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 parent_template_name: None,
+// CHECK-NEXT:                 parent_template_args: [],
+// CHECK-NEXT:             },
+// CHECK-NEXT:             EncodingDecl {
+// CHECK-NEXT:                 body: BlockExpr {
+// CHECK-NEXT:                     type: <unresolved>,
+// CHECK-NEXT:                     stmts: [
+// CHECK-NEXT:                         BinOpExpr {
+// CHECK-NEXT:                             kind: BitConcat,
+// CHECK-NEXT:                             left: BinOpExpr {
+// CHECK-NEXT:                                 kind: BitConcat,
+// CHECK-NEXT:                                 left: BinOpExpr {
+// CHECK-NEXT:                                     kind: BitConcat,
+// CHECK-NEXT:                                     left: BinOpExpr {
+// CHECK-NEXT:                                         kind: BitConcat,
+// CHECK-NEXT:                                         left: LiteralExpr {
+// CHECK-NEXT:                                             type: <unresolved>,
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                         right: LiteralExpr {
+// CHECK-NEXT:                                             type: <unresolved>,
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                     right: LiteralExpr {
+// CHECK-NEXT:                                         type: <unresolved>,
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 right: LiteralExpr {
+// CHECK-NEXT:                                     type: <unresolved>,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                             right: LiteralExpr {
+// CHECK-NEXT:                                 type: <unresolved>,
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:             },
+// CHECK-NEXT:             AsmDecl {
+// CHECK-NEXT:                 body: BlockExpr {
+// CHECK-NEXT:                     type: str,
+// CHECK-NEXT:                     stmts: [
+// CHECK-NEXT:                         LiteralExpr {
+// CHECK-NEXT:                             type: str,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:             },
+// CHECK-NEXT:             InstrTemplateDecl {
+// CHECK-NEXT:                 name: "IALUInstr",
+// CHECK-NEXT:                 params: [
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct7",
+// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$funct3",
+// CHECK-NEXT:                         type: bits<3>,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     InstrTemplateParameterDecl {
+// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                         type: str,
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:                 fields: [],
+// CHECK-NEXT:                 parent_template_name: Some(
+// CHECK-NEXT:                     "IInstr",
+// CHECK-NEXT:                 ),
+// CHECK-NEXT:                 parent_template_args: [
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                     InstrTemplateArg,
+// CHECK-NEXT:                 ],
+// CHECK-NEXT:             },
+// CHECK-NEXT:         ],
+// CHECK-NEXT:     },
+// CHECK-NEXT: )

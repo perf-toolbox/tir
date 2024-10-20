@@ -38,6 +38,8 @@ pub enum SyntaxKind {
     InstrKw,
     /// `enum`
     EnumKw,
+    /// `impl`
+    ImplKw,
 
     // Identifiers and literals
     Identifier,
@@ -100,6 +102,11 @@ pub enum SyntaxKind {
     StructFieldName,
 
     StructFieldAccess,
+
+    ImplDecl,
+    ImplBody,
+    ImplTraitName,
+    ImplTargetName,
 
     EncodingDecl,
     AsmDecl,

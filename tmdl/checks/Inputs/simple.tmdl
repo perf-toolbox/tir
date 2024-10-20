@@ -11,6 +11,8 @@ enum GPR {
     X7
 }
 
+impl Register for GPR {}
+
 // Attached comment
 instr_template RInstr<$funct7: bits<7>, $funct3: bits<3>, $mnemonic: str, $opcode: bits<7>> {
    rd: GPR,
