@@ -418,7 +418,7 @@ fn encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
         elements.extend(aliens2);
         let name_span = name.as_token().span();
         elements.push(NodeOrToken::Node(GreenNodeData::new(
-            SyntaxKind::InstrTemplateName,
+            SyntaxKind::ImplTargetName,
             vec![name],
             name_span,
         )));
@@ -453,7 +453,7 @@ fn asm_<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
         elements.extend(aliens2);
         let name_span = name.as_token().span();
         elements.push(NodeOrToken::Node(GreenNodeData::new(
-            SyntaxKind::InstrTemplateName,
+            SyntaxKind::ImplTargetName,
             vec![name],
             name_span,
         )));
