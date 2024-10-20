@@ -23,15 +23,25 @@ def process_file(input_filename):
     modified_lines = [
         line
         for line in lines
-        if not line.startswith("// CHECK:")
+        if not line.startswith("// CHECK")
         and not line.startswith("// This file was generated")
         and not line.strip() == ''
     ]
 
+    check_next = False
+
     for line in output.splitlines():
         string = line.decode("utf-8")
-        if string.strip() != '':
-          modified_lines.append("// CHECK: " + string)
+        if string.startswith("#"):
+            string = string[1:]
+        if string.strip() == '' or "#" in string:
+            check_next = False
+        else:
+            if check_next:
+                modified_lines.append("// CHECK-NEXT: " + string)
+            else:
+                modified_lines.append("// CHECK: " + string)
+                check_next = True
 
     # Write modified lines back to file
     with open(input_filename, "w") as f:

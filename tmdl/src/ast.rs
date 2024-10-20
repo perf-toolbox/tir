@@ -195,6 +195,17 @@ impl fmt::Debug for Type {
     }
 }
 
+impl Item {
+    pub fn name(&self) -> String {
+        match self {
+            Item::InstrDecl(instr) => instr.name(),
+            Item::InstrTemplateDecl(instr) => instr.name(),
+            Item::EnumDecl(instr) => instr.name(),
+            _ => "unknown".to_owned(),
+        }
+    }
+}
+
 impl fmt::Debug for Item {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -264,6 +275,10 @@ impl SourceFile {
             syntax: root,
             items,
         })
+    }
+
+    pub fn items(&self) -> &[Item] {
+        &self.items
     }
 }
 
@@ -611,6 +626,34 @@ impl EncodingDecl {
 
         Some(Self { syntax, body })
     }
+
+    pub fn target_name(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) => {
+                    if node.kind() == SyntaxKind::InstrTemplateName {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
 }
 
 impl fmt::Debug for EncodingDecl {
@@ -633,6 +676,34 @@ impl AsmDecl {
         })?;
 
         Some(Self { syntax, body })
+    }
+
+    pub fn target_name(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Node(node) => {
+                    if node.kind() == SyntaxKind::InstrTemplateName {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .iter()
+            .flat_map(|node| node.children())
+            .find_map(|child| match child {
+                crate::SyntaxElement::Token(token) => {
+                    if token.kind() == SyntaxKind::Identifier {
+                        Some(token.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
     }
 }
 
@@ -719,13 +790,17 @@ impl EnumDecl {
             })
             .unwrap_or("unknown".to_string())
     }
+
+    pub fn variants(&self) -> &[EnumVariantDecl] {
+        &self.variants
+    }
 }
 
 impl fmt::Debug for EnumDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EnumDecl")
             .field("name", &self.name())
-            .field("variants", &self.variants)
+            .field("variants", &self.variants())
             .finish()
     }
 }

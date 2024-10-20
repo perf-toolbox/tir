@@ -1,0 +1,84 @@
+// This file was generated with ./utils/scripts/update_tmdlc_checks.py. Do not modify CHECKs manually.
+
+// RUN: tmdlc --action=emit-rust -d test %S/../Inputs/simple.tmdl -o - | filecheck %s
+
+// CHECK: pub enum GPR {
+// CHECK-NEXT:     X0,
+// CHECK-NEXT:     X1,
+// CHECK-NEXT:     X2,
+// CHECK-NEXT:     X3,
+// CHECK-NEXT:     X4,
+// CHECK-NEXT:     X5,
+// CHECK-NEXT:     X6,
+// CHECK-NEXT:     X7,
+// CHECK-NEXT: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "add", dialect = test)]
+// CHECK-NEXT: pub struct ADDOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "sub", dialect = test)]
+// CHECK-NEXT: pub struct SUBOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "sll", dialect = test)]
+// CHECK-NEXT: pub struct SLLOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "slt", dialect = test)]
+// CHECK-NEXT: pub struct SLTOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "sltu", dialect = test)]
+// CHECK-NEXT: pub struct SLTUOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "xor", dialect = test)]
+// CHECK-NEXT: pub struct XOROp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "srl", dialect = test)]
+// CHECK-NEXT: pub struct SRLOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "sra", dialect = test)]
+// CHECK-NEXT: pub struct SRAOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "or", dialect = test)]
+// CHECK-NEXT: pub struct OROp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
+// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [operation(name = "and", dialect = test)]
+// CHECK-NEXT: pub struct ANDOp {
+// CHECK-NEXT:     rd: bool,
+// CHECK-NEXT:     rs1: bool,
+// CHECK-NEXT:     rs2: bool,
+// CHECK: }
