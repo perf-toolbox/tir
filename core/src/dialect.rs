@@ -1,12 +1,12 @@
-use lpl::BoxedParser;
+use lpl::ParseResult;
 
 use crate::{Attr, IRFormatter, IRStrStream, OpRef};
 use std::any::Any;
 use std::collections::HashMap;
 
-type ParseFn<'a, T> = BoxedParser<'a, IRStrStream<'a>, T>;
-pub type OpParseFn<'a> = ParseFn<'a, OpRef>;
-pub type TyParseFn<'a> = ParseFn<'a, HashMap<String, Attr>>;
+type ParseFn<T> = dyn for<'a> Fn(IRStrStream<'a>) -> ParseResult<IRStrStream<'a>, T> + 'static;
+pub type OpParseFn = ParseFn<OpRef>;
+pub type TyParseFn = ParseFn<HashMap<String, Attr>>;
 pub type TyPrintFn = fn(&HashMap<String, Attr>, &mut dyn IRFormatter);
 
 pub struct Dialect {
@@ -14,8 +14,8 @@ pub struct Dialect {
     id: u32,
     operation_ids: HashMap<&'static str, u32>,
     type_ids: HashMap<&'static str, u32>,
-    op_parse_fn: HashMap<u32, Box<dyn for<'a> Fn() -> OpParseFn<'a>>>,
-    ty_parse_fn: HashMap<u32, Box<dyn for<'a> Fn() -> TyParseFn<'a>>>,
+    op_parse_fn: HashMap<u32, Box<OpParseFn>>,
+    ty_parse_fn: HashMap<u32, Box<TyParseFn>>,
     ty_print_fn: HashMap<u32, TyPrintFn>,
     ext: Option<Box<dyn Any>>,
 }
@@ -49,7 +49,7 @@ impl Dialect {
         self.name
     }
 
-    pub fn add_operation(&mut self, name: &'static str, parser: Box<dyn for<'a> Fn() -> OpParseFn<'a>>) {
+    pub fn add_operation(&mut self, name: &'static str, parser: Box<OpParseFn>) {
         if self
             .operation_ids
             .insert(name, self.operation_ids.len() as u32)
@@ -64,11 +64,11 @@ impl Dialect {
         self.operation_ids.get(name).copied()
     }
 
-    pub fn get_operation_parser(&self, id: u32) -> Option<OpParseFn<'_>> {
-        self.op_parse_fn.get(&id).map(|f| f())
+    pub fn get_operation_parser(&self, id: u32) -> Option<&Box<OpParseFn>> {
+        self.op_parse_fn.get(&id)
     }
 
-    pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: Box<dyn for<'a> Fn() -> TyParseFn<'a>>) {
+    pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: Box<TyParseFn>) {
         let id: u32 = self.type_ids.len() as u32;
         self.type_ids.insert(name, id);
         self.ty_print_fn.insert(id, print_fn);
@@ -83,8 +83,8 @@ impl Dialect {
         self.ty_print_fn.get(&id).cloned()
     }
 
-    pub fn get_type_parser(&self, id: u32) -> Option<TyParseFn<'_>> {
-        self.ty_parse_fn.get(&id).map(|f| f())
+    pub fn get_type_parser(&self, id: u32) -> Option<&Box<TyParseFn>> {
+        self.ty_parse_fn.get(&id)
     }
 
     pub fn get_similarly_named_op(&self, name: &str) -> Option<&'static str> {

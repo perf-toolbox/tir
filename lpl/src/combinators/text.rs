@@ -114,10 +114,7 @@ where
 {
     move |input: Input| {
         if !input.is_string_like() {
-            return Err(ParserError::new(
-                "Expected string-like input".to_string(),
-                input.span(),
-            ));
+            return Err(InternalError::NotStringLike(input.span()).into());
         }
 
         let mut last = 0;
@@ -125,17 +122,11 @@ where
         let mut chars = input.chars().peekable();
 
         if input.len() == 0 {
-            return Err(ParserError::new(
-                "Expected at least one character".to_string(),
-                input.span(),
-            ));
+            return Err(InternalError::UnexpectedEof(input.span()).into())
         }
 
         if !chars.peek().unwrap().is_alphabetic() {
-            return Err(ParserError::new(
-                "Identifier must start with an alphabetic character".to_string(),
-                input.span(),
-            ));
+            return Err(InternalError::NotAlpha(input.span()).into());
         }
 
         for c in chars {
@@ -146,7 +137,7 @@ where
         }
 
         if last == 0 {
-            return Err(ParserError::new("".to_string(), input.span()));
+            return Err(InternalError::PredNotSatisfied(input.span()).into());
         }
 
         let next_input: Option<Input> = input.slice(last..input.len());

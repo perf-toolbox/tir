@@ -1,5 +1,6 @@
-use crate::Printable;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
+use crate::{IRStrStream, Printable};
+use lpl::ParseResult;
 use std::collections::HashMap;
 use tir_macros::{dialect_type, dialect_type_with_extensions};
 
@@ -19,7 +20,7 @@ impl TyAssembly for VoidType {
         fmt.write_direct("void");
     }
 
-    fn parse_assembly<'a>() -> BoxedParser<'a, IRStrStream<'a>, std::collections::HashMap<String, tir_core::Attr>> {
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
         // tir_core::parser::skip_attrs(input)
         todo!()
     }
@@ -137,10 +138,7 @@ impl TyAssembly for IntType {
         fmt.write_direct(">");
     }
 
-    fn parse_assembly<'a>() -> BoxedParser<'a, IRStrStream<'a>, HashMap<String, Attr>>
-    where
-        Self: Sized,
-    {
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
         // tir_core::parser::parse_int_bits(input)
         todo!()
     }

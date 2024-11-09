@@ -1,10 +1,14 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::parser::{op_tuple, PError, Parsable, ParseStream};
+use lpl::ParseResult;
+
+use crate::parser::Parsable;
+// use crate::parser::{op_tuple, PError, Parsable, ParseStream};
 use crate::Attr;
 use crate::ContextRef;
 use crate::ContextWRef;
+use crate::IRStrStream;
 use crate::Printable;
 use crate::TyAssembly;
 
@@ -76,25 +80,25 @@ impl Printable for Type {
 }
 
 impl Parsable<Type> for Type {
-    fn parse<'a>() -> BoxedParser<'a, IRStrStream<'a>, Type> {
+    fn parse(input: IRStrStream<'_>) -> ParseResult<IRStrStream<'_>, Type> {
         todo!()
-    //     let (dialect, ty) = preceded("!", op_tuple).parse_next(input)?;
+        //     let (dialect, ty) = preceded("!", op_tuple).parse_next(input)?;
 
-    //     let context = input.state.get_context();
-    //     let dialect = context
-    //         .get_dialect_by_name(dialect)
-    //         .ok_or(ErrMode::Cut(PError::UnknownDialect(dialect.to_string())))?;
-    //     let id = dialect
-    //         .get_type_id(ty)
-    //         .ok_or(ErrMode::Cut(PError::UnknownType(ty.to_string())))?;
+        //     let context = input.state.get_context();
+        //     let dialect = context
+        //         .get_dialect_by_name(dialect)
+        //         .ok_or(ErrMode::Cut(PError::UnknownDialect(dialect.to_string())))?;
+        //     let id = dialect
+        //         .get_type_id(ty)
+        //         .ok_or(ErrMode::Cut(PError::UnknownType(ty.to_string())))?;
 
-    //     // By definition every existing type has a parser, and we just obtained type id from this
-    //     // dialect.
-    //     let mut parser = dialect.get_type_parser(id).unwrap();
+        //     // By definition every existing type has a parser, and we just obtained type id from this
+        //     // dialect.
+        //     let mut parser = dialect.get_type_parser(id).unwrap();
 
-    //     let attrs = parser.parse_next(input)?;
+        //     let attrs = parser.parse_next(input)?;
 
-    //     Ok(Type::new(context, dialect.get_id(), id, attrs))
+        //     Ok(Type::new(context, dialect.get_id(), id, attrs))
     }
 }
 

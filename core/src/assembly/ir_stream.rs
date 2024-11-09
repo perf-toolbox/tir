@@ -25,21 +25,30 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
     type Extra = ContextRef;
     type Item = char;
 
-    fn get(&self, range: Range<usize>) -> Option<Self::Slice> {
-        self.string.get(range)
+    fn get<R>(&self, range: R) -> Option<Self::Slice>
+    where
+        R: RangeBounds<usize>,
+    {
+        self.string
+            .get((range.start_bound().cloned(), range.end_bound().cloned()))
     }
 
-    fn slice(&self, range: Range<usize>) -> Option<Self> {
+    fn slice<R>(&self, range: R) -> Option<Self>
+    where
+        R: RangeBounds<usize>,
+    {
         let offset = match range.start_bound() {
             std::ops::Bound::Included(bound) => self.offset + bound,
             std::ops::Bound::Excluded(bound) => self.offset + bound + 1,
             std::ops::Bound::Unbounded => self.offset,
         };
-        self.string.get(range).map(|string| Self {
-            string,
-            offset,
-            context: self.context.clone(),
-        })
+        self.string
+            .get((range.start_bound().cloned(), range.end_bound().cloned()))
+            .map(|string| Self {
+                string,
+                offset,
+                context: self.context.clone(),
+            })
     }
 
     fn len(&self) -> usize {
@@ -72,5 +81,9 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
 
     fn peek(&self) -> Option<Self::Item> {
         self.string.chars().next()
+    }
+
+    fn nth(&self, n: usize) -> Option<Self::Item> {
+        self.string.chars().nth(n)
     }
 }

@@ -1,7 +1,6 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{region_with_blocks, sym_name, Parsable};
 use crate::*;
-use lpl::BoxedParser;
+use lpl::ParseResult;
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 
 use crate as tir_core;
@@ -54,7 +53,7 @@ impl Terminator for ReturnOp {}
 // }
 
 impl OpAssembly for FuncOp {
-    fn parse_assembly<'a>() -> BoxedParser<'a, IRStrStream<'a>, OpRef>
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream, OpRef>
     where
         Self: Sized,
     {

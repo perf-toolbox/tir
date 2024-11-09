@@ -1,5 +1,4 @@
-use crate::{InternalError, ParseStream, Parser, Span, Spanned};
-use std::{any::Any, rc::Rc};
+use crate::{Diagnostic, InternalError, ParseStream, Parser, Span, Spanned};
 
 pub fn map<'a, P, F, Input, Output1, Output2>(
     parser: P,
@@ -112,7 +111,7 @@ pub fn try_map<'a, P, F, Input, Output1, Output2>(
 where
     Input: ParseStream<'a> + 'a,
     P: Parser<'a, Input, Output1>,
-    F: Fn(Output1, Span) -> Result<Output2, ParserError>,
+    F: Fn(Output1, Span) -> Result<Output2, Diagnostic>,
 {
     move |input: Input| {
         let span = input.span();

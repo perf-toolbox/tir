@@ -181,10 +181,8 @@ where
                 return Ok(result);
             }
         }
-        Err(ParserError::new(
-            "no parser matched".to_string(),
-            input.span(),
-        ))
+        // FIXME: must be a combination of diagnostics
+        Err(InternalError::EmptyList(input.span()).into())
     }
 }
 

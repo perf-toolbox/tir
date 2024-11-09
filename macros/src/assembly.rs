@@ -127,19 +127,19 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
             #return_printer
           }
 
-          fn parse_assembly<'a>() -> lpl::BoxedParser<'a, tir_core::parser::IRStrStream<'a>, tir_core::OpRef> {
+          fn parse_assembly<'a>(input: tir_core::assembly::IRStrStream<'a>) -> lpl::ParseResult<tir_core::assembly::IRStrStream<'a>, tir_core::OpRef> {
             todo!()
-            let operands_parser = #operands_parser;
-            let mut builder = Self::builder(&input.state.get_context());
-
-            let attr_list = tir_core::parser::attr_list.parse_next(input)?;
-
-            #return_parser
-
-            let op = builder.build();
-            op.borrow_mut().add_attrs(&attr_list);
-
-            Ok(op)
+            // let operands_parser = #operands_parser;
+            // let mut builder = Self::builder(&input.state.get_context());
+            //
+            // let attr_list = tir_core::parser::attr_list.parse_next(input)?;
+            //
+            // #return_parser
+            //
+            // let op = builder.build();
+            // op.borrow_mut().add_attrs(&attr_list);
+            //
+            // Ok(op)
           }
       }
     }

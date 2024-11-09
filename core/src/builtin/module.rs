@@ -1,8 +1,10 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{single_block_region, AsmPResult, ParseStream};
-use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator};
+// use crate::parser::single_block_region;
+use crate::{
+    IRFormatter, IRStrStream, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
+};
+use lpl::ParseResult;
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
-use winnow::Parser;
 
 use crate as tir_core;
 
@@ -24,17 +26,18 @@ pub struct ModuleEndOp {
 impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {
-    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
+    fn parse_assembly<'a>(input: IRStrStream<'_>) -> ParseResult<IRStrStream<'_>, OpRef>
     where
         Self: Sized,
     {
-        let ops = single_block_region.parse_next(input)?;
-        let context = input.state.get_context();
-        let module = ModuleOp::builder(&context).build();
-        for op in ops {
-            module.borrow_mut().get_body().push(&op);
-        }
-        Ok(module)
+        todo!()
+        // let ops = single_block_region.parse_next(input)?;
+        // let context = input.state.get_context();
+        // let module = ModuleOp::builder(&context).build();
+        // for op in ops {
+        //     module.borrow_mut().get_body().push(&op);
+        // }
+        // Ok(module)
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

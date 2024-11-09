@@ -5,9 +5,12 @@ use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
+use lpl::combinators::lang::ident;
 use lpl::combinators::literal;
-use lpl::combinators::text::ident;
-use lpl::{ParseStream, Parser, ParserError};
+use lpl::combinators::zero_or_more;
+use lpl::Diagnostic;
+use lpl::ParseResult;
+use lpl::{ParseStream, Parser};
 use thiserror::Error;
 
 use crate::assembly::ir_stream::IRStrStream;
@@ -19,21 +22,26 @@ use crate::Region;
 use crate::RegionRef;
 use crate::{ContextRef, OpRef, Type};
 
+use super::DiagKind;
+
 /// Basic trait that any operation has to implement
 pub trait Parsable<T> {
-    fn parse<'a>() -> Box<dyn Parser<'a, IRStrStream<'a>, OpRef>>;
+    fn parse(input: IRStrStream) -> ParseResult<IRStrStream, T>;
 }
 
 /// Parse textual TIR into inner structures
-pub fn parse_ir(context: ContextRef, input: &str) -> Result<OpRef, ParserError> {
+pub fn parse_ir(context: ContextRef, input: &str) -> Result<OpRef, Diagnostic> {
     let stream = IRStrStream::new(input, context);
-    // let stream: StrS
-    todo!()
+
+    let parser = single_op();
+
+    let (op, _) = parser.parse(stream)?;
+    Ok(op)
 }
 
 /// Parse TIR @-style symbol names
 pub fn sym_name<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
-    literal("@").and_then(ident(valid_op_char)).map(|(_, sym)| sym)
+    literal("@").and_then(identifier()).map(|(_, sym)| sym)
 }
 
 /// Parse generic TIR identifier
@@ -41,14 +49,26 @@ pub fn identifier<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
     ident(|c| c == '_' || c == '.')
 }
 
+/// Parse all operations inside a single basic block region
+pub fn single_block_region<'a>() -> impl Parser<'a, IRStrStream<'a>, Vec<OpRef>> {
+    literal("{")
+        .and_then(zero_or_more(single_op()))
+        .and_then(literal("}"))
+        .flat()
+        .map(|(_, ops, _)| ops)
+}
+
 /// Generic operation name
 fn op_name<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
-   dialect_op().or_else(builtin_op())
+    dialect_op().or_else(builtin_op())
 }
 
 /// dialect_name.op_name -> (dialect_name, op_name)
 fn dialect_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
-    ident(|c| c == '_').and_then(literal(".")).and_then(identifier()).map(|((d, _), o)| (d, o))
+    ident(|c| c == '_')
+        .and_then(literal("."))
+        .and_then(identifier())
+        .map(|((d, _), o)| (d, o))
 }
 
 /// "builtin op"-style identifier
@@ -57,7 +77,7 @@ fn builtin_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
 }
 
 fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
-    move |input: IRStrStream| {
+    move |input: IRStrStream<'a>| {
         let ((dialect_name, op_name), next_input) = op_name().parse(input.clone())?;
 
         // It is impossible to construct IRStrStream without a context
@@ -65,18 +85,18 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 
         let dialect = context
             .get_dialect_by_name(dialect_name)
-            .ok_or(ParserError::new(
-                format!("unknown dialect '{}'", dialect_name),
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownDialect(
+                dialect_name.to_owned(),
                 input.span(),
-            ))?;
+            )))?;
 
-        let operation_id = dialect.get_operation_id(op_name).ok_or(ParserError::new(
-            format!(
-                "unknown operation '{}' in dialect '{}'",
-                op_name, dialect_name
-            ),
-            input.span(),
-        ))?;
+        let operation_id = dialect
+            .get_operation_id(op_name)
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownOperation(
+                op_name.to_owned(),
+                dialect_name.to_owned(),
+                input.span(),
+            )))?;
 
         // It is impossible to add an operation without specifying its parser
         let parser = dialect.get_operation_parser(operation_id).unwrap();
@@ -108,15 +128,6 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 //
 // fn comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
 //     repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
-// }
-// pub fn single_block_region(ir: &mut ParseStream<'_>) -> AsmPResult<Vec<OpRef>> {
-//     expected_token("{", ir)?;
-//
-//     let operations = repeat(0.., single_op).parse_next(ir)?;
-//
-//     expected_token("}", ir)?;
-//
-//     Ok(operations)
 // }
 //
 // pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {
