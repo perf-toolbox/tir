@@ -43,11 +43,14 @@ fn make_return_type_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStre
         if let OpFieldAttrs::Return = f.attrs {
             let ident = f.ident.as_ref().unwrap();
             return quote! {
-                |builder| {
-                    lpl::literal("->").spaced().and_then(tir_core::Type::parse).map(|(_, ty)| {
-                        builder.#ident(ty);
-                    })
-                }
+                let return_parser =
+                    lpl::combinators::literal("->").spaced().and_then(tir_core::Type::parse).map(|(_, ty): (_, tir_core::Type)| {
+                        ty
+                    });
+
+                let (ty, next_input) = return_parser.parse(next_input.unwrap())?;
+
+                let builder = builder.#ident(ty);
             };
         }
     }
@@ -56,19 +59,17 @@ fn make_return_type_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStre
 }
 
 fn make_operands_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
-    let mut parsers = vec![
-        quote! {
-            lpl::literal("(").spaced()
-        }
-    ];
+    let mut parsers = vec![quote! {
+        lpl::combinators::spaced(lpl::combinators::literal("("))
+    }];
 
     parsers.extend(fields.iter().filter_map(|f| {
         if let OpFieldAttrs::Operand = f.attrs {
             let operand_str = format!("{}", f.ident.as_ref().unwrap());
             let ty = &f.ty;
             Some(quote!({
-                .and_then(lpl::literal(#operand_str).and_then(lpl::literal("=").spaced()).map(|(_, _)| {
-                    todo!()
+                .and_then(lpl::combinators::literal(#operand_str).and_then(lpl::combinators::spaced(lpl::combinators::literal("="))).map(|(_, _)| {
+                    ()
                 }))
             }))
         } else {
@@ -77,7 +78,7 @@ fn make_operands_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream 
     }));
 
     parsers.push(quote! {
-        lpl::literal(")").spaced()
+        .and_then(lpl::combinators::spaced(lpl::combinators::literal(")")))
     });
 
     quote! {
@@ -128,18 +129,21 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
           }
 
           fn parse_assembly<'a>(input: tir_core::assembly::IRStrStream<'a>) -> lpl::ParseResult<tir_core::assembly::IRStrStream<'a>, tir_core::OpRef> {
-            todo!()
-            // let operands_parser = #operands_parser;
-            // let mut builder = Self::builder(&input.state.get_context());
-            //
-            // let attr_list = tir_core::parser::attr_list.parse_next(input)?;
-            //
-            // #return_parser
-            //
-            // let op = builder.build();
-            // op.borrow_mut().add_attrs(&attr_list);
-            //
-            // Ok(op)
+            let context = input.get_extra().unwrap().clone();
+            let mut builder = Self::builder(&context);
+            let operands_parser = #operands_parser;
+            let attrs_parser = tir_core::parser::attr_list();
+
+            let (_, next_input) = operands_parser(&builder).parse(input)?;
+            let (attr_list, next_input) = attrs_parser.parse(next_input.unwrap())?;
+
+            #return_parser
+
+            let op = builder.build();
+            op.borrow_mut().add_attrs(&attr_list);
+            let op: tir_core::OpRef = op;
+
+            Ok((op, next_input))
           }
       }
     }

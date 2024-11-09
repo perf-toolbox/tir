@@ -2,6 +2,7 @@ use crate::utils::ITypeInstr;
 use crate::utils::RTypeInstr;
 use crate::{assemble_reg, disassemble_gpr};
 use crate::{register_parser, Register};
+use lpl::Parser;
 use tir_backend::isema;
 use tir_backend::isema::WithISema;
 use tir_backend::AsmToken;
@@ -13,7 +14,6 @@ use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{lowercase, uppercase};
 use tir_macros::{Op, OpAssembly, OpValidator};
-use lpl::Parser;
 
 use crate::DIALECT_NAME;
 
@@ -61,9 +61,7 @@ macro_rules! alu_op_base {
 
         impl ISAParser for $struct_name {
             fn parse<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
-                asm_ident().try_map(|t| {
-                    
-                })
+                asm_ident().try_map(|t| {})
                 // let opcode = one_of(|t| {
                 //     if let AsmToken::Ident(name) = t {
                 //         name == lowercase!($op_name) || name == uppercase!($op_name)

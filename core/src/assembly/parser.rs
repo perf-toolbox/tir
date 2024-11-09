@@ -95,7 +95,7 @@ pub fn attr_list<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>
                     return Err(DiagKind::DuplicateAttr(k.clone(), span).into());
                 }
 
-               map.insert(k.clone(), v.clone());
+                map.insert(k.clone(), v.clone());
             }
             Ok(map)
         })
@@ -325,8 +325,9 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 
 #[cfg(test)]
 mod tests {
+    use super::{attr_list, Attr};
+    use crate::IRStrStream;
     use lpl::Parser;
-    use super::{attr_list, Attr};    use crate::IRStrStream;
 
     #[test]
     fn test_attr_list() {
@@ -337,7 +338,10 @@ mod tests {
         assert!(result.is_ok());
         let (attrs, _) = result.unwrap();
         println!("{:?}", attrs);
-        assert_eq!(attrs.get("attr1").unwrap(), &Attr::String("Hello, World!".to_string()));
+        assert_eq!(
+            attrs.get("attr1").unwrap(),
+            &Attr::String("Hello, World!".to_string())
+        );
         assert_eq!(attrs.get("attr2").unwrap(), &Attr::I8(42));
     }
 

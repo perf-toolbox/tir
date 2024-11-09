@@ -1,7 +1,7 @@
+use lpl::Parser;
 use tir_backend::{DisassemblerError, ISAParser, TokenStream};
 use tir_core::Dialect;
 use tir_core::{ContextRef, OpAssembly, OpBuilder};
-use lpl::Parser;
 
 mod asm_parser;
 mod ops;

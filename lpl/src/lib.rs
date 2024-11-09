@@ -123,6 +123,14 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         BoxedParser::new(combinators::and_then(self, parser2))
     }
 
+    fn spaced(self) -> BoxedParser<'a, Input, Output>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+    {
+        BoxedParser::new(combinators::spaced(self))
+    }
+
     fn void(self) -> BoxedParser<'a, Input, ()>
     where
         Self: Sized + 'a,

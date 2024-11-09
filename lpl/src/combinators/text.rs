@@ -122,7 +122,7 @@ where
         let mut chars = input.chars().peekable();
 
         if input.len() == 0 {
-            return Err(InternalError::UnexpectedEof(input.span()).into())
+            return Err(InternalError::UnexpectedEof(input.span()).into());
         }
 
         if !chars.peek().unwrap().is_alphabetic() {

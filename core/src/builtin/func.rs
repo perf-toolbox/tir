@@ -1,7 +1,7 @@
 use crate::builtin::DIALECT_NAME;
 use crate::*;
 use lpl::ParseResult;
-use lpl::{Parser, ParseStream};
+use lpl::{ParseStream, Parser};
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 
 use crate as tir_core;

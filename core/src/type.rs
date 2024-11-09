@@ -100,10 +100,17 @@ impl Parsable<Type> for Type {
 
         let dialect = context
             .get_dialect_by_name(dialect_name)
-            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownDialect(dialect_name.to_string(), span.clone())))?;
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownDialect(
+                dialect_name.to_string(),
+                span.clone(),
+            )))?;
         let id = dialect
             .get_type_id(ty_name)
-            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownType(ty_name.to_string(), dialect_name.to_string(), span)))?;
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownType(
+                ty_name.to_string(),
+                dialect_name.to_string(),
+                span,
+            )))?;
 
         let attr_parser = dialect.get_type_parser(id).unwrap();
 
