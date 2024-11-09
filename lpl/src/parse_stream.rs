@@ -1,8 +1,11 @@
-use std::ops::{Range, RangeBounds};
+use std::{
+    fmt,
+    ops::{Range, RangeBounds},
+};
 
 use crate::Span;
 
-pub trait ParseStream<'a>: Clone {
+pub trait ParseStream<'a>: Clone + fmt::Debug {
     type Slice;
     type Extra;
     type Item;
@@ -45,7 +48,7 @@ pub trait ParseStream<'a>: Clone {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct StrStream<'a> {
     string: &'a str,
     offset: usize,
@@ -122,5 +125,11 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
 impl<'a> From<&'a str> for StrStream<'a> {
     fn from(string: &'a str) -> Self {
         StrStream { string, offset: 0 }
+    }
+}
+
+impl<'a> fmt::Debug for StrStream<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:30}", self.string)
     }
 }

@@ -76,6 +76,7 @@
 // CHECK-NEXT:                 parent_template_args: [],
 // CHECK-NEXT:             },
 // CHECK-NEXT:             EncodingDecl {
+// CHECK-NEXT:                 target_name: "RInstr",
 // CHECK-NEXT:                 body: BlockExpr {
 // CHECK-NEXT:                     type: <unresolved>,
 // CHECK-NEXT:                     stmts: [
@@ -116,6 +117,7 @@
 // CHECK-NEXT:                 },
 // CHECK-NEXT:             },
 // CHECK-NEXT:             AsmDecl {
+// CHECK-NEXT:                 target_name: "RInstr",
 // CHECK-NEXT:                 body: BlockExpr {
 // CHECK-NEXT:                     type: str,
 // CHECK-NEXT:                     stmts: [
@@ -288,6 +290,7 @@
 // CHECK-NEXT:                 parent_template_args: [],
 // CHECK-NEXT:             },
 // CHECK-NEXT:             EncodingDecl {
+// CHECK-NEXT:                 target_name: "IInstr",
 // CHECK-NEXT:                 body: BlockExpr {
 // CHECK-NEXT:                     type: <unresolved>,
 // CHECK-NEXT:                     stmts: [
@@ -322,6 +325,7 @@
 // CHECK-NEXT:                 },
 // CHECK-NEXT:             },
 // CHECK-NEXT:             AsmDecl {
+// CHECK-NEXT:                 target_name: "IInstr",
 // CHECK-NEXT:                 body: BlockExpr {
 // CHECK-NEXT:                     type: str,
 // CHECK-NEXT:                     stmts: [

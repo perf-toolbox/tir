@@ -12,6 +12,7 @@ where
     reset(literal(comment_start))
         .and_then(take_while(|c| *c != '\n'))
         .map(|(_, c)| c)
+        .label("line_comment")
 }
 
 /// Parses an identifier based on a custom predicate.
