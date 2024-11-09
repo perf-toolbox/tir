@@ -1,10 +1,14 @@
 pub mod combinators;
 pub mod syntax;
 
+#[cfg(debug_assertions)]
+mod debug;
 mod diagnostic;
 mod parse_stream;
 
 use combinators::Flatten;
+#[cfg(debug_assertions)]
+pub use debug::*;
 pub use diagnostic::*;
 pub use parse_stream::*;
 
@@ -128,6 +132,19 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         Output: Flatten<Output = NewOutput> + 'a,
     {
         BoxedParser::new(combinators::flat(self))
+    }
+
+    fn label(self, label: &'static str) -> impl Parser<'a, Input, Output>
+    where
+        Self: Sized + 'a,
+    {
+        cfg_if::cfg_if! {
+            if #[cfg(debug_assertions)] {
+                LabelledParser::new(label, BoxedParser::new(self))
+            } else {
+                self
+            }
+        }
     }
 }
 

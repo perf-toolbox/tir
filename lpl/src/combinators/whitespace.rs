@@ -17,14 +17,18 @@ pub fn any_whitespace0<'a, Input>() -> impl Parser<'a, Input, ()>
 where
     Input: ParseStream<'a> + 'a,
 {
-    zero_or_more(any_whitespace()).map(|_| ())
+    zero_or_more(any_whitespace())
+        .map(|_| ())
+        .label("any_wgitespace0")
 }
 
 pub fn any_whitespace1<'a, Input>() -> impl Parser<'a, Input, ()>
 where
     Input: ParseStream<'a> + 'a,
 {
-    one_or_more(any_whitespace()).map(|_| ())
+    one_or_more(any_whitespace())
+        .map(|_| ())
+        .label("any_whitespace1")
 }
 
 pub fn space<'a, Input>() -> impl Parser<'a, Input, char>
@@ -38,14 +42,14 @@ pub fn space0<'a, Input>() -> impl Parser<'a, Input, ()>
 where
     Input: ParseStream<'a> + 'a,
 {
-    zero_or_more(space()).map(|_| ())
+    zero_or_more(space()).map(|_| ()).label("space0")
 }
 
 pub fn space1<'a, Input>() -> impl Parser<'a, Input, ()>
 where
     Input: ParseStream<'a> + 'a,
 {
-    one_or_more(space()).map(|_| ())
+    one_or_more(space()).map(|_| ()).label("space1")
 }
 
 pub fn spaced<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Output>
