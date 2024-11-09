@@ -1,4 +1,7 @@
-use lpl::ParseResult;
+use lpl::{
+    combinators::{lang::ident, literal, spaced, text::take_while},
+    ParseResult, Parser,
+};
 
 use crate::{parser::Parsable, IRStrStream, Printable, Type};
 
@@ -78,33 +81,36 @@ impl Printable for Attr {
 
 impl Parsable<Attr> for Attr {
     fn parse(input: IRStrStream) -> ParseResult<IRStrStream, Attr> {
-        todo!()
-        //     let value_parser = take_till(1.., |c| c == '>');
-        //     let atom = separated_pair(identifier, (space0, ":", space0), value_parser);
-        //     let (ty, value) =
-        //         delimited((space0, "<", space0), atom, (space0, ">", space0)).parse_next(input)?;
-        //     let value = value.trim();
-
-        //     // TODO error handling for String attrs
-        //     match ty {
-        //         "str" => Ok(Attr::String(
-        //             value
-        //                 .strip_prefix("\"")
-        //                 .unwrap()
-        //                 .strip_suffix("\"")
-        //                 .unwrap()
-        //                 .to_string(),
-        //         )),
-        //         "i8" => Ok(Attr::I8(value.parse::<i8>().unwrap())),
-        //         "u8" => Ok(Attr::U8(value.parse::<u8>().unwrap())),
-        //         "i16" => Ok(Attr::I16(value.parse::<i16>().unwrap())),
-        //         "u16" => Ok(Attr::U16(value.parse::<u16>().unwrap())),
-        //         "i32" => Ok(Attr::I32(value.parse::<i32>().unwrap())),
-        //         "u32" => Ok(Attr::U32(value.parse::<u32>().unwrap())),
-        //         "i64" => Ok(Attr::I64(value.parse::<i64>().unwrap())),
-        //         "u64" => Ok(Attr::U64(value.parse::<u64>().unwrap())),
-        //         _ => todo!(),
-        //     }
+        let parser = spaced(literal("<"))
+            .and_then(ident(|_| false))
+            .and_then(spaced(literal(":")))
+            .and_then(take_while(|&c| c != '>'))
+            .and_then(spaced(literal(">")))
+            .flat()
+            .try_map(|(_, ty, _, value, _), _span| {
+                let value = value.trim();
+                let ty = ty.trim();
+                match ty {
+                    "str" => Ok(Attr::String(
+                        value
+                            .strip_prefix("\"")
+                            .unwrap()
+                            .strip_suffix("\"")
+                            .unwrap()
+                            .to_string(),
+                    )),
+                    "i8" => Ok(Attr::I8(value.parse::<i8>().unwrap())),
+                    "u8" => Ok(Attr::U8(value.parse::<u8>().unwrap())),
+                    "i16" => Ok(Attr::I16(value.parse::<i16>().unwrap())),
+                    "u16" => Ok(Attr::U16(value.parse::<u16>().unwrap())),
+                    "i32" => Ok(Attr::I32(value.parse::<i32>().unwrap())),
+                    "u32" => Ok(Attr::U32(value.parse::<u32>().unwrap())),
+                    "i64" => Ok(Attr::I64(value.parse::<i64>().unwrap())),
+                    "u64" => Ok(Attr::U64(value.parse::<u64>().unwrap())),
+                    _ => todo!(),
+                }
+            });
+        parser.parse(input)
     }
 }
 

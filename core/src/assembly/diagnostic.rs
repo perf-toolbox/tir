@@ -7,6 +7,10 @@ pub enum DiagKind {
     UnknownDialect(String, Span),
     #[error("Unknown operation '{0}' in dialect '{1}'")]
     UnknownOperation(String, String, Span),
+    #[error("Unknown type '{0}' in dialect '{1}'")]
+    UnknownType(String, String, Span),
+    #[error("Duplicate attribute '{0}'")]
+    DuplicateAttr(String, Span),
 }
 
 impl DiagnosticLike for DiagKind {
@@ -18,6 +22,8 @@ impl DiagnosticLike for DiagKind {
         match self {
             DiagKind::UnknownDialect(_, span) => span.clone(),
             DiagKind::UnknownOperation(_, _, span) => span.clone(),
+            DiagKind::UnknownType(_, _, span) => span.clone(),
+            DiagKind::DuplicateAttr(_, span) => span.clone(),
         }
     }
 

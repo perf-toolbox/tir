@@ -1,9 +1,10 @@
 use crate::builtin::DIALECT_NAME;
+use crate::parser::single_block_region;
 // use crate::parser::single_block_region;
 use crate::{
     IRFormatter, IRStrStream, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
 };
-use lpl::ParseResult;
+use lpl::{ParseResult, ParseStream, Parser};
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
 
 use crate as tir_core;
@@ -30,14 +31,18 @@ impl OpAssembly for ModuleOp {
     where
         Self: Sized,
     {
-        todo!()
-        // let ops = single_block_region.parse_next(input)?;
-        // let context = input.state.get_context();
-        // let module = ModuleOp::builder(&context).build();
-        // for op in ops {
-        //     module.borrow_mut().get_body().push(&op);
-        // }
-        // Ok(module)
+        let parser = single_block_region();
+        let context = input.get_extra().unwrap().clone();
+        parser.parse(input).map(|(ops, next_input)| {
+            let module = ModuleOp::builder(&context).build();
+            for op in ops {
+                module.borrow_mut().get_body().push(&op);
+            }
+
+            let module: OpRef = module;
+
+            (module, next_input)
+        })
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

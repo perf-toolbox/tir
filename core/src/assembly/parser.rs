@@ -5,8 +5,11 @@ use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
+use lpl::combinators::interleaved;
 use lpl::combinators::lang::ident;
 use lpl::combinators::literal;
+use lpl::combinators::separated_ignore;
+use lpl::combinators::spaced;
 use lpl::combinators::zero_or_more;
 use lpl::Diagnostic;
 use lpl::ParseResult;
@@ -49,13 +52,53 @@ pub fn identifier<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
     ident(|c| c == '_' || c == '.')
 }
 
-/// Parse all operations inside a single basic block region
+/// Parse all operations inside a single basic block region.
+/// Syntax is:
+/// ```tir
+/// {
+///     op1
+///     op2
+/// }
+/// ```
 pub fn single_block_region<'a>() -> impl Parser<'a, IRStrStream<'a>, Vec<OpRef>> {
-    literal("{")
+    spaced(literal("{"))
         .and_then(zero_or_more(single_op()))
-        .and_then(literal("}"))
+        .and_then(spaced(literal("}")))
         .flat()
         .map(|(_, ops, _)| ops)
+}
+
+/// Parse attributes list.
+///
+/// Syntax example:
+/// ```tir
+/// attrs = {attr1 = <str: "Hello, World!">, attr2 = <i8: 42>}
+/// ```
+pub fn attr_list<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    let single_attribute = identifier()
+        .and_then(spaced(literal("=")))
+        .and_then(Attr::parse)
+        .map(|((name, _), attr)| (name.to_string(), attr));
+
+    let attr_pairs = separated_ignore(single_attribute, spaced(literal(",")).void());
+
+    literal("attrs")
+        .and_then(spaced(literal("=")))
+        .and_then(spaced(literal("{")))
+        .and_then(attr_pairs)
+        .and_then(spaced(literal("}")))
+        .flat()
+        .try_map(|(_, _, _, pairs, _), span| {
+            let mut map = HashMap::new();
+            for (k, v) in pairs.iter() {
+                if map.contains_key(k) {
+                    return Err(DiagKind::DuplicateAttr(k.clone(), span).into());
+                }
+
+               map.insert(k.clone(), v.clone());
+            }
+            Ok(map)
+        })
 }
 
 /// Generic operation name
@@ -78,7 +121,7 @@ fn builtin_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
 
 fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
     move |input: IRStrStream<'a>| {
-        let ((dialect_name, op_name), next_input) = op_name().parse(input.clone())?;
+        let ((dialect_name, op_name), next_input) = spaced(op_name()).parse(input.clone())?;
 
         // It is impossible to construct IRStrStream without a context
         let context = input.get_extra().unwrap();
@@ -104,32 +147,6 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
     }
 }
 
-// pub fn word<'a, F, O, E: ParserError<ParseStream<'a>>>(
-//     inner: F,
-// ) -> impl Parser<ParseStream<'a>, O, E>
-// where
-//     F: Parser<ParseStream<'a>, O, E>,
-// {
-//     delimited(space0, inner, space0)
-// }
-//
-// pub fn skip_attrs(
-//     _input: &mut ParseStream<'_>,
-// ) -> AsmPResult<std::collections::HashMap<String, Attr>> {
-//     let res: std::collections::HashMap<String, Attr> = HashMap::new();
-//     Ok(res)
-// }
-//
-// fn single_comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
-//     (';', take_till(1.., ['\n', '\r']), line_ending)
-//         .void()
-//         .parse_next(input)
-// }
-//
-// fn comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
-//     repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
-// }
-//
 // pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {
 //     let skip = trace(
 //         "skip comments",
@@ -192,18 +209,6 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 //     .parse_next(input)
 // }
 //
-// pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr>> {
-//     let attr_pairs =
-//         separated::<_, _, HashMap<_, _>, _, _, _, _>(0.., attr_pair, (space0, ",", space0));
-//     trace(
-//         "attribute list",
-//         terminated(
-//             preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
-//             (space0, "}", space0),
-//         ),
-//     )
-//     .parse_next(input)
-// }
 //
 // fn parse_digits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
 //     winnow::token::take_while(1.., '0'..='9').parse_next(input)
@@ -317,3 +322,31 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 //         assert_eq!(result, ("test", "module"));
 //     }
 // }
+
+#[cfg(test)]
+mod tests {
+    use lpl::Parser;
+    use super::{attr_list, Attr};    use crate::IRStrStream;
+
+    #[test]
+    fn test_attr_list() {
+        let context = crate::Context::new(); // Assuming Context is defined in crate
+        let input = "attrs = {attr1 = <str: \"Hello, World!\">, attr2 = <i8: 42>}";
+        let input = IRStrStream::new(input, context);
+        let result = attr_list().parse(input);
+        assert!(result.is_ok());
+        let (attrs, _) = result.unwrap();
+        println!("{:?}", attrs);
+        assert_eq!(attrs.get("attr1").unwrap(), &Attr::String("Hello, World!".to_string()));
+        assert_eq!(attrs.get("attr2").unwrap(), &Attr::I8(42));
+    }
+
+    #[test]
+    fn test_attr_list_duplicate() {
+        let context = crate::Context::new();
+        let input = "attrs = {attr1 = <str: \"Hello\">, attr1 = <str: \"World\">}";
+        let input = IRStrStream::new(input, context);
+        let result = attr_list().parse(input);
+        assert!(result.is_err());
+    }
+}
