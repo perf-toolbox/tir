@@ -18,9 +18,9 @@ macro_rules! populate_riscv_ops {
         populate_dialect_ops!($($op),*);
 
         fn populate_riscv_asm_parsers(ext: &mut RVExt) {
-            $(
-            ext.register_asm_parser(Box::new(<$op as ISAParser>::parse()));
-            )*
+            // $(
+            // ext.register_asm_parser(Box::new(<$op as ISAParser>::parse()));
+            // )*
         }
     };
 }

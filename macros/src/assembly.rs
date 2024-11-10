@@ -67,11 +67,11 @@ fn make_operands_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream 
         if let OpFieldAttrs::Operand = f.attrs {
             let operand_str = format!("{}", f.ident.as_ref().unwrap());
             let ty = &f.ty;
-            Some(quote!({
+            Some(quote! {
                 .and_then(lpl::combinators::literal(#operand_str).and_then(lpl::combinators::spaced(lpl::combinators::literal("="))).map(|(_, _)| {
                     ()
                 }))
-            }))
+            })
         } else {
             None
         }
@@ -81,10 +81,17 @@ fn make_operands_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream 
         .and_then(lpl::combinators::spaced(lpl::combinators::literal(")")))
     });
 
+    if parsers.len() == 2 {
+        return quote! {};
+    }
+
+    let operands_parser = quote! {
+        #(#parsers)*
+    };
+
     quote! {
-        |builder| {
-            #(#parsers)*
-        }
+        let operands_parser = #operands_parser;
+        let (_, next_input) = operands_parser.parse(next_input.unwrap())?;
     }
 }
 
@@ -128,13 +135,15 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
             #return_printer
           }
 
-          fn parse_assembly<'a>(input: tir_core::assembly::IRStrStream<'a>) -> lpl::ParseResult<tir_core::assembly::IRStrStream<'a>, tir_core::OpRef> {
+          fn parse_assembly<'a>(input: tir_core::IRStrStream<'a>) -> lpl::ParseResult<tir_core::IRStrStream<'a>, tir_core::OpRef> {
             let context = input.get_extra().unwrap().clone();
             let mut builder = Self::builder(&context);
-            let operands_parser = #operands_parser;
             let attrs_parser = tir_core::parser::attr_list();
 
-            let (_, next_input) = operands_parser(&builder).parse(input)?;
+            let next_input = Some(input);
+
+            #operands_parser
+
             let (attr_list, next_input) = attrs_parser.parse(next_input.unwrap())?;
 
             #return_parser

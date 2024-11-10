@@ -87,12 +87,16 @@ impl Printable for Type {
 
 impl Parsable<Type> for Type {
     fn parse(input: IRStrStream) -> ParseResult<IRStrStream, Type> {
-        let parser = literal("!")
-            .and_then(ident(|c| c == '_'))
+        let type_name = ident(|c| c == '_')
             .and_then(literal("."))
-            .and_then(identifier())
-            .flat()
-            .map(|(_, dialect, _, ty_name)| (dialect, ty_name));
+            .and_then(ident(|c| c == '_'))
+            .map(|((dialect_name, _), type_name)| (dialect_name, type_name))
+            .or_else(ident(|c| c == '_').map(|type_name| ("builtin", type_name)));
+
+        let parser = literal("!")
+            .and_then(type_name)
+            .map(|(_, (dialect, ty_name))| (dialect, ty_name))
+            .label("type_name");
 
         let span = input.span();
         let context = input.get_extra().unwrap().clone();

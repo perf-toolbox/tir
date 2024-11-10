@@ -5,6 +5,7 @@ use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
+use lpl::combinators::any_whitespace1;
 use lpl::combinators::interleaved;
 use lpl::combinators::lang::ident;
 use lpl::combinators::literal;
@@ -44,12 +45,15 @@ pub fn parse_ir(context: ContextRef, input: &str) -> Result<OpRef, Diagnostic> {
 
 /// Parse TIR @-style symbol names
 pub fn sym_name<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
-    literal("@").and_then(identifier()).map(|(_, sym)| sym)
+    literal("@")
+        .and_then(identifier())
+        .map(|(_, sym)| sym)
+        .label("sym_name")
 }
 
 /// Parse generic TIR identifier
 pub fn identifier<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
-    ident(|c| c == '_' || c == '.')
+    ident(|c| c == '_' || c == '.').label("identifier")
 }
 
 /// Parse all operations inside a single basic block region.
@@ -66,6 +70,7 @@ pub fn single_block_region<'a>() -> impl Parser<'a, IRStrStream<'a>, Vec<OpRef>>
         .and_then(spaced(literal("}")))
         .flat()
         .map(|(_, ops, _)| ops)
+        .label("single_block_region")
 }
 
 /// Parse attributes list.
@@ -99,11 +104,16 @@ pub fn attr_list<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>
             }
             Ok(map)
         })
+        .label("attr_list")
+}
+
+pub fn skip_attrs<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    any_whitespace1().map(|_| HashMap::new())
 }
 
 /// Generic operation name
 fn op_name<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
-    dialect_op().or_else(builtin_op())
+    dialect_op().or_else(builtin_op()).label("op_name")
 }
 
 /// dialect_name.op_name -> (dialect_name, op_name)
@@ -112,15 +122,18 @@ fn dialect_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
         .and_then(literal("."))
         .and_then(identifier())
         .map(|((d, _), o)| (d, o))
+        .label("dialect_op")
 }
 
 /// "builtin op"-style identifier
 fn builtin_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
-    ident(|c| c == '_').map(|o| ("builtin", o))
+    ident(|c| c == '_')
+        .map(|o| ("builtin", o))
+        .label("builtin_op")
 }
 
 fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
-    move |input: IRStrStream<'a>| {
+    let parser = move |input: IRStrStream<'a>| {
         let ((dialect_name, op_name), next_input) = spaced(op_name()).parse(input.clone())?;
 
         // It is impossible to construct IRStrStream without a context
@@ -144,7 +157,9 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
         // It is impossible to add an operation without specifying its parser
         let parser = dialect.get_operation_parser(operation_id).unwrap();
         parser.parse(next_input.unwrap())
-    }
+    };
+
+    parser.label("single_op")
 }
 
 // pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {

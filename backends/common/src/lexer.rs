@@ -12,7 +12,7 @@ use lpl::{
         any_whitespace1, interleaved, literal,
         text::{dec_number, ident},
     },
-    ParseStream, Parser, ParserError, Spanned, StrStream,
+    Diagnostic, ParseStream, Parser, Spanned, StrStream,
 };
 use tir_core::OpBuilder;
 
@@ -89,7 +89,10 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
     type Extra = AsmParserContext;
     type Item = AsmToken<'a>;
 
-    fn get(&self, range: std::ops::Range<usize>) -> Option<Self::Slice> {
+    fn get<R>(&self, range: R) -> Option<Self::Slice>
+    where
+        R: RangeBounds<usize>,
+    {
         let ub = match range.end_bound() {
             Bound::Included(value) => *value + 1,
             Bound::Excluded(value) => *value,
@@ -97,15 +100,15 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
         };
 
         if ub <= self.tokens.len() {
-            Some(&self.tokens[range])
+            Some(&self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())])
         } else {
             None
         }
     }
 
-    fn slice(&self, range: std::ops::Range<usize>) -> Option<Self>
+    fn slice<R>(&self, range: R) -> Option<Self>
     where
-        Self: Sized,
+        R: RangeBounds<usize>,
     {
         let ub = match range.end_bound() {
             Bound::Included(value) => *value + 1,
@@ -115,7 +118,7 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
 
         if ub <= self.tokens.len() {
             Some(Self {
-                tokens: &self.tokens[range],
+                tokens: &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())],
                 extra: self.extra.clone(),
             })
         } else {
@@ -142,6 +145,10 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
     fn peek(&self) -> Option<Self::Item> {
         self.tokens.first().map(|(t, _)| t).cloned()
     }
+
+    fn nth(&self, n: usize) -> Option<Self::Item> {
+        self.tokens.get(n).map(|t| t.0.clone())
+    }
 }
 
 fn allowed_ident_char(c: char) -> bool {
@@ -167,7 +174,7 @@ fn punct<'a>() -> impl Parser<'a, StrStream<'a>, AsmToken<'a>> {
         .or_else(literal(",").map(|_| AsmToken::Comma))
 }
 
-pub fn lex_asm<'a>(input: &'a str) -> Result<Vec<Spanned<AsmToken<'a>>>, ParserError> {
+pub fn lex_asm<'a>(input: &'a str) -> Result<Vec<Spanned<AsmToken<'a>>>, Diagnostic> {
     let stream: StrStream = input.into();
 
     let token = directive()

@@ -1,13 +1,13 @@
 use crate::target::SectionOp;
 use crate::{AsmToken, TokenStream};
 use lpl::combinators::one_of;
-use lpl::{ParseStream, Parser, ParserError};
+use lpl::{Diagnostic, ParseStream, Parser};
 use tir_core::{Block, Region};
 
 pub fn parse_asm<'a>(
     input: TokenStream<'a>,
     instr_parsers: &'a [Box<dyn Parser<'a, TokenStream<'a>, ()>>],
-) -> Result<((), Option<TokenStream<'a>>), ParserError> {
+) -> Result<((), Option<TokenStream<'a>>), Diagnostic> {
     let parser = section().or_else(label()).or_else(one_of(instr_parsers));
 
     parser.parse(input)
@@ -16,10 +16,10 @@ pub fn parse_asm<'a>(
 fn directive_as_str<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
     move |stream: TokenStream<'a>| match stream.get(0..1).unwrap()[0].0 {
         AsmToken::Directive(d) => Ok((d, stream.slice(1..stream.len()))),
-        _ => Err(ParserError::new(
-            "expected a directive".to_string(),
-            stream.span(),
-        )),
+        _ => todo!(), /*Err(ParserError::new(
+                          "expected a directive".to_string(),
+                          stream.span(),
+                      ))*/,
     }
 }
 
@@ -27,10 +27,10 @@ fn known_section<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
     directive_as_str().try_map(|d, s| match d {
         "text" => Ok(d),
         "data" => Ok(d),
-        _ => Err(ParserError::new(
-            "expected a name of a known directive".to_string(),
-            s,
-        )),
+        _ => todo!(), /*Err(ParserError::new(
+                          "expected a name of a known directive".to_string(),
+                          s,
+                      ))*/,
     })
 }
 
@@ -39,7 +39,7 @@ pub fn asm_ident<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
         let first = input.peek().unwrap();
         match first {
             AsmToken::Ident(ident) => Ok((ident, input.slice(1..input.len().clone()))),
-            _ => Err(ParserError::new("expected ident".to_string(), input.span())),
+            _ => todo!(), /*Err(ParserError::new("expected ident".to_string(), input.span()))*/,
         }
     }
 }
@@ -49,7 +49,7 @@ fn asm_label<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
         let first = input.peek().unwrap();
         match first {
             AsmToken::Label(ident) => Ok((ident, input.slice(1..input.len().clone()))),
-            _ => Err(ParserError::new("expected label".to_string(), input.span())),
+            _ => todo!(), /*Err(ParserError::new("expected label".to_string(), input.span()))*/,
         }
     }
 }
@@ -58,7 +58,7 @@ fn generic_section<'a>() -> impl Parser<'a, TokenStream<'a>, &'a str> {
     directive_as_str()
         .try_map(|d, s| match d {
             "section" => Ok(()),
-            _ => Err(ParserError::new("expected 'section'".to_string(), s)),
+            _ => todo!(), /*Err(ParserError::new("expected 'section'".to_string(), s))*/,
         })
         .and_then(asm_ident())
         .map(|(_, name)| name)

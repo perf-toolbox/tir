@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use tir_backend::parser::{label, section};
+use lpl::{Diagnostic, ParseResult};
+// use tir_backend::parser::{label, section};
 use tir_backend::{lex_asm, TokenStream};
-use tir_core::parser::{AsmPResult, PError};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 
 use crate::RVExt;
@@ -33,7 +33,7 @@ use crate::RVExt;
 pub fn parse_asm<'a>(
     context: &ContextRef,
     input: &'a str,
-) -> Result<Rc<RefCell<ModuleOp>>, winnow::error::ParseError<TokenStream<'a, 'a>, PError>> {
+) -> Result<Rc<RefCell<ModuleOp>>, Diagnostic> {
     // let module = ModuleOp::builder(context).build();
     // let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
     //

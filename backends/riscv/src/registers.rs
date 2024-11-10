@@ -1,16 +1,7 @@
+use lpl::{ParseResult, ParseStream, Parser};
 use seq_macro::seq;
-use tir_core::{
-    parser::{AsmPResult, Parsable, ParseStream},
-    IRFormatter, Printable,
-};
+use tir_core::{parser::Parsable, IRFormatter, IRStrStream, Printable};
 use tir_macros::{lowercase, uppercase};
-
-use winnow::{
-    ascii::{alpha1, alphanumeric0},
-    stream::{AsChar, Stream, StreamIsPartial},
-    Parser,
-};
-use winnow::{combinator::trace, stream::Compare};
 
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
@@ -81,28 +72,30 @@ macro_rules! register {
             }
         }
 
-        pub fn register_parser<'a, Input>(input: &mut Input) -> AsmPResult<Register>
+        pub fn register_parser<'a, Input>(input: Input) -> ParseResult<Input, Register>
         where
-            Input: StreamIsPartial + Stream<Slice = &'a str> + Clone + Compare<&'a str>,
-            <Input as Stream>::Token: AsChar, {
-            (alpha1, alphanumeric0).take().verify_map(|reg| {
-                match reg {
-                $(
-                    $abi_name => Some(Register::$case_name),
-                    uppercase!($abi_name) => Some(Register::$case_name),
-                    stringify!($case_name) => Some(Register::$case_name),
-                    lowercase!($case_name) => Some(Register::$case_name),
-                )*
-                    _ => None,
-                }
-            }).parse_next(input)
+            Input: ParseStream<'a>
+        {
+            todo!()
+            // (alpha1, alphanumeric0).take().verify_map(|reg| {
+            //     match reg {
+            //     $(
+            //         $abi_name => Some(Register::$case_name),
+            //         uppercase!($abi_name) => Some(Register::$case_name),
+            //         stringify!($case_name) => Some(Register::$case_name),
+            //         lowercase!($case_name) => Some(Register::$case_name),
+            //     )*
+            //         _ => None,
+            //     }
+            // }).parse_next(input)
         }
     };
 }
 
 impl Parsable<Register> for Register {
-    fn parse(input: &mut ParseStream<'_>) -> AsmPResult<Register> {
-        trace("RISC-V register", register_parser).parse_next(input)
+    fn parse(input: IRStrStream) -> ParseResult<IRStrStream, Register> {
+        todo!()
+        // trace("RISC-V register", register_parser).parse_next(input)
     }
 }
 

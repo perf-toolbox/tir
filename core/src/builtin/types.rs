@@ -1,6 +1,7 @@
+use crate::parser::skip_attrs;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
 use crate::{IRStrStream, Printable};
-use lpl::ParseResult;
+use lpl::{ParseResult, Parser};
 use std::collections::HashMap;
 use tir_macros::{dialect_type, dialect_type_with_extensions};
 
@@ -21,8 +22,8 @@ impl TyAssembly for VoidType {
     }
 
     fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
-        // tir_core::parser::skip_attrs(input)
-        todo!()
+        let parser = skip_attrs();
+        parser.parse(input)
     }
 }
 
