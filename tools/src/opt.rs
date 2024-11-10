@@ -1,5 +1,5 @@
 use clap::{ArgMatches, FromArgMatches, Parser};
-use tir_core::{parse_ir, parser::print_parser_diag, ContextRef, PassManager, StdoutPrinter};
+use tir_core::{parse_ir, ContextRef, PassManager, StdoutPrinter};
 
 #[derive(Debug, Parser)]
 #[command(name = "opt")]
@@ -39,7 +39,8 @@ pub fn main(
             module.borrow().print(&mut printer);
         }
         Err(err) => {
-            print_parser_diag(context, &err);
+            todo!();
+            // print_parser_diag(context, &err);
             // FIXME(alexbatashev): return an error instead of exit
             // winnow errors do not implement std::error::Error
             std::process::exit(1);
