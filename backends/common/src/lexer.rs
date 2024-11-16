@@ -125,14 +125,6 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
         } else {
             None
         }
-        // if ub <= self.tokens.len() {
-        //     Some(Self {
-        //         tokens: &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())],
-        //         extra: self.extra.clone(),
-        //     })
-        // } else {
-        //     None
-        // }
     }
 
     fn len(&self) -> usize {
@@ -140,7 +132,11 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
     }
 
     fn span(&self) -> lpl::Span {
-        self.tokens.first().unwrap().1.clone()
+        if self.tokens.is_empty() {
+            lpl::Span::empty()
+        } else {
+            self.tokens.first().unwrap().1.clone()
+        }
     }
 
     fn set_extra(&mut self, extra: Self::Extra) {

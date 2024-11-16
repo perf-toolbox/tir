@@ -1,14 +1,20 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use ariadne::Color;
 use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
+use lpl::combinators::any_whitespace0;
 use lpl::combinators::any_whitespace1;
 use lpl::combinators::interleaved;
 use lpl::combinators::lang::ident;
+use lpl::combinators::lang::line_comment;
 use lpl::combinators::literal;
+use lpl::combinators::maybe_then;
+use lpl::combinators::one_or_more;
+use lpl::combinators::optional;
 use lpl::combinators::separated_ignore;
 use lpl::combinators::spaced;
 use lpl::combinators::zero_or_more;
@@ -17,7 +23,7 @@ use lpl::ParseResult;
 use lpl::{ParseStream, Parser};
 use thiserror::Error;
 
-use crate::assembly::ir_stream::IRStrStream;
+use crate::assembly::ir_stream::{IRStrStream, ParserState};
 use crate::Attr;
 use crate::Block;
 use crate::BlockRef;
@@ -34,13 +40,78 @@ pub trait Parsable<T> {
 }
 
 /// Parse textual TIR into inner structures
-pub fn parse_ir(context: ContextRef, input: &str) -> Result<OpRef, Diagnostic> {
-    let stream = IRStrStream::new(input, context);
+pub fn parse_ir(context: ContextRef, input: &str, filename: &str) -> Result<OpRef, Diagnostic> {
+    let stream = IRStrStream::new(input, filename, context);
 
     let parser = single_op();
 
     let (op, _) = parser.parse(stream)?;
     Ok(op)
+}
+
+pub fn print_parser_diag(source: &str, diag: &Diagnostic) {
+    let span = diag.span();
+    let offset = span.get_offset_start();
+
+    let mut builder = Report::build(
+        ReportKind::Error,
+        (
+            span.get_filename().unwrap_or_default(),
+            offset..(span.get_offset_end()),
+        ),
+    )
+    .with_config(
+        Config::default()
+            .with_tab_width(2)
+            .with_index_type(ariadne::IndexType::Byte),
+    )
+    .with_message("Failed to parse IR")
+    .with_label(
+        Label::new((
+            span.get_filename().unwrap_or_default(),
+            offset..(offset + 1),
+        ))
+        .with_message(diag.message()),
+    );
+
+    println!("{:?}", diag);
+
+    builder
+        .finish()
+        .print((
+            span.get_filename().unwrap_or_default(),
+            ariadne::Source::from(source),
+        ))
+        .unwrap();
+    // match inner {
+    //     PError::UnknownOperation(dialect_name, op_name) => {
+    //         builder.add_label(
+    //             Label::new((offset - op_name.len())..offset)
+    //                 .with_color(Color::Red)
+    //                 .with_message("unknown operation"),
+    //         );
+    //         if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
+    //             if let Some(name) = dialect.get_similarly_named_op(op_name) {
+    //                 builder.set_note(format!(
+    //                     "there is a similarly named operation '{}' in '{}' dialect",
+    //                     name, &dialect_name
+    //                 ));
+    //             }
+    //         }
+    //     }
+    //     PError::ExpectedNotFound(token) => {
+    //         builder.add_label(
+    //             Label::new(offset..(offset + token.len()))
+    //                 .with_message("unexpected token")
+    //                 .with_color(Color::Red),
+    //         );
+    //     }
+    //     _ => {
+    //         builder.add_label(Label::new(offset..(offset + 1)).with_message("unexpected token"));
+    //         #[cfg(debug_assertions)]
+    //         builder.set_note("for development purpose try re-building with --features=winnow/debug")
+    //     }
+    // }
 }
 
 /// Parse TIR @-style symbol names
@@ -108,7 +179,58 @@ pub fn attr_list<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>
 }
 
 pub fn skip_attrs<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
-    any_whitespace1().map(|_| HashMap::new())
+    any_whitespace0().map(|_| HashMap::new())
+}
+
+pub fn single_block<'a>() -> impl Parser<'a, IRStrStream<'a>, BlockRef> {
+    any_whitespace0()
+        .and_then(literal("^"))
+        .and_then(ident(|_| false))
+        .and_then(literal(":"))
+        .flat()
+        .map(|(_, _, name, _)| name)
+        .and_then(one_or_more(single_op()))
+        .map_with(|(block_name, ops), extra| {
+            let state = extra.unwrap();
+
+            let region = state.get_region();
+
+            let names = state.take_deferred_names();
+            let types = state.take_deferred_types();
+            let block = Block::with_arguments(block_name, &region, &types, &names);
+
+            for op in ops {
+                block.push(&op);
+            }
+
+            block
+        })
+}
+
+pub fn region_with_blocks<'a>() -> impl Parser<'a, IRStrStream<'a>, RegionRef> {
+    spaced(literal("{"))
+        .map_with(|_, extra| {
+            let state: &Arc<ParserState> = extra.unwrap();
+            let context = state.context();
+
+            let region = Region::empty(&context);
+            state.push_region(region.clone());
+
+            region
+        })
+        .and_then(one_or_more(single_block()))
+        .and_then(any_whitespace0().and_then(literal("}")))
+        .map_with(|((region, blocks), _), extra| {
+            let state: &Arc<ParserState> = extra.unwrap();
+
+            for block in blocks {
+                region.add_block(block);
+            }
+
+            state.pop_region();
+
+            region
+        })
 }
 
 /// Generic operation name
@@ -137,7 +259,8 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
         let ((dialect_name, op_name), next_input) = spaced(op_name()).parse(input.clone())?;
 
         // It is impossible to construct IRStrStream without a context
-        let context = input.get_extra().unwrap();
+        let state = input.get_extra().unwrap();
+        let context = state.context();
 
         let dialect = context
             .get_dialect_by_name(dialect_name)
@@ -159,58 +282,22 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
         parser.parse(next_input.unwrap())
     };
 
-    parser.label("single_op")
+    maybe_then(
+        optional(
+            zero_or_more(
+                any_whitespace0()
+                    .and_then(line_comment(";"))
+                    .and_then(any_whitespace0()),
+            )
+            .label("eat comments"),
+        )
+        .and_then(parser.label("single_op")),
+        zero_or_more(line_comment(";")),
+    )
+    .map(|((_, op), _)| op)
 }
 
-// pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {
-//     let skip = trace(
-//         "skip comments",
-//         alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
-//     );
-//     let block_name = preceded(
-//         (skip, '^'),
-//         terminated(
-//             identifier,
-//             (
-//                 cut_err(':'.context(StrContext::Expected(StrContextValue::CharLiteral(':')))),
-//                 multispace0,
-//             ),
-//         ),
-//     )
-//     .parse_next(input)?;
 //
-//     let ops: Vec<OpRef> = repeat(0.., single_op).parse_next(input)?;
-//
-//     let region = input.state.get_region();
-//
-//     let names = input.state.take_deferred_names();
-//     let types = input.state.take_deferred_types();
-//     let block = Block::with_arguments(block_name, &region, &types, &names);
-//
-//     for op in ops {
-//         block.push(&op);
-//     }
-//
-//     Ok(block)
-// }
-//
-// pub fn region_with_blocks(input: &mut ParseStream<'_>) -> AsmPResult<RegionRef> {
-//     expected_token("{", input)?;
-//     let context = input.state.get_context();
-//     let region = Region::empty(&context);
-//     input.state.push_region(region.clone());
-//
-//     let (blocks, (_, _)): (Vec<BlockRef>, (_, _)) =
-//         repeat_till(1.., single_block, (multispace0, "}")).parse_next(input)?;
-//
-//     for block in blocks {
-//         region.add_block(block);
-//     }
-//
-//     input.state.pop_region();
-//
-//     Ok(region)
-// }
 //
 // fn attr_pair(input: &mut ParseStream<'_>) -> AsmPResult<(String, Attr)> {
 //     trace(
@@ -348,7 +435,7 @@ mod tests {
     fn test_attr_list() {
         let context = crate::Context::new();
         let input = "attrs = {attr1 = <str: \"Hello, World!\">, attr2 = <i8: 42>}";
-        let input = IRStrStream::new(input, context);
+        let input = IRStrStream::new(input, "-", context);
         let result = attr_list().parse(input);
         assert!(result.is_ok());
         let (attrs, _) = result.unwrap();
@@ -364,7 +451,7 @@ mod tests {
     fn test_attr_list_duplicate() {
         let context = crate::Context::new();
         let input = "attrs = {attr1 = <str: \"Hello\">, attr1 = <str: \"World\">}";
-        let input = IRStrStream::new(input, context);
+        let input = IRStrStream::new(input, "-", context);
         let result = attr_list().parse(input);
         assert!(result.is_err());
     }

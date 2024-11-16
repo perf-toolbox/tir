@@ -40,8 +40,12 @@ pub fn zero_or_more<'a, P, Input: ParseStream<'a> + 'a, Output>(
 where
     P: Parser<'a, Input, Output>,
 {
-    move |input| {
+    move |input: Input| {
         let mut result = Vec::new();
+
+        if input.is_empty() {
+            return Ok((result, None));
+        }
 
         let mut next_input: Option<Input> = Some(input);
 

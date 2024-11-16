@@ -20,7 +20,7 @@ where
 {
     zero_or_more(any_whitespace())
         .map(|_| ())
-        .label("any_wgitespace0")
+        .label("any_whitespace0")
 }
 
 pub fn any_whitespace1<'a, Input>() -> impl Parser<'a, Input, ()>

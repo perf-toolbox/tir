@@ -136,7 +136,8 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
           }
 
           fn parse_assembly<'a>(input: tir_core::IRStrStream<'a>) -> lpl::ParseResult<tir_core::IRStrStream<'a>, tir_core::OpRef> {
-            let context = input.get_extra().unwrap().clone();
+            let state = input.get_extra().unwrap();
+            let context = state.context();
             let mut builder = Self::builder(&context);
             let attrs_parser = tir_core::parser::attr_list();
 

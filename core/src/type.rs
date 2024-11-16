@@ -87,11 +87,16 @@ impl Printable for Type {
 
 impl Parsable<Type> for Type {
     fn parse(input: IRStrStream) -> ParseResult<IRStrStream, Type> {
-        let type_name = ident(|c| c == '_')
+        let common_name = ident(|c| c == '_')
             .and_then(literal("."))
             .and_then(ident(|c| c == '_'))
             .map(|((dialect_name, _), type_name)| (dialect_name, type_name))
-            .or_else(ident(|c| c == '_').map(|type_name| ("builtin", type_name)));
+            .label("generic type name");
+        let type_name = common_name.or_else(
+            ident(|c| c == '_')
+                .map(|type_name| ("builtin", type_name))
+                .label("builtin type name"),
+        );
 
         let parser = literal("!")
             .and_then(type_name)
@@ -99,7 +104,8 @@ impl Parsable<Type> for Type {
             .label("type_name");
 
         let span = input.span();
-        let context = input.get_extra().unwrap().clone();
+        let state = input.get_extra().unwrap().clone();
+        let context = state.context();
         let ((dialect_name, ty_name), next_input) = parser.parse(input)?;
 
         let dialect = context

@@ -32,7 +32,8 @@ impl OpAssembly for ModuleOp {
         Self: Sized,
     {
         let parser = single_block_region();
-        let context = input.get_extra().unwrap().clone();
+        let state = input.get_extra().unwrap().clone();
+        let context = state.context();
         parser.parse(input).map(|(ops, next_input)| {
             let module = ModuleOp::builder(&context).build();
             for op in ops {
@@ -110,7 +111,7 @@ mod test {
     fn test_module_parse() {
         let context = Context::new();
         let input = "module {\n}\n";
-        let op = parse_ir(context, input).expect("parsed ir");
+        let op = parse_ir(context, "-", input).expect("parsed ir");
         assert_eq!(op.borrow().type_id(), TypeId::of::<ModuleOp>());
     }
 }

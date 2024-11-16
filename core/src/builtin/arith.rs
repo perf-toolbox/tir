@@ -84,7 +84,7 @@ mod test {
         ";
 
         let context = Context::new();
-        let module = parse_ir(context.clone(), ir).expect("module");
+        let module = parse_ir(context.clone(), "-", ir).expect("module");
 
         let module = utils::op_cast::<ModuleOp>(module).unwrap();
 

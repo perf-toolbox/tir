@@ -1,28 +1,47 @@
-use std::ops::{Range, RangeBounds};
+use std::{
+    cell::RefCell,
+    ops::{Range, RangeBounds},
+    sync::Arc,
+};
 
-use crate::ContextRef;
+use crate::{ContextRef, RegionRef, Type};
 use lpl::{ParseStream, Span};
 
 #[derive(Debug, Clone)]
 pub struct IRStrStream<'a> {
     string: &'a str,
+    filename: Arc<String>,
     offset: usize,
-    context: ContextRef,
+    state: Arc<ParserState>,
 }
 
+#[derive(Debug)]
+pub struct ParserStateImpl {
+    context: ContextRef,
+    deferred_type_list: Vec<Type>,
+    deferred_arg_names: Vec<String>,
+    cur_region: Vec<RegionRef>,
+}
+
+#[derive(Debug)]
+pub struct ParserState(RefCell<ParserStateImpl>);
+
 impl<'a> IRStrStream<'a> {
-    pub fn new(string: &'a str, context: ContextRef) -> Self {
+    pub fn new(string: &'a str, filename: &'a str, context: ContextRef) -> Self {
+        let filename = Arc::new(filename.to_string());
+        let state = ParserState::new(context);
         Self {
             string,
+            filename,
             offset: 0,
-            context,
+            state,
         }
     }
 }
 
 impl<'a> ParseStream<'a> for IRStrStream<'a> {
     type Slice = &'a str;
-    type Extra = ContextRef;
+    type Extra = Arc<ParserState>;
     type Item = char;
 
     fn get<R>(&self, range: R) -> Option<Self::Slice>
@@ -51,8 +70,9 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
                 } else {
                     Some(Self {
                         string,
+                        filename: self.filename.clone(),
                         offset,
-                        context: self.context.clone(),
+                        state: self.state.clone(),
                     })
                 }
             })
@@ -75,15 +95,15 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
     }
 
     fn span(&self) -> Span {
-        Span::unbound(None, self.offset)
+        Span::unbound(Some(self.filename.clone()), self.offset)
     }
 
     fn set_extra(&mut self, extra: Self::Extra) {
-        self.context = extra;
+        self.state = extra;
     }
 
     fn get_extra(&self) -> Option<&Self::Extra> {
-        Some(&self.context)
+        Some(&self.state)
     }
 
     fn peek(&self) -> Option<Self::Item> {
@@ -92,5 +112,51 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
 
     fn nth(&self, n: usize) -> Option<Self::Item> {
         self.string.chars().nth(n)
+    }
+}
+
+unsafe impl Send for ParserState {}
+unsafe impl Sync for ParserState {}
+
+impl ParserState {
+    pub fn new(context: ContextRef) -> Arc<Self> {
+        Arc::new(ParserState(RefCell::new(ParserStateImpl {
+            context,
+            deferred_type_list: vec![],
+            deferred_arg_names: vec![],
+            cur_region: vec![],
+        })))
+    }
+
+    pub fn context(&self) -> ContextRef {
+        self.0.borrow().context.clone()
+    }
+
+    pub fn push_region(&self, region: RegionRef) {
+        self.0.borrow_mut().cur_region.push(region);
+    }
+
+    pub fn get_region(&self) -> RegionRef {
+        self.0.borrow().cur_region.last().cloned().unwrap()
+    }
+
+    pub fn pop_region(&self) {
+        self.0.borrow_mut().cur_region.pop();
+    }
+
+    pub fn take_deferred_types(&self) -> Vec<Type> {
+        std::mem::take(&mut self.0.borrow_mut().deferred_type_list)
+    }
+
+    pub fn set_deferred_types(&self, types: Vec<Type>) {
+        self.0.borrow_mut().deferred_type_list = types;
+    }
+
+    pub fn take_deferred_names(&self) -> Vec<String> {
+        std::mem::take(&mut self.0.borrow_mut().deferred_arg_names)
+    }
+
+    pub fn set_deferred_names(&self, names: Vec<String>) {
+        self.0.borrow_mut().deferred_arg_names = names;
     }
 }
