@@ -35,14 +35,20 @@ impl OpAssembly for CompInstrOp {
     where
         Self: Sized,
     {
-        todo!()
-        // let ops = single_block_region.parse_next(input)?;
-        // let context = input.state.get_context();
-        // let module = CompInstrOp::builder(&context).build();
-        // for op in ops {
-        //     module.borrow_mut().get_body().push(&op);
-        // }
-        // Ok(module)
+        let parser = single_block_region().map_with(|ops, extra| {
+            let state = extra.unwrap();
+            let context = state.context();
+
+            let comp = CompInstrOp::builder(&context).build();
+            for op in ops {
+                comp.borrow_mut().get_body().push(&op);
+            }
+
+            let comp: OpRef = comp;
+            comp
+        });
+
+        parser.parse(input)
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

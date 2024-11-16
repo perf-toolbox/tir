@@ -110,12 +110,6 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
     where
         R: RangeBounds<usize>,
     {
-        let ub = match range.end_bound() {
-            Bound::Included(value) => *value + 1,
-            Bound::Excluded(value) => *value,
-            Bound::Unbounded => self.tokens.len(),
-        };
-
         let tokens = &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())];
         if !tokens.is_empty() {
             Some(Self {

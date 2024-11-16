@@ -1,6 +1,5 @@
 use crate::builtin::DIALECT_NAME;
 use crate::parser::single_block_region;
-// use crate::parser::single_block_region;
 use crate::{
     IRFormatter, IRStrStream, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
 };
