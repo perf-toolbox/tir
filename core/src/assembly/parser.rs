@@ -17,6 +17,7 @@ use lpl::combinators::one_or_more;
 use lpl::combinators::optional;
 use lpl::combinators::separated_ignore;
 use lpl::combinators::spaced;
+use lpl::combinators::text::take_while;
 use lpl::combinators::zero_or_more;
 use lpl::Diagnostic;
 use lpl::ParseResult;
@@ -233,6 +234,20 @@ pub fn region_with_blocks<'a>() -> impl Parser<'a, IRStrStream<'a>, RegionRef> {
         })
 }
 
+pub fn parse_int_bits<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    literal("<")
+        .and_then(take_while(|c| c.is_numeric()))
+        .and_then(literal(">"))
+        .flat()
+        .map(|(_, bits, _)| {
+            let bits = bits.parse::<u32>().unwrap();
+            let mut attrs = HashMap::new();
+            attrs.insert("bits".into(), Attr::U32(bits));
+
+            attrs
+        })
+}
+
 /// Generic operation name
 fn op_name<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
     dialect_op().or_else(builtin_op()).label("op_name")
@@ -316,22 +331,6 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
 //     winnow::token::take_while(1.., '0'..='9').parse_next(input)
 // }
 //
-// pub fn parse_int_bits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<HashMap<String, Attr>> {
-//     let parse_int_bits_impl = |input: &mut ParseStream<'s>| {
-//         terminated(preceded("<", parse_digits), ">").parse_next(input)
-//     };
-//     let bits_str = parse_int_bits_impl(input)?;
-//     let maybe_bits_num: AsmPResult<u32> = match str::parse(bits_str) {
-//         Ok(n) => Ok(n),
-//         Err(..) => Err(winnow::error::ErrMode::Cut(PError::ExpectedNotFound(
-//             String::from("integer"),
-//         ))),
-//     };
-//     let bits_num = maybe_bits_num?;
-//     let mut r = HashMap::<String, Attr>::new();
-//     r.insert("bits".into(), Attr::U32(bits_num));
-//     Ok(r)
-// }
 //
 // pub fn print_parser_diag(
 //     context: ContextRef,

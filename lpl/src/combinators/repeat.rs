@@ -124,10 +124,6 @@ where
             }
         }
 
-        if result.is_empty() {
-            return Err(InternalError::EmptyList(input.span()).into());
-        }
-
         Ok((result, next_input))
     }
 }

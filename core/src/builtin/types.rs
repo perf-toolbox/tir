@@ -140,8 +140,7 @@ impl TyAssembly for IntType {
     }
 
     fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
-        // tir_core::parser::parse_int_bits(input)
-        todo!()
+        tir_core::parser::parse_int_bits().parse(input)
     }
 }
 
