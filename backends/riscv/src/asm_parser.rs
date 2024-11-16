@@ -1,56 +1,55 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use lpl::{Diagnostic, ParseResult};
-// use tir_backend::parser::{label, section};
+use lpl::combinators::{eof, zero_or_more};
+use lpl::{Diagnostic, ParseResult, ParseStream, Parser};
+use tir_backend::parser::{label, section};
 use tir_backend::{lex_asm, TokenStream};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 
 use crate::RVExt;
 
-// fn asm_instr(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-//     let builder = input.get_builder();
-//     let context = builder.get_context();
-//     let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
-//
-//     let mut parsers = dialect
-//         .get_dialect_extension()
-//         .unwrap()
-//         .downcast_ref::<RVExt>()
-//         .unwrap()
-//         .get_asm_parsers();
-//
-//     for p in &mut parsers {
-//         if p.parse_next(input).is_ok() {
-//             return Ok(());
-//         }
-//     }
-//
-//     Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
-// }
+fn asm_instr(input: TokenStream) -> ParseResult<TokenStream, ()> {
+    let asm_ctx = input.get_extra().unwrap();
+    let builder = asm_ctx.get_builder();
+    let context = builder.get_context();
+    let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
+
+    let parsers = dialect
+        .get_dialect_extension()
+        .unwrap()
+        .downcast_ref::<RVExt>()
+        .unwrap()
+        .get_asm_parsers();
+
+    for p in parsers {
+        let result = p.parse(input.clone());
+        if result.is_ok() {
+            return result;
+        }
+    }
+    //
+    //     Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
+    todo!()
+}
 
 #[allow(clippy::result_large_err)]
-pub fn parse_asm<'a>(
-    context: &ContextRef,
-    input: &'a str,
-) -> Result<Rc<RefCell<ModuleOp>>, Diagnostic> {
-    // let module = ModuleOp::builder(context).build();
-    // let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
-    //
-    // let tokens = lex_asm(input);
-    // if let Err(ref err) = tokens {
-    //     panic!("lexer failed: {}", err);
-    // }
-    // let tokens = tokens.unwrap();
-    // println!("Tokens: {:?}\n", &tokens);
-    // let stream = TokenStream::new(&builder, &tokens);
-    //
-    // let _: Vec<()> = repeat(0.., alt((section, label, asm_instr)))
-    //     .parse(stream)
-    //     .expect("todo err handling");
-    //
-    // Ok(module)
-    todo!()
+pub fn parse_asm(context: &ContextRef, input: &str) -> Result<Rc<RefCell<ModuleOp>>, Diagnostic> {
+    let module = ModuleOp::builder(context).build();
+    let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
+
+    let tokens = lex_asm(input)?;
+
+    let stream = TokenStream::new(&tokens, builder);
+
+    let parser = eof(zero_or_more(
+        section()
+            .or_else(label())
+            .or_else(asm_instr.label("asm_instr")),
+    ));
+
+    parser.parse(stream)?;
+    Ok(module)
 }
 
 #[cfg(test)]

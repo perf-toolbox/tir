@@ -346,7 +346,7 @@ mod tests {
 
     #[test]
     fn test_attr_list() {
-        let context = crate::Context::new(); // Assuming Context is defined in crate
+        let context = crate::Context::new();
         let input = "attrs = {attr1 = <str: \"Hello, World!\">, attr2 = <i8: 42>}";
         let input = IRStrStream::new(input, context);
         let result = attr_list().parse(input);

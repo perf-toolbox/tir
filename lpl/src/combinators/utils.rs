@@ -7,15 +7,17 @@ where
     move |_| -> ParseResult<Input, Output> { todo!() }
 }
 
-pub fn eof<'a, Input>() -> impl Parser<'a, Input, ()>
+pub fn eof<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Output>
 where
+    P: Parser<'a, Input, Output> + 'a,
     Input: ParseStream<'a> + 'a,
 {
-    move |input: Input| -> ParseResult<Input, ()> {
-        if input.len() == 0 {
-            Ok(((), Some(input)))
+    move |input: Input| -> ParseResult<Input, Output> {
+        let (res, ni) = parser.parse(input)?;
+        if let Some(ni) = ni {
+            Err(InternalError::ExpectedEof(ni.span()).into())
         } else {
-            Err(InternalError::ExpectedEof(input.span()).into())
+            Ok((res, None))
         }
     }
 }

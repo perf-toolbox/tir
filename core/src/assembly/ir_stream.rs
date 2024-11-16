@@ -42,12 +42,19 @@ impl<'a> ParseStream<'a> for IRStrStream<'a> {
             std::ops::Bound::Excluded(bound) => self.offset + bound + 1,
             std::ops::Bound::Unbounded => self.offset,
         };
+
         self.string
             .get((range.start_bound().cloned(), range.end_bound().cloned()))
-            .map(|string| Self {
-                string,
-                offset,
-                context: self.context.clone(),
+            .and_then(|string| {
+                if string.is_empty() {
+                    None
+                } else {
+                    Some(Self {
+                        string,
+                        offset,
+                        context: self.context.clone(),
+                    })
+                }
             })
     }
 

@@ -64,8 +64,8 @@ impl Dialect {
         self.operation_ids.get(name).copied()
     }
 
-    pub fn get_operation_parser(&self, id: u32) -> Option<&Box<OpParseFn>> {
-        self.op_parse_fn.get(&id)
+    pub fn get_operation_parser(&self, id: u32) -> Option<&OpParseFn> {
+        self.op_parse_fn.get(&id).map(|f| f.as_ref())
     }
 
     pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: Box<TyParseFn>) {

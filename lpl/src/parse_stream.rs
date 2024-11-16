@@ -80,7 +80,13 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
         };
         self.string
             .get((range.start_bound().cloned(), range.end_bound().cloned()))
-            .map(|string| Self { string, offset })
+            .and_then(|string| {
+                if string.is_empty() {
+                    None
+                } else {
+                    Some(Self { string, offset })
+                }
+            })
     }
 
     fn len(&self) -> usize {

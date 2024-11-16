@@ -1,10 +1,10 @@
 use crate::utils::ITypeInstr;
 use crate::utils::RTypeInstr;
 use crate::{assemble_reg, disassemble_gpr};
-use crate::{register_parser, Register};
+use crate::{register_parser, DiagKind, Register};
 use tir_backend::isema;
 use tir_backend::isema::WithISema;
-use tir_backend::AsmToken;
+use tir_backend::parser::{asm_ident, comma, number};
 use tir_backend::BinaryEmittable;
 use tir_backend::ISAParser;
 use tir_backend::TokenStream;
@@ -13,7 +13,7 @@ use tir_core::*;
 use tir_macros::{lowercase, uppercase};
 use tir_macros::{Op, OpAssembly, OpValidator};
 
-use lpl::{ParseResult, ParseStream, Parser};
+use lpl::{combinators::separated_ignore, Diagnostic, ParseResult, ParseStream, Parser};
 
 use crate::DIALECT_NAME;
 
@@ -60,41 +60,38 @@ macro_rules! alu_op_base {
         }
 
         impl ISAParser for $struct_name {
-            fn parse<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
-                lpl::combinators::todo()
-                // asm_ident().try_map(|t| {})
-                // let opcode = one_of(|t| {
-                //     if let AsmToken::Ident(name) = t {
-                //         name == lowercase!($op_name) || name == uppercase!($op_name)
-                //     } else {
-                //         false
-                //     }
-                // });
-                // let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                //     .map(|t| {
-                //         if let AsmToken::Ident(name) = t {
-                //             name
-                //         } else {
-                //             unreachable!();
-                //         }
-                //     })
-                //     .and_then(register_parser);
-                // let comma = one_of(|t| t == AsmToken::Comma).void();
-                //
-                // let regs: Vec<Register> =
-                //     preceded(opcode, separated(3, reg, comma)).parse_next(input)?;
-                // let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
-                //
-                // let builder = input.get_builder();
-                // let context = builder.get_context();
-                // let op = $struct_name::builder(&context)
-                //     .rs1(rs1)
-                //     .rs2(rs2)
-                //     .rd(rd)
-                //     .build();
-                // builder.insert(&op);
+            fn parse(input: TokenStream) -> ParseResult<TokenStream, ()> {
+                let asm_ctx = input.get_extra().unwrap().clone();
 
-                // Ok(())
+                let opcode = asm_ident().try_map(|t, s| match t {
+                    lowercase!($op_name) | uppercase!($op_name) => Ok(()),
+                    _ => Err(Into::<Diagnostic>::into(DiagKind::UnknownOpcode(s))),
+                });
+                let reg = asm_ident().try_map(|r, s| {
+                    register_parser(r).ok_or(Into::<Diagnostic>::into(DiagKind::UnknownRegister(
+                        r.to_string(),
+                        s,
+                    )))
+                });
+
+                let (regs, ni): (Vec<Register>, _) = opcode
+                    .and_then(separated_ignore(reg, comma()))
+                    .map(|(_, r)| r)
+                    .label($op_name)
+                    .parse(input)?;
+
+                let (rd, rs1, rs2) = (regs[0], regs[1], regs[2]);
+
+                let builder = asm_ctx.get_builder();
+                let context = builder.get_context();
+                let op = $struct_name::builder(&context)
+                    .rs1(rs1)
+                    .rs2(rs2)
+                    .rd(rd)
+                    .build();
+                builder.insert(&op);
+
+                Ok(((), ni))
             }
         }
     };
@@ -141,48 +138,42 @@ macro_rules! alu_imm_op_base {
         }
 
         impl ISAParser for $struct_name {
-            fn parse<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
-                lpl::combinators::todo()
-                // let opcode = one_of(|t| {
-                //     if let AsmToken::Ident(name) = t {
-                //         name == lowercase!($op_name) || name == uppercase!($op_name)
-                //     } else {
-                //         false
-                //     }
-                // });
-                // let reg = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                //     .map(|t| {
-                //         if let AsmToken::Ident(name) = t {
-                //             name
-                //         } else {
-                //             unreachable!();
-                //         }
-                //     })
-                //     .and_then(register_parser);
-                // let comma1 = one_of(|t| t == AsmToken::Comma).void();
-                // let comma2 = one_of(|t| t == AsmToken::Comma).void();
-                // let imm = one_of(|t| matches!(t, AsmToken::Number(_))).map(|t| match t {
-                //     AsmToken::Number(num) => num as i16,
-                //     _ => unreachable!("Why is this not a number?"),
-                // });
-                //
-                // let args: (Vec<Register>, i16) = preceded(
-                //     opcode,
-                //     separated_pair(separated(2, reg, comma1), comma2, imm),
-                // )
-                // .parse_next(input)?;
-                // let (rd, rs1, imm) = (args.0[0], args.0[1], args.1);
-                //
-                // let builder = input.get_builder();
-                // let context = builder.get_context();
-                // let op = $struct_name::builder(&context)
-                //     .rs1(rs1)
-                //     .imm(imm.into())
-                //     .rd(rd)
-                //     .build();
-                // builder.insert(&op);
-                //
-                // Ok(())
+            fn parse(input: TokenStream) -> ParseResult<TokenStream, ()> {
+                let asm_ctx = input.get_extra().unwrap().clone();
+
+                let opcode = asm_ident().try_map(|t, s| match t {
+                    lowercase!($op_name) | uppercase!($op_name) => Ok(()),
+                    _ => Err(Into::<Diagnostic>::into(DiagKind::UnknownOpcode(s))),
+                });
+                let reg = move || {
+                    asm_ident().try_map(|r, s| {
+                        register_parser(r).ok_or(Into::<Diagnostic>::into(
+                            DiagKind::UnknownRegister(r.to_string(), s),
+                        ))
+                    })
+                };
+
+                let imm = number().map(|num| num as i16);
+
+                let parser = opcode
+                    .and_then(reg())
+                    .and_then(comma())
+                    .and_then(reg())
+                    .and_then(comma())
+                    .and_then(imm)
+                    .map(|(((((_, rd), _), rs1), _), imm_value)| (rd, rs1, imm_value));
+                let ((rd, rs1, imm_value), ni) = parser.parse(input)?;
+
+                let builder = asm_ctx.get_builder();
+                let context = builder.get_context();
+                let op = $struct_name::builder(&context)
+                    .rs1(rs1)
+                    .imm(imm_value.into())
+                    .rd(rd)
+                    .build();
+                builder.insert(&op);
+
+                Ok(((), ni))
             }
         }
     };

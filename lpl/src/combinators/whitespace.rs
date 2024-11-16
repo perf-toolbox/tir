@@ -2,6 +2,7 @@ use crate::combinators::pred;
 use crate::ParseStream;
 use crate::Parser;
 
+use super::maybe_then;
 use super::one_or_more;
 use super::text::any_char;
 use super::zero_or_more;
@@ -58,10 +59,7 @@ where
     P: Parser<'a, Input, Output> + 'a,
     Output: 'a,
 {
-    any_whitespace0()
-        .and_then(parser)
-        .and_then(any_whitespace0())
-        .map(|((_, d), _)| d)
+    maybe_then(any_whitespace0().and_then(parser), any_whitespace0()).map(|((_, d), _)| d)
 }
 
 #[cfg(test)]

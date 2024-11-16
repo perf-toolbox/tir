@@ -1,4 +1,5 @@
-use lpl::{ParseResult, ParseStream, Parser};
+use crate::DiagKind;
+use lpl::{combinators::lang::ident, Diagnostic, ParseResult, ParseStream, Parser};
 use seq_macro::seq;
 use tir_core::{parser::Parsable, IRFormatter, IRStrStream, Printable};
 use tir_macros::{lowercase, uppercase};
@@ -72,30 +73,30 @@ macro_rules! register {
             }
         }
 
-        pub fn register_parser<'a, Input>(input: Input) -> ParseResult<Input, Register>
-        where
-            Input: ParseStream<'a>
+        pub fn register_parser(input: &str) -> Option<Register>
         {
-            todo!()
-            // (alpha1, alphanumeric0).take().verify_map(|reg| {
-            //     match reg {
-            //     $(
-            //         $abi_name => Some(Register::$case_name),
-            //         uppercase!($abi_name) => Some(Register::$case_name),
-            //         stringify!($case_name) => Some(Register::$case_name),
-            //         lowercase!($case_name) => Some(Register::$case_name),
-            //     )*
-            //         _ => None,
-            //     }
-            // }).parse_next(input)
+            match input {
+                $(
+                    $abi_name => Some(Register::$case_name),
+                    uppercase!($abi_name) => Some(Register::$case_name),
+                    stringify!($case_name) => Some(Register::$case_name),
+                    lowercase!($case_name) => Some(Register::$case_name),
+                )*
+                _ => None,
+            }
         }
     };
 }
 
 impl Parsable<Register> for Register {
     fn parse(input: IRStrStream) -> ParseResult<IRStrStream, Register> {
-        todo!()
-        // trace("RISC-V register", register_parser).parse_next(input)
+        let parser = ident(|_| false).try_map(|r, s| {
+            register_parser(r).ok_or(Into::<Diagnostic>::into(DiagKind::UnknownRegister(
+                r.to_string(),
+                s,
+            )))
+        });
+        parser.parse(input)
     }
 }
 

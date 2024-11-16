@@ -116,14 +116,23 @@ impl<'a> ParseStream<'a> for TokenStream<'a> {
             Bound::Unbounded => self.tokens.len(),
         };
 
-        if ub <= self.tokens.len() {
+        let tokens = &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())];
+        if !tokens.is_empty() {
             Some(Self {
-                tokens: &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())],
+                tokens,
                 extra: self.extra.clone(),
             })
         } else {
             None
         }
+        // if ub <= self.tokens.len() {
+        //     Some(Self {
+        //         tokens: &self.tokens[(range.start_bound().cloned(), range.end_bound().cloned())],
+        //         extra: self.extra.clone(),
+        //     })
+        // } else {
+        //     None
+        // }
     }
 
     fn len(&self) -> usize {
@@ -159,12 +168,14 @@ fn directive<'a>() -> impl Parser<'a, StrStream<'a>, AsmToken<'a>> {
     literal(".")
         .and_then(ident(allowed_ident_char))
         .map(|(_, ident_str)| AsmToken::Directive(ident_str))
+        .label("asm_directive")
 }
 
 fn label<'a>() -> impl Parser<'a, StrStream<'a>, AsmToken<'a>> {
     ident(allowed_ident_char)
         .and_then(literal(":"))
         .map(|(ident_str, _)| AsmToken::Label(ident_str))
+        .label("asm_label")
 }
 
 fn punct<'a>() -> impl Parser<'a, StrStream<'a>, AsmToken<'a>> {
@@ -172,16 +183,18 @@ fn punct<'a>() -> impl Parser<'a, StrStream<'a>, AsmToken<'a>> {
         .map(|_| AsmToken::OpenParen)
         .or_else(literal(")").map(|_| AsmToken::CloseParen))
         .or_else(literal(",").map(|_| AsmToken::Comma))
+        .label("asm_punct")
 }
 
-pub fn lex_asm<'a>(input: &'a str) -> Result<Vec<Spanned<AsmToken<'a>>>, Diagnostic> {
+pub fn lex_asm(input: &str) -> Result<Vec<Spanned<AsmToken>>, Diagnostic> {
     let stream: StrStream = input.into();
 
     let token = directive()
         .or_else(label())
         .or_else(ident(allowed_ident_char).map(AsmToken::Ident))
         .or_else(dec_number().map(AsmToken::Number))
-        .or_else(punct());
+        .or_else(punct())
+        .label("asm_token");
 
     let lexer = interleaved(token.spanned(), any_whitespace1());
 

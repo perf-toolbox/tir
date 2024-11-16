@@ -69,6 +69,27 @@ where
     }
 }
 
+pub fn maybe_then<'a, P1, P2, Input, Output1, Output2>(
+    parser1: P1,
+    parser2: P2,
+) -> impl Parser<'a, Input, (Output1, Option<Output2>)>
+where
+    Input: ParseStream<'a> + 'a,
+    P1: Parser<'a, Input, Output1>,
+    P2: Parser<'a, Input, Output2>,
+{
+    move |input: Input| {
+        parser1
+            .parse(input.clone())
+            .and_then(|(out, next_input)| match next_input {
+                Some(next_input) => parser2
+                    .parse(next_input)
+                    .map(|(out2, next_input)| ((out, Some(out2)), next_input)),
+                None => Ok(((out, None), None)),
+            })
+    }
+}
+
 pub fn spanned<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Spanned<Output>>
 where
     Input: ParseStream<'a> + 'a,
