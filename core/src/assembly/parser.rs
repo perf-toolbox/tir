@@ -284,7 +284,7 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
     maybe_then(
         optional(
             zero_or_more(
-                any_whitespace0()
+                any_whitespace1()
                     .and_then(line_comment(";"))
                     .and_then(any_whitespace0()),
             )
@@ -296,122 +296,10 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
     .map(|((_, op), _)| op)
 }
 
-//
-//
-// fn attr_pair(input: &mut ParseStream<'_>) -> AsmPResult<(String, Attr)> {
-//     trace(
-//         "attr pair",
-//         separated_pair(
-//             identifier.map(|s| s.to_string()),
-//             (space0, "=", space0),
-//             Attr::parse,
-//         ),
-//     )
-//     .parse_next(input)
-// }
-//
-//
-// fn parse_digits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
-//     winnow::token::take_while(1.., '0'..='9').parse_next(input)
-// }
-//
-//
-// pub fn print_parser_diag(
-//     context: ContextRef,
-//     diag: &winnow::error::ParseError<ParseStream<'_>, PError>,
-// ) {
-//     let offset = diag.offset();
-//     let inner = diag.inner();
-//
-//     let mut builder = Report::<std::ops::Range<usize>>::build(ReportKind::Error, (), offset)
-//         .with_config(
-//             Config::default()
-//                 .with_tab_width(2)
-//                 .with_index_type(ariadne::IndexType::Byte),
-//         )
-//         .with_message(&format!("{}", &inner));
-//
-//     match inner {
-//         PError::UnknownOperation(dialect_name, op_name) => {
-//             builder.add_label(
-//                 Label::new((offset - op_name.len())..offset)
-//                     .with_color(Color::Red)
-//                     .with_message("unknown operation"),
-//             );
-//             if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
-//                 if let Some(name) = dialect.get_similarly_named_op(op_name) {
-//                     builder.set_note(format!(
-//                         "there is a similarly named operation '{}' in '{}' dialect",
-//                         name, &dialect_name
-//                     ));
-//                 }
-//             }
-//         }
-//         PError::ExpectedNotFound(token) => {
-//             builder.add_label(
-//                 Label::new(offset..(offset + token.len()))
-//                     .with_message("unexpected token")
-//                     .with_color(Color::Red),
-//             );
-//         }
-//         _ => {
-//             builder.add_label(Label::new(offset..(offset + 1)).with_message("unexpected token"));
-//             #[cfg(debug_assertions)]
-//             builder.set_note("for development purpose try re-building with --features=winnow/debug")
-//         }
-//     }
-//
-//     builder
-//         .finish()
-//         .print(ariadne::Source::from(diag.input().input))
-//         .unwrap();
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use winnow::Parser;
-//
-//     use super::{identifier, op_tuple, ParseStream, ParserState};
-//     use crate::Context;
-//
-//     macro_rules! input {
-//         ($inp:literal, $context:expr) => {
-//             ParseStream {
-//                 input: $inp.into(),
-//                 state: ParserState::new($context),
-//             }
-//         };
-//     }
-//
-//     #[test]
-//     fn parse_ident() {
-//         let context = Context::new();
-//         assert!(identifier.parse(input!("abc", context.clone())).is_ok());
-//         assert!(identifier.parse(input!("abc123", context.clone())).is_ok());
-//         assert!(identifier.parse(input!("123", context.clone())).is_err());
-//         assert!(identifier.parse(input!("123abs", context.clone())).is_err());
-//         let mut inp = input!("abc123 abc 123", context.clone());
-//         let ident = identifier.parse_next(&mut inp).unwrap();
-//         assert_eq!(ident, "abc123");
-//     }
-//
-//     #[test]
-//     fn parse_op_name() {
-//         let context = Context::new();
-//         let mut ir = input!("module", context.clone());
-//         let result = op_tuple.parse_next(&mut ir).unwrap();
-//         assert_eq!(result, ("builtin", "module"));
-//
-//         let mut ir = input!("test.module", context.clone());
-//         let result = op_tuple.parse_next(&mut ir).unwrap();
-//         assert_eq!(result, ("test", "module"));
-//     }
-// }
-
 #[cfg(test)]
 mod tests {
     use super::{attr_list, Attr};
-    use crate::IRStrStream;
+    use crate::{parser::op_name, IRStrStream};
     use lpl::Parser;
 
     #[test]
@@ -437,5 +325,20 @@ mod tests {
         let input = IRStrStream::new(input, "-", context);
         let result = attr_list().parse(input);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn parse_op_name() {
+        let context = crate::Context::new();
+        let input = "module";
+        let input = IRStrStream::new(input, "-", context.clone());
+
+        let (result, _) = op_name().parse(input).unwrap();
+        assert_eq!(result, ("builtin", "module"));
+
+        let input = "test.module";
+        let input = IRStrStream::new(input, "-", context);
+        let (result, _) = op_name().parse(input).unwrap();
+        assert_eq!(result, ("test", "module"));
     }
 }

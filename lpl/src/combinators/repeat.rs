@@ -188,7 +188,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::combinators::literal;
+    use crate::combinators::{eof, literal};
     use crate::parse_stream::StrStream;
     use crate::Parser;
 
@@ -203,8 +203,8 @@ mod tests {
         let stream2: StrStream = input2.into();
         let stream3: StrStream = input3.into();
 
-        let matcher1 = interleaved(literal("test"), literal(",").void());
-        let matcher2 = separated_ignore(literal("test"), literal(",").void());
+        let matcher1 = eof(interleaved(literal("test"), literal(",").void()));
+        let matcher2 = eof(separated_ignore(literal("test"), literal(",").void()));
 
         assert!(matcher1.parse(stream1.clone()).is_ok());
         assert!(matcher1.parse(stream2.clone()).is_ok());

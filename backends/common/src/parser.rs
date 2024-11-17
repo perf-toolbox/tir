@@ -199,9 +199,9 @@ mod tests {
         let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
         context.add_dialect(create_dialect());
 
-        let input = ".section text";
+        let input = ".section text
 
-        // label:";
+label:";
         let tokens = lex_asm(input).expect("lex");
         println!("{:?}", &tokens);
         let stream = TokenStream::new(&tokens, builder);

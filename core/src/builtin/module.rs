@@ -110,7 +110,7 @@ mod test {
     fn test_module_parse() {
         let context = Context::new();
         let input = "module {\n}\n";
-        let op = parse_ir(context, "-", input).expect("parsed ir");
+        let op = parse_ir(context, input, "-").expect("parsed ir");
         assert_eq!(op.borrow().type_id(), TypeId::of::<ModuleOp>());
     }
 }
