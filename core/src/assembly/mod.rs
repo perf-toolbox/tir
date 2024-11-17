@@ -17,7 +17,7 @@ pub use self::ir_stream::IRStrStream;
 
 pub trait OpAssembly {
     fn print_assembly(&self, fmt: &mut dyn IRFormatter);
-    fn parse_assembly<'a>(input: IRStrStream<'a>) -> ParseResult<IRStrStream<'a>, OpRef>
+    fn parse_assembly(input: IRStrStream<'_>) -> ParseResult<IRStrStream<'_>, OpRef>
     where
         Self: Sized;
 }
@@ -26,9 +26,9 @@ pub trait TyAssembly {
     fn print_assembly(attrs: &HashMap<String, Attr>, fmt: &mut dyn IRFormatter)
     where
         Self: Sized;
-    fn parse_assembly<'a>(
-        input: IRStrStream<'a>,
-    ) -> ParseResult<IRStrStream<'a>, HashMap<String, Attr>>
+    fn parse_assembly(
+        input: IRStrStream<'_>,
+    ) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>>
     where
         Self: Sized;
 }

@@ -1,14 +1,12 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use ariadne::Color;
 use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
 use lpl::combinators::any_whitespace0;
 use lpl::combinators::any_whitespace1;
-use lpl::combinators::interleaved;
 use lpl::combinators::lang::ident;
 use lpl::combinators::lang::line_comment;
 use lpl::combinators::literal;
@@ -22,16 +20,14 @@ use lpl::combinators::zero_or_more;
 use lpl::Diagnostic;
 use lpl::ParseResult;
 use lpl::{ParseStream, Parser};
-use thiserror::Error;
 
 use crate::assembly::ir_stream::{IRStrStream, ParserState};
 use crate::Attr;
 use crate::Block;
 use crate::BlockRef;
-use crate::OpBuilder;
 use crate::Region;
 use crate::RegionRef;
-use crate::{ContextRef, OpRef, Type};
+use crate::{ContextRef, OpRef};
 
 use super::DiagKind;
 
@@ -54,7 +50,7 @@ pub fn print_parser_diag(source: &str, diag: &Diagnostic) {
     let span = diag.span();
     let offset = span.get_offset_start();
 
-    let mut builder = Report::build(
+    let builder = Report::build(
         ReportKind::Error,
         (
             span.get_filename().unwrap_or_default(),
@@ -84,6 +80,7 @@ pub fn print_parser_diag(source: &str, diag: &Diagnostic) {
             ariadne::Source::from(source),
         ))
         .unwrap();
+    // FIXME(alexbatashev): restore fuzzy dialect and op name search
     // match inner {
     //     PError::UnknownOperation(dialect_name, op_name) => {
     //         builder.add_label(
@@ -100,19 +97,6 @@ pub fn print_parser_diag(source: &str, diag: &Diagnostic) {
     //             }
     //         }
     //     }
-    //     PError::ExpectedNotFound(token) => {
-    //         builder.add_label(
-    //             Label::new(offset..(offset + token.len()))
-    //                 .with_message("unexpected token")
-    //                 .with_color(Color::Red),
-    //         );
-    //     }
-    //     _ => {
-    //         builder.add_label(Label::new(offset..(offset + 1)).with_message("unexpected token"));
-    //         #[cfg(debug_assertions)]
-    //         builder.set_note("for development purpose try re-building with --features=winnow/debug")
-    //     }
-    // }
 }
 
 /// Parse TIR @-style symbol names
@@ -185,8 +169,7 @@ pub fn skip_attrs<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr
 
 pub fn single_block<'a>() -> impl Parser<'a, IRStrStream<'a>, BlockRef> {
     let skip = zero_or_more(any_whitespace1().or_else(line_comment(";").void()));
-    skip 
-        .and_then(literal("^"))
+    skip.and_then(literal("^"))
         .and_then(ident(|_| false))
         .and_then(literal(":"))
         .flat()

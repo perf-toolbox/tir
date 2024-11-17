@@ -1,5 +1,8 @@
 use crate::DiagKind;
-use lpl::{combinators::{lang::ident, NotTuple}, Diagnostic, ParseResult, ParseStream, Parser};
+use lpl::{
+    combinators::{lang::ident, NotTuple},
+    Diagnostic, ParseResult, Parser,
+};
 use seq_macro::seq;
 use tir_core::{parser::Parsable, IRFormatter, IRStrStream, Printable};
 use tir_macros::{lowercase, uppercase};

@@ -156,14 +156,20 @@ where
     Input::Slice: PartialEq<&'a str>,
     Int: std::str::FromStr + 'a,
 {
-    optional(literal("-")).and_then(take_while(|c| c.is_ascii_digit())).map(|(sign, num)| {
-        let num = if sign.is_some() { &format!("-{}", num) } else { num };
-        if let Ok(num) = Int::from_str(num) {
-            num
-        } else {
-            unreachable!()
-        }
-    })
+    optional(literal("-"))
+        .and_then(take_while(|c| c.is_ascii_digit()))
+        .map(|(sign, num)| {
+            let num = if sign.is_some() {
+                &format!("-{}", num)
+            } else {
+                num
+            };
+            if let Ok(num) = Int::from_str(num) {
+                num
+            } else {
+                unreachable!()
+            }
+        })
 }
 
 #[cfg(test)]

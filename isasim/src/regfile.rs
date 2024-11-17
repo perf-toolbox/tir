@@ -1,7 +1,5 @@
 use std::{cell::RefCell, rc::Rc};
 
-use lpl::StrStream;
-
 const MAX_REG_SIZE: usize = 256;
 
 #[derive(Debug, Clone)]

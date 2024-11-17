@@ -1,8 +1,7 @@
-use crate::assembly::parser::Parsable;
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
-use crate::{Op, OpImpl, OpRef, Type};
+use crate::{Op, OpImpl, Type};
 use lpl::{ParseStream, Parser};
 use tir_macros::{Op, OpAssembly, OpValidator};
 

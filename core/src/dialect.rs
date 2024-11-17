@@ -83,8 +83,8 @@ impl Dialect {
         self.ty_print_fn.get(&id).cloned()
     }
 
-    pub fn get_type_parser(&self, id: u32) -> Option<&Box<TyParseFn>> {
-        self.ty_parse_fn.get(&id)
+    pub fn get_type_parser(&self, id: u32) -> Option<&TyParseFn> {
+        self.ty_parse_fn.get(&id).map(|p| p.as_ref())
     }
 
     pub fn get_similarly_named_op(&self, name: &str) -> Option<&'static str> {

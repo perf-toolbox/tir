@@ -8,7 +8,6 @@ use lpl::ParseResult;
 use lpl::ParseStream;
 use lpl::Parser;
 
-use crate::parser::identifier;
 use crate::parser::Parsable;
 use crate::Attr;
 use crate::ContextRef;

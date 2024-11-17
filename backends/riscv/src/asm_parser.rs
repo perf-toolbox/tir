@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use lpl::combinators::lang::line_comment;
 use lpl::combinators::{eof, zero_or_more};
 use lpl::{Diagnostic, ParseResult, ParseStream, Parser};
 use tir_backend::parser::{label, section};
