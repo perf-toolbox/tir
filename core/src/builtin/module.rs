@@ -1,8 +1,10 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{single_block_region, AsmPResult, ParseStream};
-use crate::{IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator};
+use crate::parser::single_block_region;
+use crate::{
+    IRFormatter, IRStrStream, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
+};
+use lpl::{ParseResult, ParseStream, Parser};
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
-use winnow::Parser;
 
 use crate as tir_core;
 
@@ -24,17 +26,23 @@ pub struct ModuleEndOp {
 impl Terminator for ModuleEndOp {}
 
 impl OpAssembly for ModuleOp {
-    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
+    fn parse_assembly<'a>(input: IRStrStream<'_>) -> ParseResult<IRStrStream<'_>, OpRef>
     where
         Self: Sized,
     {
-        let ops = single_block_region.parse_next(input)?;
-        let context = input.state.get_context();
-        let module = ModuleOp::builder(&context).build();
-        for op in ops {
-            module.borrow_mut().get_body().push(&op);
-        }
-        Ok(module)
+        let parser = single_block_region();
+        let state = input.get_extra().unwrap().clone();
+        let context = state.context();
+        parser.parse(input).map(|(ops, next_input)| {
+            let module = ModuleOp::builder(&context).build();
+            for op in ops {
+                module.borrow_mut().get_body().push(&op);
+            }
+
+            let module: OpRef = module;
+
+            (module, next_input)
+        })
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {
@@ -102,7 +110,7 @@ mod test {
     fn test_module_parse() {
         let context = Context::new();
         let input = "module {\n}\n";
-        let op = parse_ir(context, input).expect("parsed ir");
+        let op = parse_ir(context, input, "-").expect("parsed ir");
         assert_eq!(op.borrow().type_id(), TypeId::of::<ModuleOp>());
     }
 }

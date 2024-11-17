@@ -1,4 +1,4 @@
-use crate::{InternalError, ParseStream, Parser, Span, Spanned};
+use crate::{Diagnostic, InternalError, ParseStream, Parser, Span, Spanned};
 
 pub fn map<'a, P, F, Input, Output1, Output2>(
     parser: P,
@@ -13,6 +13,22 @@ where
         parser
             .parse(input)
             .map(|(result, next_input)| (map_fn(result), next_input))
+    }
+}
+
+pub fn map_with<'a, P, F, Input, Output1, Output2, Extra>(
+    parser: P,
+    map_fn: F,
+) -> impl Parser<'a, Input, Output2>
+where
+    Input: ParseStream<'a, Extra = Extra> + 'a,
+    P: Parser<'a, Input, Output1>,
+    F: Fn(Output1, Option<&Extra>) -> Output2,
+{
+    move |input: Input| {
+        parser
+            .parse(input.clone())
+            .map(|(result, next_input)| (map_fn(result, input.get_extra()), next_input))
     }
 }
 
@@ -53,6 +69,27 @@ where
     }
 }
 
+pub fn maybe_then<'a, P1, P2, Input, Output1, Output2>(
+    parser1: P1,
+    parser2: P2,
+) -> impl Parser<'a, Input, (Output1, Option<Output2>)>
+where
+    Input: ParseStream<'a> + 'a,
+    P1: Parser<'a, Input, Output1>,
+    P2: Parser<'a, Input, Output2>,
+{
+    move |input: Input| {
+        parser1
+            .parse(input.clone())
+            .and_then(|(out, next_input)| match next_input {
+                Some(next_input) => parser2
+                    .parse(next_input)
+                    .map(|(out2, next_input)| ((out, Some(out2)), next_input)),
+                None => Ok(((out, None), None)),
+            })
+    }
+}
+
 pub fn spanned<'a, P, Input, Output>(parser: P) -> impl Parser<'a, Input, Spanned<Output>>
 where
     Input: ParseStream<'a> + 'a,
@@ -84,6 +121,25 @@ where
             Ok((Some(output), next_input))
         } else {
             Ok((None, Some(input)))
+        }
+    }
+}
+
+pub fn try_map<'a, P, F, Input, Output1, Output2>(
+    parser: P,
+    map_fn: F,
+) -> impl Parser<'a, Input, Output2>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output1>,
+    F: Fn(Output1, Span) -> Result<Output2, Diagnostic>,
+{
+    move |input: Input| {
+        let span = input.span();
+        let result = parser.parse(input);
+        match result {
+            Ok((res, next_input)) => map_fn(res, span).map(|res| (res, next_input)),
+            Err(err) => Err(err),
         }
     }
 }

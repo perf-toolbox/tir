@@ -1,5 +1,4 @@
 use std::{cell::RefCell, rc::Rc};
-use winnow::Parser;
 
 const MAX_REG_SIZE: usize = 256;
 
@@ -122,12 +121,12 @@ impl RegFile for RISCVRegFile {
     }
 
     fn read_register(&self, reg_name: &str) -> Value {
-        let reg = tir_riscv::register_parser.parse(reg_name).unwrap();
+        let reg = tir_riscv::register_parser(reg_name).unwrap();
         self.registers[tir_riscv::get_reg_num(&reg)].clone()
     }
 
     fn write_register(&mut self, reg_name: &str, value: &Value) {
-        let reg = tir_riscv::register_parser.parse(reg_name).unwrap();
+        let reg = tir_riscv::register_parser(reg_name).unwrap();
 
         // hardwired zero
         if let tir_riscv::Register::X0 = reg {

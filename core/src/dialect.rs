@@ -1,9 +1,10 @@
-use crate::parser::{AsmPResult, ParseStream};
-use crate::{Attr, IRFormatter, OpRef};
+use lpl::ParseResult;
+
+use crate::{Attr, IRFormatter, IRStrStream, OpRef};
 use std::any::Any;
 use std::collections::HashMap;
 
-type ParseFn<T> = fn(&mut ParseStream) -> AsmPResult<T>;
+type ParseFn<T> = dyn for<'a> Fn(IRStrStream<'a>) -> ParseResult<IRStrStream<'a>, T> + 'static;
 pub type OpParseFn = ParseFn<OpRef>;
 pub type TyParseFn = ParseFn<HashMap<String, Attr>>;
 pub type TyPrintFn = fn(&HashMap<String, Attr>, &mut dyn IRFormatter);
@@ -13,8 +14,8 @@ pub struct Dialect {
     id: u32,
     operation_ids: HashMap<&'static str, u32>,
     type_ids: HashMap<&'static str, u32>,
-    op_parse_fn: HashMap<u32, OpParseFn>,
-    ty_parse_fn: HashMap<u32, TyParseFn>,
+    op_parse_fn: HashMap<u32, Box<OpParseFn>>,
+    ty_parse_fn: HashMap<u32, Box<TyParseFn>>,
     ty_print_fn: HashMap<u32, TyPrintFn>,
     ext: Option<Box<dyn Any>>,
 }
@@ -48,14 +49,14 @@ impl Dialect {
         self.name
     }
 
-    pub fn add_operation(&mut self, name: &'static str, parser: OpParseFn) {
+    pub fn add_operation(&mut self, name: &'static str, parser: Box<OpParseFn>) {
         if self
             .operation_ids
-            .insert(name, self.operation_ids.len().try_into().unwrap())
+            .insert(name, self.operation_ids.len() as u32)
             .is_none()
         {
             self.op_parse_fn
-                .insert((self.operation_ids.len() - 1).try_into().unwrap(), parser);
+                .insert((self.operation_ids.len() - 1) as u32, parser);
         }
     }
 
@@ -63,12 +64,12 @@ impl Dialect {
         self.operation_ids.get(name).copied()
     }
 
-    pub fn get_operation_parser(&self, id: u32) -> Option<OpParseFn> {
-        self.op_parse_fn.get(&id).cloned()
+    pub fn get_operation_parser(&self, id: u32) -> Option<&OpParseFn> {
+        self.op_parse_fn.get(&id).map(|f| f.as_ref())
     }
 
-    pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: TyParseFn) {
-        let id: u32 = self.type_ids.len().try_into().unwrap();
+    pub fn add_type(&mut self, name: &'static str, print_fn: TyPrintFn, parse_fn: Box<TyParseFn>) {
+        let id: u32 = self.type_ids.len() as u32;
         self.type_ids.insert(name, id);
         self.ty_print_fn.insert(id, print_fn);
         self.ty_parse_fn.insert(id, parse_fn);
@@ -82,8 +83,8 @@ impl Dialect {
         self.ty_print_fn.get(&id).cloned()
     }
 
-    pub fn get_type_parser(&self, id: u32) -> Option<TyParseFn> {
-        self.ty_parse_fn.get(&id).cloned()
+    pub fn get_type_parser(&self, id: u32) -> Option<&TyParseFn> {
+        self.ty_parse_fn.get(&id).map(|p| p.as_ref())
     }
 
     pub fn get_similarly_named_op(&self, name: &str) -> Option<&'static str> {

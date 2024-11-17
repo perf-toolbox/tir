@@ -1,5 +1,7 @@
-use crate::Printable;
+use crate::parser::skip_attrs;
 use crate::{Attr, ContextRef, Ty, TyAssembly, Type};
+use crate::{IRStrStream, Printable};
+use lpl::{ParseResult, Parser};
 use std::collections::HashMap;
 use tir_macros::{dialect_type, dialect_type_with_extensions};
 
@@ -19,10 +21,9 @@ impl TyAssembly for VoidType {
         fmt.write_direct("void");
     }
 
-    fn parse_assembly(
-        input: &mut tir_core::parser::ParseStream<'_>,
-    ) -> tir_core::parser::AsmPResult<std::collections::HashMap<String, tir_core::Attr>> {
-        tir_core::parser::skip_attrs(input)
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
+        let parser = skip_attrs();
+        parser.parse(input)
     }
 }
 
@@ -138,13 +139,8 @@ impl TyAssembly for IntType {
         fmt.write_direct(">");
     }
 
-    fn parse_assembly(
-        input: &mut tir_core::parser::ParseStream<'_>,
-    ) -> tir_core::parser::AsmPResult<HashMap<String, Attr>>
-    where
-        Self: Sized,
-    {
-        tir_core::parser::parse_int_bits(input)
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream<'_>, HashMap<String, Attr>> {
+        tir_core::parser::parse_int_bits().parse(input)
     }
 }
 

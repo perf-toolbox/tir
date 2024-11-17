@@ -22,10 +22,10 @@ pub fn main(
     let ir = if args.input == "-" {
         std::io::read_to_string(std::io::stdin())?
     } else {
-        std::fs::read_to_string(args.input)?
+        std::fs::read_to_string(&args.input)?
     };
 
-    let module = parse_ir(context.clone(), &ir);
+    let module = parse_ir(context.clone(), &ir, &args.input);
 
     match module {
         Ok(module) => {
@@ -39,7 +39,7 @@ pub fn main(
             module.borrow().print(&mut printer);
         }
         Err(err) => {
-            print_parser_diag(context, &err);
+            print_parser_diag(&ir, &err);
             // FIXME(alexbatashev): return an error instead of exit
             // winnow errors do not implement std::error::Error
             std::process::exit(1);

@@ -21,6 +21,8 @@ pub enum InternalError {
     ExpectedEof(Span),
     #[error("Pair parsers not matched")]
     UnmatchedPair(Span),
+    #[error("Expected an alphabetic character")]
+    NotAlpha(Span),
 }
 
 pub enum DiagnosticKind {
@@ -51,6 +53,7 @@ impl InternalError {
             InternalError::UnexpectedEof(span) => span,
             InternalError::ExpectedEof(span) => span,
             InternalError::UnmatchedPair(span) => span,
+            InternalError::NotAlpha(span) => span,
         }
     }
 }

@@ -98,6 +98,16 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         BoxedParser::new(combinators::map(self, map_fn))
     }
 
+    fn map_with<F, NewOutput>(self, map_fn: F) -> BoxedParser<'a, Input, NewOutput>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+        NewOutput: 'a,
+        F: Fn(Output, Option<&Input::Extra>) -> NewOutput + 'a,
+    {
+        BoxedParser::new(combinators::map_with(self, map_fn))
+    }
+
     fn or_else<P2>(self, parser2: P2) -> BoxedParser<'a, Input, Output>
     where
         P2: Parser<'a, Input, Output> + 'a,
@@ -117,6 +127,14 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         BoxedParser::new(combinators::and_then(self, parser2))
     }
 
+    fn spaced(self) -> BoxedParser<'a, Input, Output>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+    {
+        BoxedParser::new(combinators::spaced(self))
+    }
+
     fn void(self) -> BoxedParser<'a, Input, ()>
     where
         Self: Sized + 'a,
@@ -132,6 +150,16 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
         Output: Flatten<Output = NewOutput> + 'a,
     {
         BoxedParser::new(combinators::flat(self))
+    }
+
+    fn try_map<F, NewOutput>(self, map_fn: F) -> BoxedParser<'a, Input, NewOutput>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+        NewOutput: 'a,
+        F: Fn(Output, Span) -> Result<NewOutput, Diagnostic> + 'a,
+    {
+        BoxedParser::new(combinators::try_map(self, map_fn))
     }
 
     fn label(self, label: &'static str) -> impl Parser<'a, Input, Output>

@@ -1,56 +1,53 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use lpl::combinators::{eof, zero_or_more};
+use lpl::{Diagnostic, ParseResult, ParseStream, Parser};
 use tir_backend::parser::{label, section};
 use tir_backend::{lex_asm, TokenStream};
-use tir_core::parser::{AsmPResult, PError};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
-use winnow::combinator::{alt, repeat};
-use winnow::Parser;
 
-use crate::RVExt;
+use crate::{DiagKind, RVExt};
 
-fn asm_instr(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-    let builder = input.get_builder();
+fn asm_instr(input: TokenStream) -> ParseResult<TokenStream, ()> {
+    let asm_ctx = input.get_extra().unwrap();
+    let builder = asm_ctx.get_builder();
     let context = builder.get_context();
     let dialect = context.get_dialect_by_name(crate::DIALECT_NAME).unwrap();
 
-    let mut parsers = dialect
+    let parsers = dialect
         .get_dialect_extension()
         .unwrap()
         .downcast_ref::<RVExt>()
         .unwrap()
         .get_asm_parsers();
 
-    for p in &mut parsers {
-        if p.parse_next(input).is_ok() {
-            return Ok(());
+    for p in parsers {
+        let result = p.parse(input.clone());
+        if result.is_ok() {
+            return result;
         }
     }
 
-    Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
+    Err(DiagKind::UnknownOpcode(input.span()).into())
 }
 
 #[allow(clippy::result_large_err)]
-pub fn parse_asm<'a>(
-    context: &ContextRef,
-    input: &'a str,
-) -> Result<Rc<RefCell<ModuleOp>>, winnow::error::ParseError<TokenStream<'a, 'a>, PError>> {
+pub fn parse_asm(context: &ContextRef, input: &str) -> Result<Rc<RefCell<ModuleOp>>, Diagnostic> {
     let module = ModuleOp::builder(context).build();
     let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
 
-    let tokens = lex_asm(input);
-    if let Err(ref err) = tokens {
-        panic!("lexer failed: {}", err);
-    }
-    let tokens = tokens.unwrap();
-    println!("Tokens: {:?}\n", &tokens);
-    let stream = TokenStream::new(&builder, &tokens);
+    let tokens = lex_asm(input)?;
 
-    let _: Vec<()> = repeat(0.., alt((section, label, asm_instr)))
-        .parse(stream)
-        .expect("todo err handling");
+    let stream = TokenStream::new(&tokens, builder);
 
+    let parser = eof(zero_or_more(
+        section()
+            .or_else(label())
+            .or_else(asm_instr.label("asm_instr")),
+    ));
+
+    parser.parse(stream)?;
     Ok(module)
 }
 

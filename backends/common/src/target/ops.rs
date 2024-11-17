@@ -1,11 +1,9 @@
-use tir_core::parser::{AsmPResult, ParseStream};
+use lpl::{
+    combinators::{lang::ident, literal},
+    ParseResult, ParseStream, Parser,
+};
 use tir_core::{parser::region_with_blocks, *};
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
-use winnow::{
-    ascii::{alphanumeric1, multispace0},
-    combinator::delimited,
-    Parser,
-};
 
 use crate::target::DIALECT_NAME;
 
@@ -18,23 +16,30 @@ pub struct SectionOp {
 }
 
 impl OpAssembly for SectionOp {
-    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream, OpRef>
     where
         Self: Sized,
     {
-        let (_, name, _) = delimited(
-            multispace0,
-            ("\"".void(), alphanumeric1, "\"".void()),
-            multispace0,
-        )
-        .parse_next(input)?;
-        let body = region_with_blocks.parse_next(input)?;
-        let context = input.state.get_context();
-        let section = SectionOp::builder(&context)
-            .name(name.to_string().into())
-            .body(body)
-            .build();
-        Ok(section)
+        let parser = literal("\"")
+            .and_then(ident(|c| c == '.'))
+            .and_then(literal("\""))
+            .flat()
+            .map(|(_, name, _)| name)
+            .and_then(region_with_blocks())
+            .map_with(|(name, body), extra| {
+                let state = extra.unwrap();
+                let context = state.context();
+
+                let section = SectionOp::builder(&context)
+                    .name(name.to_string().into())
+                    .body(body)
+                    .build();
+                let section: OpRef = section;
+                section
+            })
+            .label("section");
+
+        parser.parse(input)
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

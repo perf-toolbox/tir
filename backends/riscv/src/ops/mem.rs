@@ -1,19 +1,17 @@
 use crate::utils::{ITypeInstr, STypeInstr};
 use crate::{assemble_reg, disassemble_gpr};
-use crate::{register_parser, Register};
+use crate::{register_parser, DiagKind, Register};
 use tir_backend::isema::WithISema;
-use tir_backend::AsmToken;
+use tir_backend::parser::{asm_ident, close_paren, comma, number, open_paren};
 use tir_backend::BinaryEmittable;
 use tir_backend::ISAParser;
 use tir_backend::TokenStream;
-use tir_core::parser::{AsmPResult, Parsable};
 use tir_core::OpAssembly;
 use tir_core::*;
 use tir_macros::{lowercase, uppercase};
 use tir_macros::{Op, OpAssembly, OpValidator};
-use winnow::combinator::{delimited, preceded, separated_pair, trace};
-use winnow::token::one_of;
-use winnow::Parser;
+
+use lpl::{Diagnostic, ParseResult, ParseStream, Parser};
 
 use crate::DIALECT_NAME;
 
@@ -70,54 +68,43 @@ macro_rules! load_op_base {
         }
 
         impl ISAParser for $struct_name {
-            fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                let opcode = one_of(|t| {
-                    if let AsmToken::Ident(name) = t {
-                        name == lowercase!($op_name) || name == uppercase!($op_name)
-                    } else {
-                        false
-                    }
-                });
-                // Winnow is kind of stupid in the sense that it does not allow me to clone my
-                // parsers. This code will be so much better once we migrate to lpl.
-                let reg1 = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                    .map(|t| {
-                        if let AsmToken::Ident(name) = t {
-                            name
-                        } else {
-                            unreachable!();
-                        }
-                    })
-                    .and_then(register_parser);
-                let reg2 = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                    .map(|t| {
-                        if let AsmToken::Ident(name) = t {
-                            name
-                        } else {
-                            unreachable!();
-                        }
-                    })
-                    .and_then(register_parser);
-                let comma1 = one_of(|t| t == AsmToken::Comma).void();
-                let open_paren = one_of(|t| t == AsmToken::OpenParen).void();
-                let close_paren = one_of(|t| t == AsmToken::CloseParen).void();
-                let offset = one_of(|t| matches!(t, AsmToken::Number(_))).map(|t| match t {
-                    AsmToken::Number(num) => num as i16,
-                    _ => unreachable!("Why is this not a number>"),
+            fn parse(input: TokenStream) -> ParseResult<TokenStream, ()> {
+                let asm_ctx = input.get_extra().unwrap().clone();
+
+                let opcode = asm_ident().try_map(|t, s| match t {
+                    lowercase!($op_name) | uppercase!($op_name) => Ok(()),
+                    _ => Err(Into::<Diagnostic>::into(DiagKind::UnknownOpcode(s))),
                 });
 
-                let addr = (
-                    trace("offset", offset),
-                    delimited(open_paren, trace("base reg", reg1), close_paren),
-                );
+                let reg = move || {
+                    asm_ident()
+                        .try_map(|r, s| {
+                            register_parser(r).ok_or(Into::<Diagnostic>::into(
+                                DiagKind::UnknownRegister(r.to_string(), s),
+                            ))
+                        })
+                        .label("register")
+                };
 
-                let (rd, (offset_value, base_reg)): (Register, (i16, Register)) = preceded(
-                    trace("opcode", opcode),
-                    separated_pair(trace("src reg", reg2), comma1, trace("dst addr", addr)),
-                )
-                .parse_next(input)?;
+                let offset = number().map(|num| num as i16).label("offset");
 
-                let builder = input.get_builder();
+                let addr = offset
+                    .and_then(open_paren())
+                    .and_then(reg())
+                    .and_then(close_paren())
+                    .map(|(((offset, _), reg), _)| (offset, reg))
+                    .label("address");
+
+                let parser = opcode
+                    .and_then(reg())
+                    .and_then(comma())
+                    .and_then(addr)
+                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra))
+                    .label($op_name);
+
+                let ((rd, offset_value, base_reg), ni) = parser.parse(input)?;
+
+                let builder = asm_ctx.get_builder();
                 let context = builder.get_context();
                 let op = $struct_name::builder(&context)
                     .rs1(base_reg)
@@ -126,7 +113,7 @@ macro_rules! load_op_base {
                     .build();
                 builder.insert(&op);
 
-                Ok(())
+                Ok(((), ni))
             }
         }
     };
@@ -215,54 +202,43 @@ macro_rules! store_op_base {
         }
 
         impl ISAParser for $struct_name {
-            fn parse(input: &mut TokenStream<'_, '_>) -> AsmPResult<()> {
-                let opcode = one_of(|t| {
-                    if let AsmToken::Ident(name) = t {
-                        name == lowercase!($op_name) || name == uppercase!($op_name)
-                    } else {
-                        false
-                    }
-                });
-                // Winnow is kind of stupid in the sense that it does not allow me to clone my
-                // parsers. This code will be so much better once we migrate to lpl.
-                let reg1 = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                    .map(|t| {
-                        if let AsmToken::Ident(name) = t {
-                            name
-                        } else {
-                            unreachable!();
-                        }
-                    })
-                    .and_then(register_parser);
-                let reg2 = one_of(|t| matches!(t, AsmToken::Ident(_)))
-                    .map(|t| {
-                        if let AsmToken::Ident(name) = t {
-                            name
-                        } else {
-                            unreachable!();
-                        }
-                    })
-                    .and_then(register_parser);
-                let comma1 = one_of(|t| t == AsmToken::Comma).void();
-                let open_paren = one_of(|t| t == AsmToken::OpenParen).void();
-                let close_paren = one_of(|t| t == AsmToken::CloseParen).void();
-                let offset = one_of(|t| matches!(t, AsmToken::Number(_))).map(|t| match t {
-                    AsmToken::Number(num) => num as i16,
-                    _ => unreachable!("Why is this not a number>"),
+            fn parse(input: TokenStream) -> ParseResult<TokenStream, ()> {
+                let asm_ctx = input.get_extra().unwrap().clone();
+
+                let opcode = asm_ident().try_map(|t, s| match t {
+                    lowercase!($op_name) | uppercase!($op_name) => Ok(()),
+                    _ => Err(Into::<Diagnostic>::into(DiagKind::UnknownOpcode(s))),
                 });
 
-                let addr = (
-                    trace("offset", offset),
-                    delimited(open_paren, trace("base reg", reg1), close_paren),
-                );
+                let reg = move || {
+                    asm_ident()
+                        .try_map(|r, s| {
+                            register_parser(r).ok_or(Into::<Diagnostic>::into(
+                                DiagKind::UnknownRegister(r.to_string(), s),
+                            ))
+                        })
+                        .label("register")
+                };
 
-                let (rs2, (offset_value, base_reg)): (Register, (i16, Register)) = preceded(
-                    trace("opcode", opcode),
-                    separated_pair(trace("src reg", reg2), comma1, trace("dst addr", addr)),
-                )
-                .parse_next(input)?;
+                let offset = number().map(|num| num as i16).label("offset");
 
-                let builder = input.get_builder();
+                let addr = offset
+                    .and_then(open_paren())
+                    .and_then(reg())
+                    .and_then(close_paren())
+                    .map(|(((offset, _), reg), _)| (offset, reg))
+                    .label("address");
+
+                let parser = opcode
+                    .and_then(reg())
+                    .and_then(comma())
+                    .and_then(addr)
+                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra))
+                    .label($op_name);
+
+                let ((rs2, offset_value, base_reg), ni) = parser.parse(input)?;
+
+                let builder = asm_ctx.get_builder();
                 let context = builder.get_context();
                 let op = $struct_name::builder(&context)
                     .rs1(base_reg)
@@ -271,7 +247,7 @@ macro_rules! store_op_base {
                     .build();
                 builder.insert(&op);
 
-                Ok(())
+                Ok(((), ni))
             }
         }
     };

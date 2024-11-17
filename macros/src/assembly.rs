@@ -1,7 +1,7 @@
 use crate::{OpFieldAttrs, OpFieldReceiver, OpReceiver};
 use darling::FromDeriveInput;
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::DeriveInput;
 
 fn make_operand_printer(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
@@ -43,8 +43,14 @@ fn make_return_type_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStre
         if let OpFieldAttrs::Return = f.attrs {
             let ident = f.ident.as_ref().unwrap();
             return quote! {
-                let ty = winnow::combinator::preceded((winnow::ascii::space0, "->", winnow::ascii::space0), tir_core::Type::parse).parse_next(input)?;
-                builder = builder.#ident(ty);
+                let return_parser =
+                    lpl::combinators::literal("->").spaced().and_then(tir_core::Type::parse).map(|(_, ty): (_, tir_core::Type)| {
+                        ty
+                    });
+
+                let (ty, next_input) = return_parser.parse(next_input.unwrap())?;
+
+                let builder = builder.#ident(ty);
             };
         }
     }
@@ -52,27 +58,60 @@ fn make_return_type_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStre
     quote! {}
 }
 
-fn make_operand_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
-    let mut parsers = vec![];
+fn make_operands_parser(fields: &[OpFieldReceiver]) -> proc_macro2::TokenStream {
+    let mut parsers = vec![quote! {
+        lpl::combinators::any_whitespace0()
+    }];
 
-    for f in fields {
+    let mut names = vec![];
+
+    parsers.extend(fields.iter().filter_map(|f| {
         if let OpFieldAttrs::Operand = f.attrs {
             let operand_str = format!("{}", f.ident.as_ref().unwrap());
-            let operand = f.ident.as_ref().unwrap();
+            let ident = f.ident.as_ref().unwrap();
+            names.push(ident);
+            let span = ident.span();
             let ty = &f.ty;
-            parsers.push(quote! {
-                let (_, value) = winnow::combinator::preceded(winnow::ascii::space0, winnow::combinator::terminated(winnow::combinator::separated_pair(
-                    #operand_str,
-                    (winnow::ascii::space0, "=", winnow::ascii::space0).take(),
-                    #ty::parse
-                ), ",")).parse_next(input)?;
-                builder = builder.#operand(value);
-            });
+            Some(quote_spanned! {span=>
+                .and_then(
+                    lpl::combinators::literal(#operand_str)
+                        .and_then(lpl::combinators::spaced(lpl::combinators::literal("=")))
+                        .and_then(#ty::parse)
+                        .and_then(lpl::combinators::spaced(lpl::combinators::literal(",")))
+                        .flat().map(|(_, _, value, _)| {
+                            value
+                        }))
+            })
+        } else {
+            None
         }
+    }));
+
+    parsers.push(quote! {
+        .flat()
+    });
+
+    let mut builder = vec![];
+
+    for n in &names {
+        let span = n.span();
+        builder.push(quote_spanned! {span=>
+            builder = builder.#n(#n);
+        })
     }
 
-    quote! {
+    if parsers.len() == 2 {
+        return quote! {};
+    }
+
+    let operands_parser = quote! {
         #(#parsers)*
+    };
+
+    quote! {
+        let operands_parser = #operands_parser;
+        let ((_, #(#names),*), next_input) = operands_parser.parse(next_input.unwrap())?;
+        #(#builder)*
     }
 }
 
@@ -89,7 +128,7 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
 
     let operand_printer = make_operand_printer(&fields);
     let return_printer = make_return_type_printer(&fields);
-    let operand_parsers = make_operand_parser(&fields);
+    let operands_parser = make_operands_parser(&fields);
     let return_parser = make_return_type_parser(&fields);
 
     quote! {
@@ -116,18 +155,26 @@ pub fn make_generic_ir_printer_parser(op: DeriveInput) -> TokenStream {
             #return_printer
           }
 
-          fn parse_assembly(input: &mut tir_core::parser::ParseStream<'_>) -> tir_core::parser::AsmPResult<OpRef> {
-            let mut builder = Self::builder(&input.state.get_context());
-            #operand_parsers
+          fn parse_assembly<'a>(input: tir_core::IRStrStream<'a>) -> lpl::ParseResult<tir_core::IRStrStream<'a>, tir_core::OpRef> {
+            use tir_core::parser::Parsable;
+            let state = input.get_extra().unwrap();
+            let context = state.context();
+            let mut builder = Self::builder(&context);
+            let attrs_parser = tir_core::parser::attr_list();
 
-            let attr_list = tir_core::parser::attr_list.parse_next(input)?;
+            let next_input = Some(input);
+
+            #operands_parser
+
+            let (attr_list, next_input) = attrs_parser.parse(next_input.unwrap())?;
 
             #return_parser
 
             let op = builder.build();
             op.borrow_mut().add_attrs(&attr_list);
+            let op: tir_core::OpRef = op;
 
-            Ok(op)
+            Ok((op, next_input))
           }
       }
     }

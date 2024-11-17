@@ -1,442 +1,344 @@
 use std::collections::HashMap;
+use std::sync::Arc;
 
-use ariadne::Color;
 use ariadne::Config;
 use ariadne::Label;
 use ariadne::Report;
 use ariadne::ReportKind;
-use thiserror::Error;
-use winnow::ascii::alpha1;
-use winnow::ascii::line_ending;
-use winnow::ascii::multispace0;
-use winnow::ascii::space0;
-use winnow::combinator::alt;
-use winnow::combinator::cut_err;
-use winnow::combinator::delimited;
-use winnow::combinator::preceded;
-use winnow::combinator::repeat;
-use winnow::combinator::repeat_till;
-use winnow::combinator::separated;
-use winnow::combinator::separated_pair;
-use winnow::combinator::terminated;
-use winnow::combinator::trace;
-use winnow::error::AddContext;
-use winnow::error::ErrMode;
-use winnow::error::ErrorKind;
-use winnow::error::ParserError;
-use winnow::error::StrContext;
-use winnow::error::StrContextValue;
-use winnow::stream::AsChar;
-use winnow::stream::Stateful;
-use winnow::stream::Stream;
-use winnow::token::take_till;
-use winnow::token::take_while;
-use winnow::Parser;
+use lpl::combinators::any_whitespace0;
+use lpl::combinators::any_whitespace1;
+use lpl::combinators::lang::ident;
+use lpl::combinators::lang::line_comment;
+use lpl::combinators::literal;
+use lpl::combinators::maybe_then;
+use lpl::combinators::one_or_more;
+use lpl::combinators::optional;
+use lpl::combinators::separated_ignore;
+use lpl::combinators::spaced;
+use lpl::combinators::text::take_while;
+use lpl::combinators::zero_or_more;
+use lpl::Diagnostic;
+use lpl::ParseResult;
+use lpl::{ParseStream, Parser};
 
+use crate::assembly::ir_stream::{IRStrStream, ParserState};
 use crate::Attr;
 use crate::Block;
 use crate::BlockRef;
 use crate::Region;
 use crate::RegionRef;
-use crate::{ContextRef, OpRef, Type};
+use crate::{ContextRef, OpRef};
 
-#[derive(Debug, Clone)]
-pub struct ParserState {
-    context: ContextRef,
-    deferred_type_list: Vec<Type>,
-    deferred_arg_names: Vec<String>,
-    cur_region: Vec<RegionRef>,
-}
+use super::DiagKind;
 
-impl ParserState {
-    pub fn new(context: ContextRef) -> Self {
-        ParserState {
-            context,
-            deferred_type_list: vec![],
-            deferred_arg_names: vec![],
-            cur_region: vec![],
-        }
-    }
-
-    pub fn get_context(&self) -> ContextRef {
-        self.context.clone()
-    }
-
-    pub fn push_region(&mut self, region: RegionRef) {
-        self.cur_region.push(region);
-    }
-
-    pub fn get_region(&self) -> RegionRef {
-        self.cur_region.last().cloned().unwrap()
-    }
-
-    pub fn pop_region(&mut self) {
-        self.cur_region.pop();
-    }
-
-    pub fn take_deferred_types(&mut self) -> Vec<Type> {
-        std::mem::take(&mut self.deferred_type_list)
-    }
-
-    pub fn set_deferred_types(&mut self, types: Vec<Type>) {
-        self.deferred_type_list = types;
-    }
-
-    pub fn take_deferred_names(&mut self) -> Vec<String> {
-        std::mem::take(&mut self.deferred_arg_names)
-    }
-
-    pub fn set_deferred_names(&mut self, names: Vec<String>) {
-        self.deferred_arg_names = names;
-    }
-}
-
-pub type ParseStream<'a> = Stateful<&'a str, ParserState>;
-
-pub type AsmPResult<I> = winnow::PResult<I, PError>;
-
-#[derive(Debug, PartialEq, Eq, Error)]
-pub enum PError {
-    #[error("unknown dialect '{0}'")]
-    UnknownDialect(String),
-    #[error("unknown operation '{1}' in dialect '{0}'")]
-    UnknownOperation(String, String),
-    #[error("expected '{0}'")]
-    ExpectedNotFound(String),
-    #[error("unknown type '{0}'")]
-    UnknownType(String),
-    #[error("syntax error")]
-    Unknown,
-}
-
-impl<I: Stream + Clone> ParserError<I> for PError {
-    fn from_error_kind(_input: &I, _kind: ErrorKind) -> Self {
-        PError::Unknown
-    }
-
-    fn append(self, _: &I, _: &<I as Stream>::Checkpoint, _: ErrorKind) -> Self {
-        self
-    }
-}
-
-impl<I: Stream> AddContext<I, StrContext> for PError {
-    fn add_context(
-        self,
-        _input: &I,
-        _token_start: &<I as Stream>::Checkpoint,
-        context: StrContext,
-    ) -> Self {
-        match context {
-            StrContext::Expected(value) => match value {
-                StrContextValue::CharLiteral(value) => PError::ExpectedNotFound(value.to_string()),
-                StrContextValue::StringLiteral(value) => {
-                    PError::ExpectedNotFound(value.to_string())
-                }
-                StrContextValue::Description(value) => PError::ExpectedNotFound(value.to_string()),
-                _ => todo!(),
-            },
-            _ => PError::Unknown,
-        }
-    }
-}
-
+/// Basic trait that any operation has to implement
 pub trait Parsable<T> {
-    fn parse(input: &mut ParseStream<'_>) -> AsmPResult<T>;
+    fn parse(input: IRStrStream) -> ParseResult<IRStrStream, T>;
 }
 
-pub fn expected_token(token: &'static str, input: &mut ParseStream<'_>) -> AsmPResult<()> {
-    delimited(multispace0, token, multispace0)
-        .context(StrContext::Expected(StrContextValue::StringLiteral(token)))
-        .void()
-        .parse_next(input)
+/// Parse textual TIR into inner structures
+pub fn parse_ir(context: ContextRef, input: &str, filename: &str) -> Result<OpRef, Diagnostic> {
+    let stream = IRStrStream::new(input, filename, context);
+
+    let parser = single_op();
+
+    let (op, _) = parser.parse(stream)?;
+    Ok(op)
 }
 
-pub fn identifier<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
-    let ident_sign = take_while(0.., |c: char| c.is_alphanum() || c.as_char() == '_');
-    (alpha1, ident_sign).take().parse_next(input)
-}
+pub fn print_parser_diag(source: &str, diag: &Diagnostic) {
+    let span = diag.span();
+    let offset = span.get_offset_start();
 
-fn dialect_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
-    separated_pair(identifier, ".", identifier).parse_next(input)
-}
-
-fn builtin_op<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
-    identifier
-        .take()
-        .parse_next(input)
-        .map(|op| ("builtin", op))
-}
-
-pub fn op_tuple<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, &'s str)> {
-    alt((dialect_op, builtin_op)).parse_next(input)
-}
-
-pub fn sym_name<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
-    preceded("@", identifier).parse_next(input)
-}
-
-pub fn word<'a, F, O, E: ParserError<ParseStream<'a>>>(
-    inner: F,
-) -> impl Parser<ParseStream<'a>, O, E>
-where
-    F: Parser<ParseStream<'a>, O, E>,
-{
-    delimited(space0, inner, space0)
-}
-
-pub fn skip_attrs(
-    _input: &mut ParseStream<'_>,
-) -> AsmPResult<std::collections::HashMap<String, Attr>> {
-    let res: std::collections::HashMap<String, Attr> = HashMap::new();
-    Ok(res)
-}
-
-fn single_comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
-    (';', take_till(1.., ['\n', '\r']), line_ending)
-        .void()
-        .parse_next(input)
-}
-
-fn comment(input: &mut ParseStream<'_>) -> AsmPResult<()> {
-    repeat(0.., preceded(multispace0, single_comment)).parse_next(input)
-}
-
-pub fn single_op(input: &mut ParseStream) -> AsmPResult<OpRef> {
-    let context = input.state.get_context();
-
-    let skip = trace(
-        "skip comments",
-        alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
+    let builder = Report::build(
+        ReportKind::Error,
+        (
+            span.get_filename().unwrap_or_default(),
+            offset..(span.get_offset_end()),
+        ),
+    )
+    .with_config(
+        Config::default()
+            .with_tab_width(2)
+            .with_index_type(ariadne::IndexType::Byte),
+    )
+    .with_message("Failed to parse IR")
+    .with_label(
+        Label::new((
+            span.get_filename().unwrap_or_default(),
+            offset..(offset + 1),
+        ))
+        .with_message(diag.message()),
     );
 
-    let (dialect_name, op_name) = trace("op name", preceded(skip, op_tuple)).parse_next(input)?;
-
-    let dialect = context
-        .get_dialect_by_name(dialect_name)
-        .ok_or(ErrMode::Cut(PError::UnknownDialect(
-            dialect_name.to_owned(),
-        )))?;
-
-    let operation_id =
-        dialect
-            .get_operation_id(op_name)
-            .ok_or(ErrMode::Cut(PError::UnknownOperation(
-                dialect_name.to_owned(),
-                op_name.to_owned(),
-            )))?;
-
-    // It is impossible to add an operation without specifying its parser
-    let parser = dialect.get_operation_parser(operation_id).unwrap();
-    trace("op body", parser).parse_next(input)
-}
-
-#[allow(clippy::result_large_err)]
-pub fn parse_ir(
-    context: ContextRef,
-    input: &str,
-) -> Result<OpRef, winnow::error::ParseError<ParseStream<'_>, PError>> {
-    let input = ParseStream {
-        input,
-        state: ParserState::new(context),
-    };
-
-    single_op.parse(input)
-}
-
-pub fn single_block_region(ir: &mut ParseStream<'_>) -> AsmPResult<Vec<OpRef>> {
-    expected_token("{", ir)?;
-
-    let operations = repeat(0.., single_op).parse_next(ir)?;
-
-    expected_token("}", ir)?;
-
-    Ok(operations)
-}
-
-pub fn single_block(input: &mut ParseStream<'_>) -> AsmPResult<BlockRef> {
-    let skip = trace(
-        "skip comments",
-        alt((terminated(comment, multispace0), multispace0.map(|_| ()))),
-    );
-    let block_name = preceded(
-        (skip, '^'),
-        terminated(
-            identifier,
-            (
-                cut_err(':'.context(StrContext::Expected(StrContextValue::CharLiteral(':')))),
-                multispace0,
-            ),
-        ),
-    )
-    .parse_next(input)?;
-
-    let ops: Vec<OpRef> = repeat(0.., single_op).parse_next(input)?;
-
-    let region = input.state.get_region();
-
-    let names = input.state.take_deferred_names();
-    let types = input.state.take_deferred_types();
-    let block = Block::with_arguments(block_name, &region, &types, &names);
-
-    for op in ops {
-        block.push(&op);
-    }
-
-    Ok(block)
-}
-
-pub fn region_with_blocks(input: &mut ParseStream<'_>) -> AsmPResult<RegionRef> {
-    expected_token("{", input)?;
-    let context = input.state.get_context();
-    let region = Region::empty(&context);
-    input.state.push_region(region.clone());
-
-    let (blocks, (_, _)): (Vec<BlockRef>, (_, _)) =
-        repeat_till(1.., single_block, (multispace0, "}")).parse_next(input)?;
-
-    for block in blocks {
-        region.add_block(block);
-    }
-
-    input.state.pop_region();
-
-    Ok(region)
-}
-
-fn attr_pair(input: &mut ParseStream<'_>) -> AsmPResult<(String, Attr)> {
-    trace(
-        "attr pair",
-        separated_pair(
-            identifier.map(|s| s.to_string()),
-            (space0, "=", space0),
-            Attr::parse,
-        ),
-    )
-    .parse_next(input)
-}
-
-pub fn attr_list(input: &mut ParseStream<'_>) -> AsmPResult<HashMap<String, Attr>> {
-    let attr_pairs =
-        separated::<_, _, HashMap<_, _>, _, _, _, _>(0.., attr_pair, (space0, ",", space0));
-    trace(
-        "attribute list",
-        terminated(
-            preceded((space0, "attrs", space0, "=", space0, "{"), attr_pairs),
-            (space0, "}", space0),
-        ),
-    )
-    .parse_next(input)
-}
-
-fn parse_digits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<&'s str> {
-    winnow::token::take_while(1.., '0'..='9').parse_next(input)
-}
-
-pub fn parse_int_bits<'s>(input: &mut ParseStream<'s>) -> AsmPResult<HashMap<String, Attr>> {
-    let parse_int_bits_impl = |input: &mut ParseStream<'s>| {
-        terminated(preceded("<", parse_digits), ">").parse_next(input)
-    };
-    let bits_str = parse_int_bits_impl(input)?;
-    let maybe_bits_num: AsmPResult<u32> = match str::parse(bits_str) {
-        Ok(n) => Ok(n),
-        Err(..) => Err(winnow::error::ErrMode::Cut(PError::ExpectedNotFound(
-            String::from("integer"),
-        ))),
-    };
-    let bits_num = maybe_bits_num?;
-    let mut r = HashMap::<String, Attr>::new();
-    r.insert("bits".into(), Attr::U32(bits_num));
-    Ok(r)
-}
-
-pub fn print_parser_diag(
-    context: ContextRef,
-    diag: &winnow::error::ParseError<ParseStream<'_>, PError>,
-) {
-    let offset = diag.offset();
-    let inner = diag.inner();
-
-    let mut builder = Report::<std::ops::Range<usize>>::build(ReportKind::Error, (), offset)
-        .with_config(
-            Config::default()
-                .with_tab_width(2)
-                .with_index_type(ariadne::IndexType::Byte),
-        )
-        .with_message(format!("{}", &inner));
-
-    match inner {
-        PError::UnknownOperation(dialect_name, op_name) => {
-            builder.add_label(
-                Label::new((offset - op_name.len())..offset)
-                    .with_color(Color::Red)
-                    .with_message("unknown operation"),
-            );
-            if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
-                if let Some(name) = dialect.get_similarly_named_op(op_name) {
-                    builder.set_note(format!(
-                        "there is a similarly named operation '{}' in '{}' dialect",
-                        name, &dialect_name
-                    ));
-                }
-            }
-        }
-        PError::ExpectedNotFound(token) => {
-            builder.add_label(
-                Label::new(offset..(offset + token.len()))
-                    .with_message("unexpected token")
-                    .with_color(Color::Red),
-            );
-        }
-        _ => {
-            builder.add_label(Label::new(offset..(offset + 1)).with_message("unexpected token"));
-            #[cfg(debug_assertions)]
-            builder.set_note("for development purpose try re-building with --features=winnow/debug")
-        }
-    }
+    println!("{:?}", diag);
 
     builder
         .finish()
-        .print(ariadne::Source::from(diag.input().input))
+        .print((
+            span.get_filename().unwrap_or_default(),
+            ariadne::Source::from(source),
+        ))
         .unwrap();
+    // FIXME(alexbatashev): restore fuzzy dialect and op name search
+    // match inner {
+    //     PError::UnknownOperation(dialect_name, op_name) => {
+    //         builder.add_label(
+    //             Label::new((offset - op_name.len())..offset)
+    //                 .with_color(Color::Red)
+    //                 .with_message("unknown operation"),
+    //         );
+    //         if let Some(dialect) = context.get_dialect_by_name(dialect_name) {
+    //             if let Some(name) = dialect.get_similarly_named_op(op_name) {
+    //                 builder.set_note(format!(
+    //                     "there is a similarly named operation '{}' in '{}' dialect",
+    //                     name, &dialect_name
+    //                 ));
+    //             }
+    //         }
+    //     }
+}
+
+/// Parse TIR @-style symbol names
+pub fn sym_name<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
+    literal("@")
+        .and_then(identifier())
+        .map(|(_, sym)| sym)
+        .label("sym_name")
+}
+
+/// Parse generic TIR identifier
+pub fn identifier<'a>() -> impl Parser<'a, IRStrStream<'a>, &'a str> {
+    ident(|c| c == '_' || c == '.').label("identifier")
+}
+
+/// Parse all operations inside a single basic block region.
+/// Syntax is:
+/// ```tir
+/// {
+///     op1
+///     op2
+/// }
+/// ```
+pub fn single_block_region<'a>() -> impl Parser<'a, IRStrStream<'a>, Vec<OpRef>> {
+    spaced(literal("{"))
+        .and_then(zero_or_more(single_op()))
+        .and_then(spaced(literal("}")))
+        .flat()
+        .map(|(_, ops, _)| ops)
+        .label("single_block_region")
+}
+
+/// Parse attributes list.
+///
+/// Syntax example:
+/// ```tir
+/// attrs = {attr1 = <str: "Hello, World!">, attr2 = <i8: 42>}
+/// ```
+pub fn attr_list<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    let single_attribute = identifier()
+        .and_then(spaced(literal("=")))
+        .and_then(Attr::parse)
+        .map(|((name, _), attr)| (name.to_string(), attr));
+
+    let attr_pairs = separated_ignore(single_attribute, spaced(literal(",")).void());
+
+    literal("attrs")
+        .and_then(spaced(literal("=")))
+        .and_then(spaced(literal("{")))
+        .and_then(attr_pairs)
+        .and_then(spaced(literal("}")))
+        .flat()
+        .try_map(|(_, _, _, pairs, _), span| {
+            let mut map = HashMap::new();
+            for (k, v) in pairs.iter() {
+                if map.contains_key(k) {
+                    return Err(DiagKind::DuplicateAttr(k.clone(), span).into());
+                }
+
+                map.insert(k.clone(), v.clone());
+            }
+            Ok(map)
+        })
+        .label("attr_list")
+}
+
+pub fn skip_attrs<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    any_whitespace0().map(|_| HashMap::new())
+}
+
+pub fn single_block<'a>() -> impl Parser<'a, IRStrStream<'a>, BlockRef> {
+    let skip = zero_or_more(any_whitespace1().or_else(line_comment(";").void()));
+    skip.and_then(literal("^"))
+        .and_then(ident(|_| false))
+        .and_then(literal(":"))
+        .flat()
+        .map(|(_, _, name, _)| name)
+        .and_then(one_or_more(single_op()))
+        .map_with(|(block_name, ops), extra| {
+            let state = extra.unwrap();
+
+            let region = state.get_region();
+
+            let names = state.take_deferred_names();
+            let types = state.take_deferred_types();
+            let block = Block::with_arguments(block_name, &region, &types, &names);
+
+            for op in ops {
+                block.push(&op);
+            }
+
+            block
+        })
+}
+
+pub fn region_with_blocks<'a>() -> impl Parser<'a, IRStrStream<'a>, RegionRef> {
+    spaced(literal("{"))
+        .map_with(|_, extra| {
+            let state: &Arc<ParserState> = extra.unwrap();
+            let context = state.context();
+
+            let region = Region::empty(&context);
+            state.push_region(region.clone());
+
+            region
+        })
+        .and_then(one_or_more(single_block()))
+        .and_then(any_whitespace0().and_then(literal("}")))
+        .map_with(|((region, blocks), _), extra| {
+            let state: &Arc<ParserState> = extra.unwrap();
+
+            for block in blocks {
+                region.add_block(block);
+            }
+
+            state.pop_region();
+
+            region
+        })
+}
+
+pub fn parse_int_bits<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr>> {
+    literal("<")
+        .and_then(take_while(|c| c.is_numeric()))
+        .and_then(literal(">"))
+        .flat()
+        .map(|(_, bits, _)| {
+            let bits = bits.parse::<u32>().unwrap();
+            let mut attrs = HashMap::new();
+            attrs.insert("bits".into(), Attr::U32(bits));
+
+            attrs
+        })
+}
+
+/// Generic operation name
+fn op_name<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
+    dialect_op().or_else(builtin_op()).label("op_name")
+}
+
+/// dialect_name.op_name -> (dialect_name, op_name)
+fn dialect_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
+    ident(|c| c == '_')
+        .and_then(literal("."))
+        .and_then(identifier())
+        .map(|((d, _), o)| (d, o))
+        .label("dialect_op")
+}
+
+/// "builtin op"-style identifier
+fn builtin_op<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, &'a str)> {
+    ident(|c| c == '_')
+        .map(|o| ("builtin", o))
+        .label("builtin_op")
+}
+
+fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
+    let parser = move |input: IRStrStream<'a>| {
+        let ((dialect_name, op_name), next_input) = spaced(op_name()).parse(input.clone())?;
+
+        // It is impossible to construct IRStrStream without a context
+        let state = input.get_extra().unwrap();
+        let context = state.context();
+
+        let dialect = context
+            .get_dialect_by_name(dialect_name)
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownDialect(
+                dialect_name.to_owned(),
+                input.span(),
+            )))?;
+
+        let operation_id = dialect
+            .get_operation_id(op_name)
+            .ok_or(Into::<Diagnostic>::into(DiagKind::UnknownOperation(
+                op_name.to_owned(),
+                dialect_name.to_owned(),
+                input.span(),
+            )))?;
+
+        // It is impossible to add an operation without specifying its parser
+        let parser = dialect.get_operation_parser(operation_id).unwrap();
+        parser.parse(next_input.unwrap())
+    };
+
+    maybe_then(
+        optional(
+            zero_or_more(
+                any_whitespace0()
+                    .and_then(line_comment(";"))
+                    .and_then(any_whitespace0()),
+            )
+            .label("eat comments"),
+        )
+        .and_then(parser.label("single_op")),
+        zero_or_more(line_comment(";")),
+    )
+    .map(|((_, op), _)| op)
 }
 
 #[cfg(test)]
 mod tests {
-    use winnow::Parser;
+    use super::{attr_list, Attr};
+    use crate::{parser::op_name, IRStrStream};
+    use lpl::Parser;
 
-    use super::{identifier, op_tuple, ParseStream, ParserState};
-    use crate::Context;
-
-    macro_rules! input {
-        ($inp:literal, $context:expr) => {
-            ParseStream {
-                input: $inp.into(),
-                state: ParserState::new($context),
-            }
-        };
+    #[test]
+    fn test_attr_list() {
+        let context = crate::Context::new();
+        let input = "attrs = {attr1 = <str: \"Hello, World!\">, attr2 = <i8: 42>}";
+        let input = IRStrStream::new(input, "-", context);
+        let result = attr_list().parse(input);
+        assert!(result.is_ok());
+        let (attrs, _) = result.unwrap();
+        println!("{:?}", attrs);
+        assert_eq!(
+            attrs.get("attr1").unwrap(),
+            &Attr::String("Hello, World!".to_string())
+        );
+        assert_eq!(attrs.get("attr2").unwrap(), &Attr::I8(42));
     }
 
     #[test]
-    fn parse_ident() {
-        let context = Context::new();
-        assert!(identifier.parse(input!("abc", context.clone())).is_ok());
-        assert!(identifier.parse(input!("abc123", context.clone())).is_ok());
-        assert!(identifier.parse(input!("123", context.clone())).is_err());
-        assert!(identifier.parse(input!("123abs", context.clone())).is_err());
-        let mut inp = input!("abc123 abc 123", context.clone());
-        let ident = identifier.parse_next(&mut inp).unwrap();
-        assert_eq!(ident, "abc123");
+    fn test_attr_list_duplicate() {
+        let context = crate::Context::new();
+        let input = "attrs = {attr1 = <str: \"Hello\">, attr1 = <str: \"World\">}";
+        let input = IRStrStream::new(input, "-", context);
+        let result = attr_list().parse(input);
+        assert!(result.is_err());
     }
 
     #[test]
     fn parse_op_name() {
-        let context = Context::new();
-        let mut ir = input!("module", context.clone());
-        let result = op_tuple.parse_next(&mut ir).unwrap();
+        let context = crate::Context::new();
+        let input = "module";
+        let input = IRStrStream::new(input, "-", context.clone());
+
+        let (result, _) = op_name().parse(input).unwrap();
         assert_eq!(result, ("builtin", "module"));
 
-        let mut ir = input!("test.module", context.clone());
-        let result = op_tuple.parse_next(&mut ir).unwrap();
+        let input = "test.module";
+        let input = IRStrStream::new(input, "-", context);
+        let (result, _) = op_name().parse(input).unwrap();
         assert_eq!(result, ("test", "module"));
     }
 }

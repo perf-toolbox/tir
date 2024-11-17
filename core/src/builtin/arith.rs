@@ -1,11 +1,9 @@
-use crate::assembly::parser::Parsable;
-// use crate::builtin::value::AnyValue;arith
 use crate::builtin::DIALECT_NAME;
 use crate::OpAssembly;
 use crate::Printable;
-use crate::{Op, OpImpl, OpRef, Type};
+use crate::{Op, OpImpl, Type};
+use lpl::{ParseStream, Parser};
 use tir_macros::{Op, OpAssembly, OpValidator};
-use winnow::Parser;
 
 use crate as tir_core;
 
@@ -85,7 +83,7 @@ mod test {
         ";
 
         let context = Context::new();
-        let module = parse_ir(context.clone(), ir).expect("module");
+        let module = parse_ir(context.clone(), ir, "-").expect("module");
 
         let module = utils::op_cast::<ModuleOp>(module).unwrap();
 

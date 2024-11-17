@@ -41,14 +41,13 @@ pub fn lex(input: &str) -> Result<Vec<GreenElement<SyntaxKind>>, Diagnostic> {
         .or_else(lex_comment())
         .or_else(lex_whitespace());
 
-    let parser = zero_or_more(
+    let parser = eof(zero_or_more(
         token
             .spanned()
             .map(|(t, s)| GreenElement::Token(t.spanned(s))),
-    )
-    .and_then(eof());
+    ));
 
-    let ((tokens, _), _) = parser.parse(stream)?;
+    let (tokens, _) = parser.parse(stream)?;
 
     Ok(tokens)
 }

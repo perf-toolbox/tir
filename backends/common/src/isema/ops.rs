@@ -1,9 +1,9 @@
+use lpl::{ParseResult, ParseStream, Parser};
 use tir_core::{
-    parser::{single_block_region, AsmPResult, ParseStream},
-    IRFormatter, Op, OpAssembly, OpImpl, OpRef, Printable, RegionRef, Terminator,
+    parser::single_block_region, IRFormatter, IRStrStream, Op, OpAssembly, OpImpl, OpRef,
+    Printable, RegionRef, Terminator,
 };
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
-use winnow::Parser;
 
 use crate::isema::DIALECT_NAME;
 
@@ -31,17 +31,24 @@ pub struct CompInstrEndOp {
 impl Terminator for CompInstrEndOp {}
 
 impl OpAssembly for CompInstrOp {
-    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream, OpRef>
     where
         Self: Sized,
     {
-        let ops = single_block_region.parse_next(input)?;
-        let context = input.state.get_context();
-        let module = CompInstrOp::builder(&context).build();
-        for op in ops {
-            module.borrow_mut().get_body().push(&op);
-        }
-        Ok(module)
+        let parser = single_block_region().map_with(|ops, extra| {
+            let state = extra.unwrap();
+            let context = state.context();
+
+            let comp = CompInstrOp::builder(&context).build();
+            for op in ops {
+                comp.borrow_mut().get_body().push(&op);
+            }
+
+            let comp: OpRef = comp;
+            comp
+        });
+
+        parser.parse(input)
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

@@ -40,8 +40,12 @@ pub fn zero_or_more<'a, P, Input: ParseStream<'a> + 'a, Output>(
 where
     P: Parser<'a, Input, Output>,
 {
-    move |input| {
+    move |input: Input| {
         let mut result = Vec::new();
+
+        if input.is_empty() {
+            return Ok((result, None));
+        }
 
         let mut next_input: Option<Input> = Some(input);
 
@@ -120,10 +124,6 @@ where
             }
         }
 
-        if result.is_empty() {
-            return Err(InternalError::EmptyList(input.span()).into());
-        }
-
         Ok((result, next_input))
     }
 }
@@ -168,9 +168,27 @@ where
     }
 }
 
+pub fn one_of<'a, Input, Output>(
+    parsers: &'a [Box<dyn Parser<'a, Input, Output>>],
+) -> impl Parser<'a, Input, Output>
+where
+    Input: ParseStream<'a> + 'a,
+{
+    move |input: Input| {
+        for p in parsers {
+            let result = p.parse(input.clone());
+            if let Ok(result) = result {
+                return Ok(result);
+            }
+        }
+        // FIXME: must be a combination of diagnostics
+        Err(InternalError::EmptyList(input.span()).into())
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::combinators::literal;
+    use crate::combinators::{eof, literal};
     use crate::parse_stream::StrStream;
     use crate::Parser;
 
@@ -185,8 +203,8 @@ mod tests {
         let stream2: StrStream = input2.into();
         let stream3: StrStream = input3.into();
 
-        let matcher1 = interleaved(literal("test"), literal(",").void());
-        let matcher2 = separated_ignore(literal("test"), literal(",").void());
+        let matcher1 = eof(interleaved(literal("test"), literal(",").void()));
+        let matcher2 = eof(separated_ignore(literal("test"), literal(",").void()));
 
         assert!(matcher1.parse(stream1.clone()).is_ok());
         assert!(matcher1.parse(stream2.clone()).is_ok());

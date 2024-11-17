@@ -81,10 +81,25 @@ fn run_test(test: &PathBuf) -> bool {
                     print!("ok");
                 } else {
                     has_failures = true;
-                    let stdout = unescape(&String::from_utf8(output.stdout).unwrap()).unwrap();
-                    eprintln!("STDOUT: \n{}", stdout);
-                    let stderr = unescape(&String::from_utf8(output.stderr).unwrap()).unwrap();
-                    eprintln!("STDERR: \n{}", stderr);
+                    if let Ok(stdout) = String::from_utf8(output.stdout) {
+                        if let Ok(stdout) = unescape(&stdout) {
+                            eprintln!("STDOUT:\n{}\n", stdout);
+                        } else {
+                            eprintln!("ESCAPED STDOUT:\n{}\n", stdout);
+                        }
+                    } else {
+                        eprintln!("FAILED TO CAPTURE STDOUT\n");
+                    }
+
+                    if let Ok(stderr) = String::from_utf8(output.stderr) {
+                        if let Ok(stderr) = unescape(&stderr) {
+                            eprintln!("STDERR:\n{}\n", stderr);
+                        } else {
+                            eprintln!("ESCAPED STDERR:\n{}\n", stderr);
+                        }
+                    } else {
+                        eprintln!("FAILED TO CAPTURE STDERR\n");
+                    }
                     print!("fail")
                 }
             }

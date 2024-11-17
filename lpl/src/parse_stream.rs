@@ -11,9 +11,11 @@ pub trait ParseStream<'a>: Clone + fmt::Debug {
     type Item;
 
     fn nth(&self, n: usize) -> Option<Self::Item>;
+
     fn get<R>(&self, range: R) -> Option<Self::Slice>
     where
         R: RangeBounds<usize>;
+
     fn slice<R>(&self, range: R) -> Option<Self>
     where
         Self: Sized,
@@ -78,7 +80,13 @@ impl<'a> ParseStream<'a> for StrStream<'a> {
         };
         self.string
             .get((range.start_bound().cloned(), range.end_bound().cloned()))
-            .map(|string| Self { string, offset })
+            .and_then(|string| {
+                if string.is_empty() {
+                    None
+                } else {
+                    Some(Self { string, offset })
+                }
+            })
     }
 
     fn len(&self) -> usize {

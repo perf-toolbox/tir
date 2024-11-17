@@ -1,14 +1,12 @@
 use crate::builtin::DIALECT_NAME;
-use crate::parser::{region_with_blocks, sym_name, AsmPResult, Parsable, ParseStream};
 use crate::*;
+use lpl::combinators::{literal, separated_ignore, spaced};
+use lpl::ParseResult;
+use lpl::{ParseStream, Parser};
+use parser::{identifier, region_with_blocks, sym_name, Parsable};
 use tir_macros::{op_implements, Op, OpAssembly, OpValidator};
-use winnow::ascii::space0;
-use winnow::combinator::{delimited, preceded, separated, trace};
-use winnow::Parser;
 
 use crate as tir_core;
-
-use self::parser::identifier;
 
 use super::FuncType;
 
@@ -31,58 +29,61 @@ pub struct ReturnOp {
 #[op_implements(dialect = builtin)]
 impl Terminator for ReturnOp {}
 
-fn single_arg<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(&'s str, Type)> {
-    (
-        preceded("%", identifier),
-        preceded((space0, ":", space0), Type::parse),
-    )
-        .parse_next(input)
+fn single_arg<'a>() -> impl Parser<'a, IRStrStream<'a>, (&'a str, Type)> {
+    literal("%")
+        .and_then(identifier())
+        .and_then(spaced(literal(":")))
+        .and_then(Type::parse)
+        .map(|(((_, name), _), ty)| (name, ty))
+        .label("single_arg")
 }
 
-fn signature<'s>(input: &mut ParseStream<'s>) -> AsmPResult<(Vec<&'s str>, FuncType)> {
-    let braces: Vec<(&'s str, Type)> = delimited(
-        (space0, "(", space0),
-        separated(0.., single_arg, (space0, ",", space0)),
-        (space0, ")", space0),
-    )
-    .parse_next(input)?;
+fn signature<'a>() -> impl Parser<'a, IRStrStream<'a>, (Vec<&'a str>, FuncType)> {
+    spaced(literal("("))
+        .and_then(separated_ignore(single_arg(), spaced(literal(",")).void()).label("arg list"))
+        .and_then(spaced(literal(")")))
+        .map(|((_, args), _)| args)
+        .and_then(spaced(literal("->")))
+        .and_then(Type::parse)
+        .map_with(|((args, _), return_type), extra| {
+            let state = extra.unwrap();
+            let context = state.context();
+            let (names, input_types): (Vec<&'a str>, Vec<Type>) = args.iter().cloned().unzip();
 
-    let (names, input_types): (Vec<&'s str>, Vec<Type>) = braces.iter().cloned().unzip();
+            let func_ty = FuncType::build(context.clone(), &input_types, return_type);
 
-    let return_type = preceded((space0, "->", space0), Type::parse).parse_next(input)?;
-
-    let context = input.state.get_context();
-    let func_ty = FuncType::build(context, &input_types, return_type);
-
-    Ok((names, func_ty))
+            (names, func_ty)
+        })
+        .label("signature")
 }
 
 impl OpAssembly for FuncOp {
-    fn parse_assembly(input: &mut ParseStream) -> AsmPResult<OpRef>
+    fn parse_assembly(input: IRStrStream) -> ParseResult<IRStrStream, OpRef>
     where
         Self: Sized,
     {
-        let sym_name_str = trace("sym_name", preceded(space0, sym_name)).parse_next(input)?;
+        let parser = sym_name().and_then(signature());
 
-        let (arg_names, func_ty) = signature.parse_next(input)?;
+        let state = input.get_extra().cloned().unwrap();
+
+        let ((func_name, (arg_names, func_ty)), ni) = parser.parse(input)?;
 
         let arg_names: Vec<_> = arg_names.into_iter().map(|n| n.to_owned()).collect();
         let arg_types = func_ty.get_inputs().to_vec();
 
-        input.state.set_deferred_types(arg_types);
-        input.state.set_deferred_names(arg_names);
+        state.set_deferred_types(arg_types);
+        state.set_deferred_names(arg_names);
 
-        let region = region_with_blocks.parse_next(input)?;
+        let (region, ni) = region_with_blocks().parse(ni.unwrap())?;
 
-        let context = input.state.get_context();
+        let context = state.context();
 
         let func = FuncOp::builder(&context)
-            .sym_name(Attr::String(sym_name_str.into()))
+            .sym_name(Attr::String(func_name.into()))
             .func_type(Attr::Type(func_ty.into()))
             .body(region)
             .build();
-
-        Ok(func)
+        Ok((func, ni))
     }
 
     fn print_assembly(&self, fmt: &mut dyn IRFormatter) {

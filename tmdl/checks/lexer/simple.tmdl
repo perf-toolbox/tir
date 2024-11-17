@@ -2746,6 +2746,6 @@
 // CHECK-NEXT:     GreenTokenData {
 // CHECK-NEXT:         kind: Whitespace,
 // CHECK-NEXT:         text: "\n",
-// CHECK-NEXT:         span: <unknown>@1490..1491,
+// CHECK-NEXT:         span: <unknown>@1490..18446744073709551615,
 // CHECK-NEXT:     },
 // CHECK-NEXT: ]
