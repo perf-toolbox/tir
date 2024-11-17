@@ -284,7 +284,7 @@ fn single_op<'a>() -> impl Parser<'a, IRStrStream<'a>, OpRef> {
     maybe_then(
         optional(
             zero_or_more(
-                any_whitespace1()
+                any_whitespace0()
                     .and_then(line_comment(";"))
                     .and_then(any_whitespace0()),
             )
