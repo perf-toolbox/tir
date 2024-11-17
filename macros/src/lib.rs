@@ -115,8 +115,7 @@ fn dialect_type_extension(name_ident: syn::Ident) -> TokenStream {
 
             fn parse_assembly<'a>(input: tir_core::assembly::IRStrStream<'a>) -> lpl::ParseResult<tir_core::IRStrStream<'a>, std::collections::HashMap<String, tir_core::Attr>> {
                 // FIXME: make attrs optional
-                // tir_core::parser::attr_list(input)
-                todo!()
+                tir_core::parser::attr_list().parse(input)
             }
         }
     }
