@@ -68,7 +68,7 @@ pub fn close_paren<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
         }
         let first = input.peek().unwrap();
         match first {
-            AsmToken::OpenParen => Ok(((), input.slice(1..input.len()))),
+            AsmToken::CloseParen => Ok(((), input.slice(1..input.len()))),
             _ => Err(Into::<Diagnostic>::into(DiagKind::UnexpectedToken(
                 input.span(),
             ))),
@@ -107,8 +107,9 @@ pub fn section<'a>() -> impl Parser<'a, TokenStream<'a>, ()> {
                 section
             } else {
                 let body = Region::empty(&context);
+                // FIXME(alexbatashev): need a better way to handle section names
                 let section = SectionOp::builder(&context)
-                    .name(name.to_string().into())
+                    .name(format!(".{}", name).into())
                     .body(body)
                     .build();
                 builder.insert(&section);

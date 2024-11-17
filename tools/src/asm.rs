@@ -30,8 +30,9 @@ pub fn main(
             let mut printer = StdoutPrinter::new();
             module.borrow().print(&mut printer);
         }
-        Err(_err) => {
+        Err(err) => {
             // FIXME figure out how to tie syntax errors with tokens
+            println!("{:?}", err);
             panic!("ASM syntax error");
         }
     }

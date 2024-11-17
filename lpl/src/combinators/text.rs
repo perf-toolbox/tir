@@ -1,5 +1,7 @@
 use crate::{parse_stream::ParseStream, InternalError, ParseResult, Parser};
 
+use super::{literal, optional};
+
 pub fn any_char<'a, Input>(input: Input) -> ParseResult<Input, char>
 where
     Input: ParseStream<'a>,
@@ -151,10 +153,12 @@ where
 pub fn dec_number<'a, Input, Int>() -> impl Parser<'a, Input, Int>
 where
     Input: ParseStream<'a> + 'a,
+    Input::Slice: PartialEq<&'a str>,
     Int: std::str::FromStr + 'a,
 {
-    take_while(|c| c.is_digit(10)).map(|s| {
-        if let Ok(num) = Int::from_str(s) {
+    optional(literal("-")).and_then(take_while(|c| c.is_ascii_digit())).map(|(sign, num)| {
+        let num = if sign.is_some() { &format!("-{}", num) } else { num };
+        if let Ok(num) = Int::from_str(num) {
             num
         } else {
             unreachable!()

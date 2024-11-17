@@ -161,7 +161,8 @@ macro_rules! alu_imm_op_base {
                     .and_then(reg())
                     .and_then(comma())
                     .and_then(imm)
-                    .map(|(((((_, rd), _), rs1), _), imm_value)| (rd, rs1, imm_value));
+                    .map(|(((((_, rd), _), rs1), _), imm_value)| (rd, rs1, imm_value))
+                    .label($op_name);
                 let ((rd, rs1, imm_value), ni) = parser.parse(input)?;
 
                 let builder = asm_ctx.get_builder();

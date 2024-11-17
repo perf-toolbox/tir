@@ -1,5 +1,5 @@
 use crate::DiagKind;
-use lpl::{combinators::lang::ident, Diagnostic, ParseResult, ParseStream, Parser};
+use lpl::{combinators::{lang::ident, NotTuple}, Diagnostic, ParseResult, ParseStream, Parser};
 use seq_macro::seq;
 use tir_core::{parser::Parsable, IRFormatter, IRStrStream, Printable};
 use tir_macros::{lowercase, uppercase};
@@ -99,6 +99,8 @@ impl Parsable<Register> for Register {
         parser.parse(input)
     }
 }
+
+impl NotTuple for Register {}
 
 register! {
     // Hard-wired zero

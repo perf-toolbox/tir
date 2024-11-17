@@ -9,8 +9,7 @@ use std::{
 
 use lpl::{
     combinators::{
-        any_whitespace1, interleaved, literal,
-        text::{dec_number, ident},
+        any_whitespace1, eof, interleaved, lang::line_comment, literal, spaced, text::{dec_number, ident}
     },
     Diagnostic, ParseStream, Parser, Spanned, StrStream,
 };
@@ -186,7 +185,9 @@ pub fn lex_asm(input: &str) -> Result<Vec<Spanned<AsmToken>>, Diagnostic> {
         .or_else(punct())
         .label("asm_token");
 
-    let lexer = interleaved(token.spanned(), any_whitespace1());
+    let comment = spaced(line_comment("#").or_else(line_comment(";"))).void();
+
+    let lexer = eof(interleaved(token.spanned(), comment.or_else(any_whitespace1())));
 
     lexer.parse(stream).map(|(tokens, _)| tokens)
 }

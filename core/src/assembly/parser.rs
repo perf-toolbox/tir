@@ -184,7 +184,8 @@ pub fn skip_attrs<'a>() -> impl Parser<'a, IRStrStream<'a>, HashMap<String, Attr
 }
 
 pub fn single_block<'a>() -> impl Parser<'a, IRStrStream<'a>, BlockRef> {
-    any_whitespace0()
+    let skip = zero_or_more(any_whitespace1().or_else(line_comment(";").void()));
+    skip 
         .and_then(literal("^"))
         .and_then(ident(|_| false))
         .and_then(literal(":"))

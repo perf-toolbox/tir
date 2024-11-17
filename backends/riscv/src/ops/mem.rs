@@ -77,26 +77,30 @@ macro_rules! load_op_base {
                 });
 
                 let reg = move || {
-                    asm_ident().try_map(|r, s| {
-                        register_parser(r).ok_or(Into::<Diagnostic>::into(
-                            DiagKind::UnknownRegister(r.to_string(), s),
-                        ))
-                    })
+                    asm_ident()
+                        .try_map(|r, s| {
+                            register_parser(r).ok_or(Into::<Diagnostic>::into(
+                                DiagKind::UnknownRegister(r.to_string(), s),
+                            ))
+                        })
+                        .label("register")
                 };
 
-                let offset = number().map(|num| num as i16);
+                let offset = number().map(|num| num as i16).label("offset");
 
                 let addr = offset
                     .and_then(open_paren())
                     .and_then(reg())
                     .and_then(close_paren())
-                    .map(|(((offset, _), reg), _)| (offset, reg));
+                    .map(|(((offset, _), reg), _)| (offset, reg))
+                    .label("address");
 
                 let parser = opcode
                     .and_then(reg())
                     .and_then(comma())
                     .and_then(addr)
-                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra));
+                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra))
+                    .label($op_name);
 
                 let ((rd, offset_value, base_reg), ni) = parser.parse(input)?;
 
@@ -207,26 +211,30 @@ macro_rules! store_op_base {
                 });
 
                 let reg = move || {
-                    asm_ident().try_map(|r, s| {
-                        register_parser(r).ok_or(Into::<Diagnostic>::into(
-                            DiagKind::UnknownRegister(r.to_string(), s),
-                        ))
-                    })
+                    asm_ident()
+                        .try_map(|r, s| {
+                            register_parser(r).ok_or(Into::<Diagnostic>::into(
+                                DiagKind::UnknownRegister(r.to_string(), s),
+                            ))
+                        })
+                        .label("register")
                 };
 
-                let offset = number().map(|num| num as i16);
+                let offset = number().map(|num| num as i16).label("offset");
 
                 let addr = offset
                     .and_then(open_paren())
                     .and_then(reg())
                     .and_then(close_paren())
-                    .map(|(((offset, _), reg), _)| (offset, reg));
+                    .map(|(((offset, _), reg), _)| (offset, reg))
+                    .label("address");
 
                 let parser = opcode
                     .and_then(reg())
                     .and_then(comma())
                     .and_then(addr)
-                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra));
+                    .map(|(((_, rd), _), (offset, ra))| (rd, offset, ra))
+                    .label($op_name);
 
                 let ((rs2, offset_value, base_reg), ni) = parser.parse(input)?;
 

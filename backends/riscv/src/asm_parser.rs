@@ -1,13 +1,14 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use lpl::combinators::lang::line_comment;
 use lpl::combinators::{eof, zero_or_more};
 use lpl::{Diagnostic, ParseResult, ParseStream, Parser};
 use tir_backend::parser::{label, section};
 use tir_backend::{lex_asm, TokenStream};
 use tir_core::{builtin::ModuleOp, ContextRef, OpBuilder};
 
-use crate::RVExt;
+use crate::{DiagKind, RVExt};
 
 fn asm_instr(input: TokenStream) -> ParseResult<TokenStream, ()> {
     let asm_ctx = input.get_extra().unwrap();
@@ -28,9 +29,8 @@ fn asm_instr(input: TokenStream) -> ParseResult<TokenStream, ()> {
             return result;
         }
     }
-    //
-    //     Err(winnow::error::ErrMode::Backtrack(PError::Unknown))
-    todo!()
+
+    Err(DiagKind::UnknownOpcode(input.span()).into())
 }
 
 #[allow(clippy::result_large_err)]
