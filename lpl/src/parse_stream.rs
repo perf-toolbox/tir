@@ -64,7 +64,7 @@ pub struct StrStream<'a> {
     offset: usize,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TokenStream<'a, SK: SyntaxLike> {
     tokens: &'a [GreenElement<SK>],
     offset: usize,
@@ -212,10 +212,17 @@ impl<'a, SK: SyntaxLike> ParseStream<'a> for TokenStream<'a, SK> {
     }
 
     fn peek(&self) -> Option<Self::Item> {
-        todo!()
+        self.tokens.first().cloned()
     }
 
     fn nth(&self, n: usize) -> Option<Self::Item> {
         self.tokens.get(n).cloned()
+    }
+}
+
+impl<'a, SK: SyntaxLike> fmt::Debug for TokenStream<'a, SK> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let end = self.tokens.len().min(5);
+        write!(f, "offset: {} - {:?}", self.offset, &self.tokens[..end])
     }
 }

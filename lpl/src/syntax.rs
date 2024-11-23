@@ -209,6 +209,24 @@ impl<SK: SyntaxLike> PartialEq<&str> for GreenElement<SK> {
     }
 }
 
+impl<SK: SyntaxLike> PartialEq<&[SK]> for GreenElement<SK> {
+    fn eq(&self, other: &&[SK]) -> bool {
+        match self {
+            NodeOrToken::Token(t) => other.iter().any(|other| other == &t.kind()),
+            NodeOrToken::Node(n) => other.iter().any(|other| other == &n.kind()),
+        }
+    }
+}
+
+impl<SK: SyntaxLike, const N: usize> PartialEq<[SK; N]> for GreenElement<SK> {
+    fn eq(&self, other: &[SK; N]) -> bool {
+        match self {
+            NodeOrToken::Token(t) => other.iter().any(|other| other == &t.kind()),
+            NodeOrToken::Node(n) => other.iter().any(|other| other == &n.kind()),
+        }
+    }
+}
+
 impl<SK: SyntaxLike> RedTokenData<SK> {
     pub fn new(green: GreenToken<SK>) -> RedToken<SK> {
         Rc::new(RedTokenData {

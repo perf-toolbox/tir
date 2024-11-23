@@ -34,7 +34,7 @@ where
             for _ in 0..offset {
                 eprint!(" |");
             }
-            eprint!(" |- {} -> {:?} - '{:?}'", self.label, input.span(), &input);
+            eprint!(" |- {} -> {:?} - '{:?}'", self.label, input.span(), input);
         }
 
         let result = self.parser.parse(input);

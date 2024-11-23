@@ -1,3 +1,5 @@
+use smallvec::SmallVec;
+
 use crate::{ParseStream, Parser};
 
 pub trait Flatten {
@@ -32,6 +34,7 @@ impl NotTuple for String {}
 impl<T> NotTuple for Vec<T> {}
 impl<T> NotTuple for Option<T> {}
 impl<T> NotTuple for std::sync::Arc<T> {}
+impl<T, const N: usize> NotTuple for SmallVec<[T; N]> {}
 
 impl<T1, T2, T3> Flatten for (T1, (T2, T3))
 where

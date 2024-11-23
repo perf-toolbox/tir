@@ -1,3 +1,5 @@
+use smallvec::{smallvec, SmallVec};
+
 use crate::{
     combinators::{literal, reset, text::take_while},
     parse_stream::ParseStream,
@@ -126,7 +128,7 @@ where
 }
 
 pub struct WrappedToken<SK: SyntaxLike> {
-    trivia: Vec<GreenElement<SK>>,
+    trivia: SmallVec<[GreenElement<SK>; 2]>,
     token: GreenElement<SK>,
 }
 
@@ -142,13 +144,13 @@ impl<SK: SyntaxLike> WrappedToken<SK> {
 
 impl<SK: SyntaxLike> NotTuple for WrappedToken<SK> {}
 
-pub fn token<'a, SK, T>(token: T) -> impl Parser<'a, crate::TokenStream<'a, SK>, WrappedToken<SK>>
+pub fn trivia<'a, SK>(
+) -> impl Parser<'a, crate::TokenStream<'a, SK>, SmallVec<[GreenElement<SK>; 2]>>
 where
     SK: SyntaxLike + 'a,
-    GreenElement<SK>: PartialEq<T>,
 {
-    move |input: crate::TokenStream<'a, SK>| {
-        let mut trivia = vec![];
+    let parser = move |input: crate::TokenStream<'a, SK>| {
+        let mut trivia = smallvec![];
 
         let mut i = 0;
 
@@ -161,16 +163,42 @@ where
             }
         }
 
-        if let Some(t) = input.nth(i) {
+        let next_input = input.slice(i..);
+
+        Ok((trivia, next_input))
+    };
+    parser.label("trivia")
+}
+
+pub fn token<'a, SK, T>(token: T) -> impl Parser<'a, crate::TokenStream<'a, SK>, WrappedToken<SK>>
+where
+    SK: SyntaxLike + 'a,
+    GreenElement<SK>: PartialEq<T>,
+    T: std::fmt::Debug + 'a,
+{
+    trivia()
+        .and_then(just_token(token))
+        .map(|(trivia, token)| WrappedToken { trivia, token })
+        .label("token with trivia")
+}
+
+pub fn just_token<'a, SK, T>(
+    token: T,
+) -> impl Parser<'a, crate::TokenStream<'a, SK>, GreenElement<SK>>
+where
+    SK: SyntaxLike + 'a,
+    GreenElement<SK>: PartialEq<T>,
+    T: std::fmt::Debug + 'a,
+{
+    let parser = move |input: crate::TokenStream<'a, SK>| {
+        if let Some(t) = input.peek() {
             if t == token {
-                let wt = WrappedToken { trivia, token: t };
+                let next_input = input.slice(1..);
 
-                let next_input = input.slice((i + 1)..);
-
-                return Ok((wt, next_input));
+                return Ok((t, next_input));
             } else {
                 return Err(InternalError::OwnedExpectedNotFound(
-                    t.as_token().text().to_string(),
+                    format!("{:?}", &token),
                     t.as_token().span(),
                 )
                 .into());
@@ -178,7 +206,8 @@ where
         }
 
         Err(InternalError::UnexpectedEof(input.span()).into())
-    }
+    };
+    parser.label("just token")
 }
 
 #[cfg(test)]

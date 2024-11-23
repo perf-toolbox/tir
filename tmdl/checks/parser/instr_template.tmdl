@@ -56,14 +56,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@29..30,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@30..31,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@30..31,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "bits",
@@ -131,14 +131,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@47..48,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@48..49,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@48..49,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "bits",
@@ -206,14 +206,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@67..68,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@68..69,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@68..69,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "str",
@@ -264,14 +264,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@81..82,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@82..83,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@82..83,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "Register",
@@ -306,14 +306,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@99..100,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@100..101,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@100..101,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "Register",
@@ -348,14 +348,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@117..118,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@118..119,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@118..119,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "Register",
@@ -444,14 +444,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@158..159,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@159..160,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@159..160,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "str",
@@ -551,14 +551,14 @@
 // CHECK-NEXT:                                     text: ":",
 // CHECK-NEXT:                                     span: <unknown>@195..196,
 // CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 GreenTokenData {
-// CHECK-NEXT:                                     kind: Whitespace,
-// CHECK-NEXT:                                     text: " ",
-// CHECK-NEXT:                                     span: <unknown>@196..197,
-// CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 GreenNodeData {
 // CHECK-NEXT:                                     kind: Type,
 // CHECK-NEXT:                                     children: [
+// CHECK-NEXT:                                         GreenTokenData {
+// CHECK-NEXT:                                             kind: Whitespace,
+// CHECK-NEXT:                                             text: " ",
+// CHECK-NEXT:                                             span: <unknown>@196..197,
+// CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         GreenTokenData {
 // CHECK-NEXT:                                             kind: Identifier,
 // CHECK-NEXT:                                             text: "str",

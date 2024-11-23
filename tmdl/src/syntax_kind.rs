@@ -16,8 +16,9 @@ pub type SyntaxNodeData = RedNodeData<SyntaxKind>;
 
 /// A piece of syntax in the TMDL language.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u16)]
 pub enum SyntaxKind {
-    Eof,
+    Invalid = 0,
 
     // Keywords
     /// `instr_template`
