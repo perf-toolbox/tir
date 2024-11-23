@@ -121,8 +121,6 @@ pub enum SyntaxKind {
     StructField,
     StructFieldName,
 
-    StructFieldAccess,
-
     ImplDecl,
     ImplBody,
     ImplTraitName,
@@ -133,8 +131,10 @@ pub enum SyntaxKind {
 
     FlagDecl,
 
+    ListExpr,
     BlockExpr,
     LiteralExpr,
+    FieldExpr,
     BinOpExpr,
     BinOpExprLeft,
     BinOpExprRight,

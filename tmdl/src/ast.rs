@@ -1091,7 +1091,7 @@ impl LiteralExpr {
                     None
                 }
             }
-            NodeOrToken::Node(node) if node.kind() == SyntaxKind::StructFieldAccess => {
+            NodeOrToken::Node(node) if node.kind() == SyntaxKind::FieldExpr => {
                 Some(Type::Unresolved(NodeOrToken::Node(node)))
             }
             _ => None,

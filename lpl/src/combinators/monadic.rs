@@ -156,7 +156,10 @@ where
     Acc: Fn(Output1, Output2, Output1) -> Output1,
 {
     move |input: Input| {
+        let span = input.span();
         let (mut result, mut next_input) = atom.parse(input.clone())?;
+
+        let mut count = 0;
 
         while let Some(ref next_input_unwrapped) = next_input {
             match operator.parse(next_input_unwrapped.clone()) {
@@ -165,6 +168,7 @@ where
                         Ok((right, right_next_input)) => {
                             result = acc(result, op, right);
                             next_input = right_next_input;
+                            count += 1;
                         }
                         Err(_) => break,
                     }
@@ -173,7 +177,11 @@ where
             }
         }
 
-        Ok((result, next_input))
+        if count > 0 {
+            return Ok((result, next_input));
+        }
+
+        Err(InternalError::PredNotSatisfied(span).into())
     }
 }
 
