@@ -39,6 +39,10 @@ pub enum SyntaxKind {
     ImplKw,
     /// `self`
     SelfKw,
+    /// `fn`
+    FnKw,
+    /// `flag`
+    FlagKw,
 
     // Identifiers and literals
     Identifier,
@@ -55,6 +59,14 @@ pub enum SyntaxKind {
     LeftAngle,
     /// `>`
     RightAngle,
+    /// `[`
+    LeftBracket,
+    /// `]`
+    RightBracket,
+    /// `(`
+    LeftParen,
+    /// `)`
+    RightParen,
     /// `:`
     Colon,
     /// `;`
@@ -69,11 +81,14 @@ pub enum SyntaxKind {
     At,
     /// `"`
     DoubleQuote,
+    /// `#`
+    Pound,
 
     // Operators
     /// `=`
     Equals,
 
+    LocalDocComment,
     Comment,
 
     Whitespace,
@@ -109,6 +124,8 @@ pub enum SyntaxKind {
 
     EncodingDecl,
     AsmDecl,
+
+    FlagDecl,
 
     BlockExpr,
     LiteralExpr,

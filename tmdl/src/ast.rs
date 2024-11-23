@@ -29,6 +29,7 @@ pub enum Item {
     AsmDecl(AsmDecl),
     EnumDecl(EnumDecl),
     ImplDecl(ImplDecl),
+    FlagDecl(FlagDecl),
 }
 
 #[derive(Clone)]
@@ -96,6 +97,11 @@ pub struct EnumDecl {
 
 #[derive(Clone)]
 pub struct EnumVariantDecl {
+    syntax: SyntaxNode,
+}
+
+#[derive(Clone)]
+pub struct FlagDecl {
     syntax: SyntaxNode,
 }
 
@@ -222,6 +228,7 @@ impl fmt::Debug for Item {
             Item::AsmDecl(i) => i.fmt(f),
             Item::EnumDecl(i) => i.fmt(f),
             Item::ImplDecl(i) => i.fmt(f),
+            Item::FlagDecl(i) => i.fmt(f),
         }
     }
 }
@@ -262,6 +269,12 @@ impl From<ImplDecl> for Item {
     }
 }
 
+impl From<FlagDecl> for Item {
+    fn from(i: FlagDecl) -> Self {
+        Item::FlagDecl(i)
+    }
+}
+
 impl SourceFile {
     pub fn new(root: SyntaxNode) -> Option<SourceFile> {
         if root.kind() != SyntaxKind::TranslationUnit {
@@ -280,6 +293,7 @@ impl SourceFile {
                     SyntaxKind::AsmDecl => AsmDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::EnumDecl => EnumDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::ImplDecl => ImplDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::FlagDecl => FlagDecl::new(node.clone()).map(|t| t.into()),
                     _ => None,
                 },
                 _ => None,
@@ -888,12 +902,30 @@ impl EnumDecl {
     pub fn variants(&self) -> &[EnumVariantDecl] {
         &self.variants
     }
+
+    pub fn doc(&self) -> Option<String> {
+        let all: Vec<_> = self.syntax
+            .children()
+            .filter_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            }).collect();
+
+        if all.is_empty() {
+            None
+        } else {
+            Some(all.join("\n"))
+        }
+    }
 }
 
 impl fmt::Debug for EnumDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EnumDecl")
             .field("name", &self.name())
+            .field("doc", &self.doc())
             .field("variants", &self.variants())
             .finish()
     }
@@ -919,12 +951,78 @@ impl EnumVariantDecl {
             })
             .unwrap_or("unknown".to_string())
     }
+
+    pub fn doc(&self) -> Option<String> {
+        let all: Vec<_> = self.syntax
+            .children()
+            .filter_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            }).collect();
+
+        if all.is_empty() {
+            None
+        } else {
+            Some(all.join("\n"))
+        }
+    }
 }
 
 impl fmt::Debug for EnumVariantDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EnumVariantDecl")
             .field("name", &self.name())
+            .field("doc", &self.doc())
+            .finish()
+    }
+}
+
+impl FlagDecl {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::FlagDecl {
+            return None;
+        }
+
+        Some(Self { syntax })
+    }
+
+    pub fn name(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            })
+            .unwrap_or("unknown".to_string())
+    }
+
+    pub fn doc(&self) -> Option<String> {
+        let all: Vec<_> = self.syntax
+            .children()
+            .filter_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            }).collect();
+
+        if all.is_empty() {
+            None
+        } else {
+            Some(all.join("\n"))
+        }
+    }
+}
+
+impl fmt::Debug for FlagDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FlagDecl")
+            .field("name", &self.name())
+            .field("doc", &self.doc())
             .finish()
     }
 }

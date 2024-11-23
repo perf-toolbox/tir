@@ -38,6 +38,9 @@
 // CHECK-NEXT:                 trait_name: "Register",
 // CHECK-NEXT:                 target_name: "GPR",
 // CHECK-NEXT:             },
+// CHECK-NEXT:             FlagDecl {
+// CHECK-NEXT:                 name: "PlatformFlag",
+// CHECK-NEXT:             },
 // CHECK-NEXT:             InstrTemplateDecl {
 // CHECK-NEXT:                 name: "RInstr",
 // CHECK-NEXT:                 params: [

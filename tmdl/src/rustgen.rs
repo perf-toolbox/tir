@@ -1,3 +1,4 @@
+use quote::{format_ident, quote};
 use std::{collections::HashMap, io::Write};
 
 use crate::ast;
@@ -34,49 +35,135 @@ pub fn emit_rust<'a>(
                 };
                 vec.push(i);
             }
+            ast::Item::ImplDecl(decl) => {
+                let name = decl.target_name();
+                let vec = if impls.contains_key(&name) {
+                    impls.get_mut(&name).unwrap()
+                } else {
+                    let vec = vec![];
+                    impls.insert(name.clone(), vec);
+                    impls.get_mut(&name).unwrap()
+                };
+                vec.push(i);
+            }
             _ => {
                 items.insert(i.name(), i);
             }
         }
     }
 
-    for item in ast.items() {
-        match item {
-            ast::Item::EnumDecl(ref enum_) => print_enum(buf, enum_)?,
-            ast::Item::InstrDecl(ref instr) => print_instr(buf, &items, instr, dialect_name)?,
-            _ => {}
+    let rust_items: Vec<_> = ast
+        .items()
+        .iter()
+        .filter_map(|item| match item {
+            ast::Item::FlagDecl(ref flag) => Some(generate_flag(flag)),
+            ast::Item::EnumDecl(ref enum_) => Some(generate_enum(&impls, enum_)),
+            ast::Item::InstrDecl(ref instr) => Some(generate_instr(&items, instr, dialect_name)),
+            _ => None,
+        })
+        .collect();
+
+    let file: syn::File = syn::parse2(quote! { #(#rust_items)* }).unwrap();
+
+    writeln!(buf, "{}", prettyplease::unparse(&file))?;
+
+    Ok(())
+}
+
+fn generate_flag(decl: &ast::FlagDecl) -> proc_macro2::TokenStream {
+    let name = format_ident!("{}", decl.name());
+    let doc = if let Some(text) = decl.doc() {
+        quote! { #[doc = #text] }
+    } else {
+        quote! {}
+    };
+
+    quote! {
+        #doc
+        pub struct #name;
+    }
+}
+
+fn generate_enum<'a>(
+    impls: &'a HashMap::<String, Vec<&'a ast::Item>>,
+    decl: &ast::EnumDecl,
+) -> proc_macro2::TokenStream {
+    let variants = decl.variants().iter().map(|v| {
+        let ident = format_ident!("{}", v.name());
+        let doc = if let Some(doc) = v.doc() {
+            quote! { #[doc = #doc] }
+        } else {
+            quote! {}
+        };
+
+        quote! {
+            #doc
+            #ident
         }
-    }
+    });
 
-    Ok(())
+    let name = format_ident!("{}", decl.name());
+    let doc = if let Some(doc) = decl.doc() {
+        quote! { #[doc = #doc] }
+    } else {
+        quote! {}
+    };
+
+    let impl_tokens = impls.get(&decl.name()).into_iter().flatten().filter_map(|impl_| -> Option<proc_macro2::TokenStream> {
+        if let ast::Item::ImplDecl(impl_) = impl_ {
+            if impl_.trait_name() == "Register" {
+                let arms = decl.variants().iter().map(|v| {
+                    let ident = format_ident!("{}", v.name());
+                    let lowercase = v.name().to_lowercase();
+                    quote! {
+                        #name::#ident => fmt.write_direct(#lowercase)
+                    }
+                });
+
+                return Some(quote! {
+                    impl tir_core::Printable for #name {
+                        fn print(&self, fmt: &mut dyn IRFormatter) {
+                            match self {
+                                #(#arms),*
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        None
+    });
+
+    quote! {
+        #doc
+        pub enum #name {
+            #(#variants),*
+        }
+
+        impl lpl::combinators::NotTuple for #name {}
+
+        #(#impl_tokens)*
+    }
 }
 
-fn print_enum(buf: &mut dyn Write, decl: &ast::EnumDecl) -> Result<(), std::io::Error> {
-    writeln!(buf, "pub enum {} {{", decl.name())?;
-
-    for var in decl.variants() {
-        writeln!(buf, "    {},", var.name())?;
-    }
-
-    writeln!(buf, "}}\n")?;
-
-    Ok(())
-}
-
-fn print_instr<'a>(
-    buf: &mut dyn Write,
+fn generate_instr<'a>(
     other_decls: &'a HashMap<String, &'a ast::Item>,
     decl: &ast::InstrDecl,
     dialect_name: &str,
-) -> Result<(), std::io::Error> {
-    let mut struct_fields: Vec<&'a ast::StructFieldDecl> = vec![];
+) -> proc_macro2::TokenStream {
+    let mut fields = vec![];
 
     let mut parent = other_decls.get(&decl.template_name());
 
     while parent.is_some() {
         if let Some(ast::Item::InstrTemplateDecl(template)) = parent {
             for f in template.fields() {
-                struct_fields.push(f);
+                let name = format_ident!("{}", f.name());
+                fields.push(quote! {
+                    #[operand]
+                    #name: Register
+                });
             }
 
             parent = template
@@ -87,20 +174,16 @@ fn print_instr<'a>(
         }
     }
 
-    writeln!(buf, "#[derive(Op, OpAssembly, OpValidator)]")?;
-    writeln!(
-        buf,
-        "#[operation(name = \"{}\", dialect = {dialect_name})]",
-        decl.name().to_lowercase()
-    )?;
-    writeln!(buf, "pub struct {}Op {{", decl.name())?;
+    let name = format_ident!("{}", decl.name());
+    let dialect_name = format_ident!("{}", dialect_name);
+    let op_name = decl.name().to_lowercase();
 
-    for f in struct_fields {
-        writeln!(buf, "    {}: bool,", f.name())?;
+    quote! {
+        #[derive(Op, OpAssembly, OpValidator)]
+        #[operation(name = #op_name, dialect = #dialect_name)]
+        pub struct #name {
+            #(#fields),*,
+            r#impl: OpImpl,
+        }
     }
-
-    writeln!(buf, "    r#impl: OpImpl,")?;
-    writeln!(buf, "}}\n")?;
-
-    Ok(())
 }
