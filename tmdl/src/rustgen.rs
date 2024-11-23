@@ -85,7 +85,7 @@ fn generate_flag(decl: &ast::FlagDecl) -> proc_macro2::TokenStream {
 }
 
 fn generate_enum<'a>(
-    impls: &'a HashMap::<String, Vec<&'a ast::Item>>,
+    impls: &'a HashMap<String, Vec<&'a ast::Item>>,
     decl: &ast::EnumDecl,
 ) -> proc_macro2::TokenStream {
     let variants = decl.variants().iter().map(|v| {
@@ -109,31 +109,33 @@ fn generate_enum<'a>(
         quote! {}
     };
 
-    let impl_tokens = impls.get(&decl.name()).into_iter().flatten().filter_map(|impl_| -> Option<proc_macro2::TokenStream> {
-        if let ast::Item::ImplDecl(impl_) = impl_ {
-            if impl_.trait_name() == "Register" {
-                let arms = decl.variants().iter().map(|v| {
-                    let ident = format_ident!("{}", v.name());
-                    let lowercase = v.name().to_lowercase();
-                    quote! {
-                        #name::#ident => fmt.write_direct(#lowercase)
-                    }
-                });
+    let impl_tokens = impls.get(&decl.name()).into_iter().flatten().filter_map(
+        |impl_| -> Option<proc_macro2::TokenStream> {
+            if let ast::Item::ImplDecl(impl_) = impl_ {
+                if impl_.trait_name() == "Register" {
+                    let arms = decl.variants().iter().map(|v| {
+                        let ident = format_ident!("{}", v.name());
+                        let lowercase = v.name().to_lowercase();
+                        quote! {
+                            #name::#ident => fmt.write_direct(#lowercase)
+                        }
+                    });
 
-                return Some(quote! {
-                    impl tir_core::Printable for #name {
-                        fn print(&self, fmt: &mut dyn IRFormatter) {
-                            match self {
-                                #(#arms),*
+                    return Some(quote! {
+                        impl tir_core::Printable for #name {
+                            fn print(&self, fmt: &mut dyn IRFormatter) {
+                                match self {
+                                    #(#arms),*
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
             }
-        }
 
-        None
-    });
+            None
+        },
+    );
 
     quote! {
         #doc

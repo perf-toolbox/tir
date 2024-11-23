@@ -904,14 +904,16 @@ impl EnumDecl {
     }
 
     pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self.syntax
+        let all: Vec<_> = self
+            .syntax
             .children()
             .filter_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
                     Some(t.text().to_string())
                 }
                 _ => None,
-            }).collect();
+            })
+            .collect();
 
         if all.is_empty() {
             None
@@ -953,14 +955,16 @@ impl EnumVariantDecl {
     }
 
     pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self.syntax
+        let all: Vec<_> = self
+            .syntax
             .children()
             .filter_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
                     Some(t.text().to_string())
                 }
                 _ => None,
-            }).collect();
+            })
+            .collect();
 
         if all.is_empty() {
             None
@@ -1001,14 +1005,16 @@ impl FlagDecl {
     }
 
     pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self.syntax
+        let all: Vec<_> = self
+            .syntax
             .children()
             .filter_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
                     Some(t.text().to_string())
                 }
                 _ => None,
-            }).collect();
+            })
+            .collect();
 
         if all.is_empty() {
             None

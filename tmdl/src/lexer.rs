@@ -76,6 +76,7 @@ fn lex_keyword<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
         .or_else(literal("impl").map(|kw| TokenData::new(SyntaxKind::ImplKw, kw.to_owned())))
         .or_else(literal("self").map(|kw| TokenData::new(SyntaxKind::SelfKw, kw.to_owned())))
         .or_else(literal("flag").map(|kw| TokenData::new(SyntaxKind::FlagKw, kw.to_owned())))
+        .or_else(literal("fn").map(|kw| TokenData::new(SyntaxKind::FnKw, kw.to_owned())))
 }
 
 fn lex_punctuation<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
@@ -97,6 +98,7 @@ fn lex_punctuation<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
         .or_else(literal("\"").map(|p| TokenData::new(SyntaxKind::DoubleQuote, p.to_owned())))
         .or_else(literal("=").map(|p| TokenData::new(SyntaxKind::Equals, p.to_owned())))
         .or_else(literal("#").map(|p| TokenData::new(SyntaxKind::Pound, p.to_owned())))
+        .or_else(literal("-").map(|p| TokenData::new(SyntaxKind::Minus, p.to_owned())))
 }
 
 fn lex_identifier<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
@@ -104,7 +106,9 @@ fn lex_identifier<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
 }
 
 fn lex_comment<'a>() -> impl Parser<'a, StrStream<'a>, Token> {
-    line_comment("///").map(|c| TokenData::new(SyntaxKind::LocalDocComment, c.to_string())).or_else(line_comment("//").map(|c| TokenData::new(SyntaxKind::Comment, c.to_string())))
+    line_comment("///")
+        .map(|c| TokenData::new(SyntaxKind::LocalDocComment, c.to_string()))
+        .or_else(line_comment("//").map(|c| TokenData::new(SyntaxKind::Comment, c.to_string())))
 }
 
 fn lex_whitespace<'a>() -> impl Parser<'a, StrStream<'a>, Token> {

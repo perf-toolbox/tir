@@ -83,6 +83,12 @@ pub enum SyntaxKind {
     DoubleQuote,
     /// `#`
     Pound,
+    /// '-'
+    Minus,
+
+    // Compound symbols
+    /// '->'
+    Arrow,
 
     // Operators
     /// `=`
@@ -133,6 +139,12 @@ pub enum SyntaxKind {
     BinOpExprLeft,
     BinOpExprRight,
     BinOpExprOp,
+
+    FnDecl,
+    FnSignature,
+    FnParamList,
+    FnParam,
+    FnRetType,
 
     EnumDecl,
     EnumBody,
