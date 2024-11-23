@@ -7,6 +7,8 @@ use thiserror::Error;
 pub enum InternalError {
     #[error("Expected '{0}' not found")]
     ExpectedNotFound(&'static str, Span),
+    #[error("Expected '{0}' not found")]
+    OwnedExpectedNotFound(String, Span),
     #[error("Predicate not satisfied")]
     PredNotSatisfied(Span),
     #[error("No items could be parsed")]
@@ -46,6 +48,7 @@ impl InternalError {
     pub fn span(&self) -> &Span {
         match self {
             InternalError::ExpectedNotFound(_, span) => span,
+            InternalError::OwnedExpectedNotFound(_, span) => span,
             InternalError::PredNotSatisfied(span) => span,
             InternalError::EmptyList(span) => span,
             InternalError::NotStringLike(span) => span,
