@@ -377,58 +377,74 @@ fn expr<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
                 });
 
             let field_expr = move || {
-                fold_left(
-                    just_token([SyntaxKind::Identifier, SyntaxKind::SelfKw]),
-                    just_token(SyntaxKind::Dot),
-                    |left, dot, right| {
-                        let span = dot.as_token().span();
-                        let node = NodeOrToken::Node(GreenNodeData::new(
-                            SyntaxKind::FieldExpr,
-                            vec![left, dot, right],
-                            span.clone(),
-                        ));
-                        NodeOrToken::Node(GreenNodeData::new(
-                            SyntaxKind::LiteralExpr,
-                            vec![node],
-                            span,
-                        ))
-                    },
-                )
-                .label("field expr")
+                recursive(|field_expr| {
+                    literal_expr()
+                        .and_then(just_token(SyntaxKind::Dot))
+                        .and_then(field_expr)
+                        .flat()
+                        .map(|(left, dot, right): (ImmElement, ImmElement, ImmElement)| {
+                            let span = dot.as_token().span();
+                            let node = NodeOrToken::Node(GreenNodeData::new(
+                                SyntaxKind::FieldExpr,
+                                vec![left, dot, right],
+                                span.clone(),
+                            ));
+                            NodeOrToken::Node(GreenNodeData::new(
+                                SyntaxKind::LiteralExpr,
+                                vec![node],
+                                span,
+                            ))
+                        })
+                })
             };
+            // let field_expr = move || {
+            //     fold_left(
+            //         just_token([SyntaxKind::Identifier, SyntaxKind::SelfKw]),
+            //         just_token(SyntaxKind::Dot),
+            //         |left, dot, right| {
+            //             let span = dot.as_token().span();
+            //             let node = NodeOrToken::Node(GreenNodeData::new(
+            //                 SyntaxKind::FieldExpr,
+            //                 vec![left, dot, right],
+            //                 span.clone(),
+            //             ));
+            //             NodeOrToken::Node(GreenNodeData::new(
+            //                 SyntaxKind::LiteralExpr,
+            //                 vec![node],
+            //                 span,
+            //             ))
+            //         },
+            //     )
+            //     .label("field expr")
+            // };
 
-            let bit_concat = fold_left(
-                field_expr().or_else(literal_expr()),
-                token(SyntaxKind::At),
-                |left, op, right| {
-                    let span = op.token().as_token().span();
-                    let mut elements = vec![];
-                    let left_span = left.as_node().span();
-                    elements.push(NodeOrToken::Node(GreenNodeData::new(
-                        SyntaxKind::BinOpExprLeft,
-                        vec![left],
-                        left_span,
-                    )));
-                    elements.extend(op.trivia().iter().cloned());
-                    elements.push(NodeOrToken::Node(GreenNodeData::new(
-                        SyntaxKind::BinOpExprOp,
-                        vec![op.token().clone()],
-                        span.clone(),
-                    )));
-                    let right_span = right.as_node().span();
-                    elements.push(NodeOrToken::Node(GreenNodeData::new(
-                        SyntaxKind::BinOpExprRight,
-                        vec![right],
-                        right_span,
-                    )));
-                    NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BinOpExpr, elements, span))
-                },
-            );
+            let atom = move || literal_expr().or_else(field_expr());
 
-            bit_concat
-                .or_else(field_expr())
-                .or_else(literal_expr())
-                .or_else(list)
+            let bit_concat = fold_left(atom(), token(SyntaxKind::At), |left, op, right| {
+                let span = op.token().as_token().span();
+                let mut elements = vec![];
+                let left_span = left.as_node().span();
+                elements.push(NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::BinOpExprLeft,
+                    vec![left],
+                    left_span,
+                )));
+                elements.extend(op.trivia().iter().cloned());
+                elements.push(NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::BinOpExprOp,
+                    vec![op.token().clone()],
+                    span.clone(),
+                )));
+                let right_span = right.as_node().span();
+                elements.push(NodeOrToken::Node(GreenNodeData::new(
+                    SyntaxKind::BinOpExprRight,
+                    vec![right],
+                    right_span,
+                )));
+                NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BinOpExpr, elements, span))
+            });
+
+            bit_concat.or_else(atom()).or_else(list)
         });
 
         inline_expr
