@@ -73,6 +73,12 @@ impl fmt::Debug for Span {
     }
 }
 
+impl Default for Span {
+    fn default() -> Self {
+        Span::empty()
+    }
+}
+
 pub type Spanned<Type> = (Type, Span);
 
 pub type ParseResult<Input, Output> = Result<(Output, Option<Input>), Diagnostic>;

@@ -1,8 +1,11 @@
 use crate::{
     combinators::{literal, reset, text::take_while},
     parse_stream::ParseStream,
+    syntax::{GreenElement, SyntaxLike},
     InternalError, Parser,
 };
+
+use super::NotTuple;
 
 pub fn line_comment<'a, Input>(comment_start: &'static str) -> impl Parser<'a, Input, &'a str>
 where
@@ -119,6 +122,62 @@ where
         } else {
             Err(InternalError::PredNotSatisfied(input.span()).into())
         }
+    }
+}
+
+pub struct WrappedToken<SK: SyntaxLike> {
+    trivia: Vec<GreenElement<SK>>,
+    token: GreenElement<SK>,
+}
+
+impl<SK: SyntaxLike> WrappedToken<SK> {
+    pub fn trivia(&self) -> &[GreenElement<SK>] {
+        &self.trivia
+    }
+
+    pub fn token(&self) -> &GreenElement<SK> {
+        &self.token
+    }
+}
+
+impl<SK: SyntaxLike> NotTuple for WrappedToken<SK> {}
+
+pub fn token<'a, SK, T>(token: T) -> impl Parser<'a, crate::TokenStream<'a, SK>, WrappedToken<SK>>
+where
+    SK: SyntaxLike + 'a,
+    GreenElement<SK>: PartialEq<T>,
+{
+    move |input: crate::TokenStream<'a, SK>| {
+        let mut trivia = vec![];
+
+        let mut i = 0;
+
+        while let Some(t) = input.nth(i) {
+            if t.is_trivia() {
+                trivia.push(t.clone());
+                i += 1;
+            } else {
+                break;
+            }
+        }
+
+        if let Some(t) = input.nth(i) {
+            if t == token {
+                let wt = WrappedToken { trivia, token: t };
+
+                let next_input = input.slice((i + 1)..);
+
+                return Ok((wt, next_input));
+            } else {
+                return Err(InternalError::OwnedExpectedNotFound(
+                    t.as_token().text().to_string(),
+                    t.as_token().span(),
+                )
+                .into());
+            }
+        }
+
+        Err(InternalError::UnexpectedEof(input.span()).into())
     }
 }
 

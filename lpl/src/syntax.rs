@@ -14,21 +14,25 @@ pub type RedToken<SK> = Rc<RedTokenData<SK>>;
 pub type RedNode<SK> = Rc<RedNodeData<SK>>;
 pub type RedElement<SK> = NodeOrToken<RedNode<SK>, RedToken<SK>>;
 
+pub trait SyntaxLike: Copy + Clone + Debug + PartialEq {
+    fn is_trivia(&self) -> bool;
+}
+
+impl SyntaxLike for u32 {
+    fn is_trivia(&self) -> bool {
+        false
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
-pub struct GreenTokenData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+pub struct GreenTokenData<SK: SyntaxLike> {
     kind: SK,
     text: String,
     span: Span,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct GreenNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+pub struct GreenNodeData<SK: SyntaxLike> {
     kind: SK,
     children: Vec<GreenElement<SK>>,
     span: Span,
@@ -41,27 +45,18 @@ pub enum NodeOrToken<N, T> {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct RedTokenData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+pub struct RedTokenData<SK: SyntaxLike> {
     parent: Option<RedNode<SK>>,
     green: GreenToken<SK>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct RedNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+pub struct RedNodeData<SK: SyntaxLike> {
     parent: Option<RedNode<SK>>,
     green: GreenNode<SK>,
 }
 
-impl<SK> GreenTokenData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> GreenTokenData<SK> {
     pub fn new(kind: SK, text: String) -> GreenToken<SK> {
         Arc::new(GreenTokenData {
             kind,
@@ -95,23 +90,17 @@ where
     }
 }
 
-impl<SK> NotTuple for GreenTokenData<SK> where SK: Copy + Clone + Debug + PartialEq {}
+impl<SK> NotTuple for GreenTokenData<SK> where SK: SyntaxLike {}
 
-impl<SK> fmt::Display for GreenTokenData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> fmt::Display for GreenTokenData<SK> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Display::fmt(&self.text, f)
     }
 }
 
-impl<SK> NotTuple for GreenNodeData<SK> where SK: Copy + Clone + Debug + PartialEq {}
+impl<SK> NotTuple for GreenNodeData<SK> where SK: SyntaxLike {}
 
-impl<SK> GreenNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> GreenNodeData<SK> {
     pub fn new(kind: SK, children: Vec<GreenElement<SK>>, span: Span) -> GreenNode<SK> {
         Arc::new(GreenNodeData {
             kind,
@@ -149,10 +138,7 @@ where
     }
 }
 
-impl<SK> fmt::Display for GreenNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> fmt::Display for GreenNodeData<SK> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for child in &self.children {
             fmt::Display::fmt(child, f)?;
@@ -205,10 +191,25 @@ where
     }
 }
 
-impl<SK> RedTokenData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> GreenElement<SK> {
+    pub fn is_trivia(&self) -> bool {
+        match self {
+            NodeOrToken::Token(t) => t.kind().is_trivia(),
+            _ => false,
+        }
+    }
+}
+
+impl<SK: SyntaxLike> PartialEq<&str> for GreenElement<SK> {
+    fn eq(&self, other: &&str) -> bool {
+        match self {
+            NodeOrToken::Token(t) => &t.text() == other,
+            NodeOrToken::Node(_) => todo!("Nodes do not support text interface yet"),
+        }
+    }
+}
+
+impl<SK: SyntaxLike> RedTokenData<SK> {
     pub fn new(green: GreenToken<SK>) -> RedToken<SK> {
         Rc::new(RedTokenData {
             parent: None,
@@ -241,10 +242,7 @@ where
     }
 }
 
-impl<SK> RedNodeData<SK>
-where
-    SK: Copy + Clone + Debug + PartialEq,
-{
+impl<SK: SyntaxLike> RedNodeData<SK> {
     pub fn new(green: GreenNode<SK>) -> RedNode<SK> {
         Rc::new(RedNodeData {
             parent: None,

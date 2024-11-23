@@ -9,10 +9,8 @@ use std::{
 
 use lpl::{
     combinators::{
-        any_whitespace1, eof, interleaved,
-        lang::line_comment,
-        literal, spaced,
-        text::{dec_number, ident},
+        any_whitespace1, eof, interleaved, lang::ident, lang::line_comment, literal, spaced,
+        text::dec_number,
     },
     Diagnostic, ParseStream, Parser, Spanned, StrStream,
 };
