@@ -180,6 +180,14 @@ pub trait Parser<'a, Input: ParseStream<'a> + 'a, Output> {
             }
         }
     }
+
+    fn boxed(self) -> BoxedParser<'a, Input, Output>
+    where
+        Self: Sized + 'a,
+        Output: 'a,
+    {
+        BoxedParser::new(self)
+    }
 }
 
 impl<'a, F, Input, Output> Parser<'a, Input, Output> for F

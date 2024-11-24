@@ -54,8 +54,8 @@ pub fn and_then<'a, P1, P2, Input, Output1, Output2>(
 ) -> impl Parser<'a, Input, (Output1, Output2)>
 where
     Input: ParseStream<'a> + 'a,
-    P1: Parser<'a, Input, Output1>,
-    P2: Parser<'a, Input, Output2>,
+    P1: Parser<'a, Input, Output1> + 'a,
+    P2: Parser<'a, Input, Output2> + 'a,
 {
     move |input: Input| {
         parser1

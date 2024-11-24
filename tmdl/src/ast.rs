@@ -4,13 +4,51 @@ use lpl::{syntax::NodeOrToken, Span};
 
 use crate::{SyntaxElement, SyntaxKind, SyntaxNode};
 
+macro_rules! trivial_ast_node {
+    ($name: ident, $kind:expr) => {
+        #[repr(transparent)]
+        #[derive(Clone)]
+        pub struct $name(SyntaxNode);
+
+        impl $name {
+            pub fn new(root: SyntaxNode) -> Option<Self> {
+                if root.kind() != $kind {
+                    return None;
+                }
+
+                Some(Self(root))
+            }
+        }
+
+        impl ASTNode for $name {
+            fn syntax(&self) -> &SyntaxNode {
+                &self.0
+            }
+        }
+    };
+}
+
 pub trait ASTNode {
     fn syntax(&self) -> &SyntaxNode;
-    fn span(&self) -> Span;
+    fn span(&self) -> Span {
+        self.syntax().span()
+    }
 }
 
 pub trait ExprNode {
     fn ty(&self) -> &Type;
+}
+
+pub trait AttrListOwner: ASTNode {
+    fn attr_list(&self) -> Option<AttrList> {
+        self.syntax()
+            .children()
+            .find(|c| match c {
+                NodeOrToken::Node(n) => n.kind() == SyntaxKind::AttrList,
+                _ => false,
+            })
+            .and_then(|c| AttrList::new(c.as_node().clone()))
+    }
 }
 
 #[derive(Clone)]
@@ -19,7 +57,11 @@ pub enum Type {
     String,
     Integer,
     Unresolved(SyntaxElement),
+    Void,
 }
+
+trivial_ast_node!(AttrList, SyntaxKind::AttrList);
+trivial_ast_node!(Attr, SyntaxKind::Attr);
 
 #[derive(Clone)]
 pub enum Item {
@@ -30,6 +72,7 @@ pub enum Item {
     EnumDecl(EnumDecl),
     ImplDecl(ImplDecl),
     FlagDecl(FlagDecl),
+    FnDecl(FnDecl),
 }
 
 #[derive(Clone)]
@@ -47,10 +90,10 @@ pub struct InstrTemplateDecl {
     parent_template_args: Vec<InstrTemplateArg>,
 }
 
-#[derive(Clone)]
-pub struct InstrTemplateParameterDecl {
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(
+    InstrTemplateParameterDecl,
+    SyntaxKind::InstrTemplateSingleParam
+);
 
 #[derive(Clone)]
 pub struct InstrDecl {
@@ -95,10 +138,7 @@ pub struct EnumDecl {
     variants: Vec<EnumVariantDecl>,
 }
 
-#[derive(Clone)]
-pub struct EnumVariantDecl {
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(EnumVariantDecl, SyntaxKind::EnumVariantDecl);
 
 #[derive(Clone)]
 pub struct FlagDecl {
@@ -109,6 +149,7 @@ pub struct FlagDecl {
 pub enum Expr {
     Literal(LiteralExpr),
     Block(BlockExpr),
+    List(ListExpr),
     BinOp(BinOpExpr),
 }
 
@@ -127,6 +168,14 @@ pub struct BlockExpr {
     ty: Type,
 }
 
+#[derive(Clone)]
+pub struct ListExpr {
+    #[allow(dead_code)]
+    syntax: SyntaxNode,
+    elements: Vec<Expr>,
+    ty: Type,
+}
+
 #[derive(Clone, Debug)]
 pub enum BinOpKind {
     BitConcat,
@@ -140,6 +189,10 @@ pub struct BinOpExpr {
     left: Box<Expr>,
     right: Box<Expr>,
 }
+
+trivial_ast_node!(FnDecl, SyntaxKind::FnDecl);
+trivial_ast_node!(FnSignature, SyntaxKind::FnSignature);
+trivial_ast_node!(FnParam, SyntaxKind::FnParam);
 
 impl Type {
     pub fn new(syntax: SyntaxNode) -> Option<Type> {
@@ -204,6 +257,7 @@ impl fmt::Debug for Type {
             Type::String => write!(f, "str"),
             Type::Bits(num) => write!(f, "bits<{}>", num),
             Type::Integer => write!(f, "int"),
+            Type::Void => write!(f, "()"),
         }
     }
 }
@@ -214,6 +268,7 @@ impl Item {
             Item::InstrDecl(instr) => instr.name(),
             Item::InstrTemplateDecl(instr) => instr.name(),
             Item::EnumDecl(instr) => instr.name(),
+            Item::FnDecl(fn_) => fn_.signature().name(),
             _ => "unknown".to_owned(),
         }
     }
@@ -229,6 +284,7 @@ impl fmt::Debug for Item {
             Item::EnumDecl(i) => i.fmt(f),
             Item::ImplDecl(i) => i.fmt(f),
             Item::FlagDecl(i) => i.fmt(f),
+            Item::FnDecl(i) => i.fmt(f),
         }
     }
 }
@@ -275,6 +331,12 @@ impl From<FlagDecl> for Item {
     }
 }
 
+impl From<FnDecl> for Item {
+    fn from(i: FnDecl) -> Self {
+        Item::FnDecl(i)
+    }
+}
+
 impl SourceFile {
     pub fn new(root: SyntaxNode) -> Option<SourceFile> {
         if root.kind() != SyntaxKind::TranslationUnit {
@@ -294,6 +356,7 @@ impl SourceFile {
                     SyntaxKind::EnumDecl => EnumDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::ImplDecl => ImplDecl::new(node.clone()).map(|t| t.into()),
                     SyntaxKind::FlagDecl => FlagDecl::new(node.clone()).map(|t| t.into()),
+                    SyntaxKind::FnDecl => FnDecl::new(node.clone()).map(|t| t.into()),
                     _ => None,
                 },
                 _ => None,
@@ -482,16 +545,8 @@ impl fmt::Debug for InstrTemplateDecl {
 }
 
 impl InstrTemplateParameterDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::InstrTemplateSingleParam {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-
     pub fn name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node)
@@ -514,7 +569,7 @@ impl InstrTemplateParameterDecl {
 
     pub fn ty(&self) -> Type {
         let ty = self
-            .syntax
+            .syntax()
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) if node.kind() == SyntaxKind::Type => Some(node),
@@ -934,16 +989,8 @@ impl fmt::Debug for EnumDecl {
 }
 
 impl EnumVariantDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::EnumVariantDecl {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-
     pub fn name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
@@ -956,7 +1003,7 @@ impl EnumVariantDecl {
 
     pub fn doc(&self) -> Option<String> {
         let all: Vec<_> = self
-            .syntax
+            .syntax()
             .children()
             .filter_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
@@ -974,11 +1021,14 @@ impl EnumVariantDecl {
     }
 }
 
+impl AttrListOwner for EnumVariantDecl {}
+
 impl fmt::Debug for EnumVariantDecl {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("EnumVariantDecl")
             .field("name", &self.name())
             .field("doc", &self.doc())
+            .field("attr_list", &self.attr_list())
             .finish()
     }
 }
@@ -1045,6 +1095,12 @@ impl From<BlockExpr> for Expr {
     }
 }
 
+impl From<ListExpr> for Expr {
+    fn from(value: ListExpr) -> Self {
+        Expr::List(value)
+    }
+}
+
 impl From<BinOpExpr> for Expr {
     fn from(value: BinOpExpr) -> Self {
         Expr::BinOp(value)
@@ -1057,6 +1113,7 @@ impl ExprNode for Expr {
             Expr::Literal(l) => l.ty(),
             Expr::Block(b) => b.ty(),
             Expr::BinOp(b) => b.ty(),
+            Expr::List(l) => l.ty(),
         }
     }
 }
@@ -1067,6 +1124,7 @@ impl fmt::Debug for Expr {
             Expr::Literal(l) => l.fmt(f),
             Expr::Block(b) => b.fmt(f),
             Expr::BinOp(b) => b.fmt(f),
+            Expr::List(l) => l.fmt(f),
         }
     }
 }
@@ -1132,7 +1190,7 @@ impl BlockExpr {
             .filter_map(map_expr)
             .collect::<Vec<Expr>>();
 
-        let ty = stmts.last().map(|e| e.ty()).cloned()?;
+        let ty = stmts.last().map(|e| e.ty()).cloned().unwrap_or(Type::Void);
 
         Some(Self { syntax, stmts, ty })
     }
@@ -1144,6 +1202,39 @@ impl fmt::Debug for BlockExpr {
             .field("type", &self.ty)
             .field("stmts", &self.stmts)
             .finish()
+    }
+}
+
+impl ExprNode for ListExpr {
+    fn ty(&self) -> &Type {
+        &self.ty
+    }
+}
+
+impl ListExpr {
+    pub fn new(syntax: SyntaxNode) -> Option<Self> {
+        if syntax.kind() != SyntaxKind::ListExpr {
+            return None;
+        }
+
+        let elements = syntax
+            .children()
+            .filter_map(map_expr)
+            .collect::<Vec<Expr>>();
+
+        let ty = elements.last().map(|e| e.ty()).cloned()?;
+
+        Some(Self {
+            syntax,
+            elements,
+            ty,
+        })
+    }
+}
+
+impl fmt::Debug for ListExpr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(&self.elements).finish()
     }
 }
 
@@ -1221,8 +1312,159 @@ fn map_expr(element: SyntaxElement) -> Option<Expr> {
             SyntaxKind::LiteralExpr => LiteralExpr::new(node).map(|e| e.into()),
             SyntaxKind::BlockExpr => BlockExpr::new(node).map(|e| e.into()),
             SyntaxKind::BinOpExpr => BinOpExpr::new(node).map(|e| e.into()),
+            SyntaxKind::ListExpr => ListExpr::new(node).map(|e| e.into()),
             _ => None,
         },
         _ => None,
+    }
+}
+
+impl AttrList {
+    fn attributes(&self) -> impl Iterator<Item = Attr> + use<'_> {
+        self.syntax().children().filter_map(|c| match c {
+            NodeOrToken::Node(n) => Attr::new(n.clone()),
+            _ => None,
+        })
+    }
+}
+
+impl fmt::Debug for AttrList {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_list().entries(self.attributes()).finish()
+    }
+}
+
+impl Attr {
+    pub fn name(&self) -> String {
+        self.syntax()
+            .children()
+            .find_map(|child| match child {
+                NodeOrToken::Token(t) => {
+                    if t.kind() == SyntaxKind::Identifier {
+                        Some(t.text().to_string())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+
+    pub fn exprs(&self) -> impl Iterator<Item = Expr> + use<'_> {
+        self.syntax().children().filter_map(map_expr)
+    }
+}
+
+impl fmt::Debug for Attr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let exprs = self.exprs().collect::<Vec<_>>();
+        f.debug_struct("Attr")
+            .field("name", &self.name())
+            .field("values", &exprs)
+            .finish()
+    }
+}
+
+impl FnDecl {
+    pub fn signature(&self) -> FnSignature {
+        self.syntax()
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::FnSignature => {
+                    FnSignature::new(n.clone())
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+
+    pub fn body(&self) -> BlockExpr {
+        self.syntax()
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::BlockExpr => {
+                    BlockExpr::new(n.clone())
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+}
+
+impl fmt::Debug for FnDecl {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FnDecl")
+            .field("signature", &self.signature())
+            .field("body", &self.body())
+            .finish()
+    }
+}
+
+impl FnSignature {
+    pub fn name(&self) -> String {
+        self.syntax()
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            })
+            .unwrap()
+    }
+
+    pub fn params(&self) -> impl Iterator<Item = FnParam> + use<'_> {
+        self.syntax()
+            .children()
+            .find(|c| match c {
+                NodeOrToken::Node(n) => n.kind() == SyntaxKind::FnParamList,
+                _ => false,
+            })
+            .map(|list| {
+                list.as_node()
+                    .children()
+                    .filter_map(|c| match c {
+                        NodeOrToken::Node(n) if n.kind() == SyntaxKind::FnParam => {
+                            FnParam::new(n.clone())
+                        }
+                        _ => None,
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .into_iter()
+            .flatten()
+    }
+
+    pub fn ret_ty(&self) -> Option<Type> {
+        self.syntax()
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Node(n) if n.kind() == SyntaxKind::FnRetType => Some(n.clone()),
+                _ => None,
+            })
+            .and_then(|node| {
+                node.children().find_map(|c| match c {
+                    NodeOrToken::Node(c) if c.kind() == SyntaxKind::Type => Type::new(c),
+                    _ => None,
+                })
+            })
+    }
+}
+
+impl fmt::Debug for FnSignature {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let params = self.params().collect::<Vec<_>>();
+        f.debug_struct("FnSignature")
+            .field("name", &self.name())
+            .field("parameters", &params)
+            .field("return_type", &self.ret_ty())
+            .finish()
+    }
+}
+
+impl fmt::Debug for FnParam {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("FnParam").field(&self.0).finish()
     }
 }

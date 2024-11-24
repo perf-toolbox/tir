@@ -140,6 +140,8 @@ pub enum SyntaxKind {
     BinOpExprRight,
     BinOpExprOp,
 
+    ExprStmt,
+
     FnDecl,
     FnSignature,
     FnParamList,
@@ -149,6 +151,9 @@ pub enum SyntaxKind {
     EnumDecl,
     EnumBody,
     EnumVariantDecl,
+
+    AttrList,
+    Attr,
 }
 
 impl fmt::Display for SyntaxKind {

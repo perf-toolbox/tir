@@ -1,21 +1,21 @@
 // Some nice comments
 
 enum GPR {
-    #[reg_names("x0", "zero")]
+    #[reg_names(["x0", "zero"])]
     X0,
-    #[reg_names("x1", "a1")]
+    #[reg_names(["x1", "a1"])]
     X1,
-    #[reg_names("x2", "a2")]
+    #[reg_names(["x2", "a2"])]
     X2,
-    #[reg_names("x3", "ra")]
+    #[reg_names(["x3", "ra"])]
     X3,
-    #[reg_names("x4", "sp")]
+    #[reg_names(["x4", "sp"])]
     X4,
-    #[reg_names("x5", "t0")]
+    #[reg_names(["x5", "t0"])]
     X5,
-    #[reg_names("x6", "t1")]
+    #[reg_names(["x6", "t1"])]
     X6,
-    #[reg_names("x7", "t2")]
+    #[reg_names(["x7", "t2"])]
     X7
 }
 

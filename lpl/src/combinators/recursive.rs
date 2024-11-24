@@ -55,11 +55,10 @@ enum RecursiveInner<T: ?Sized> {
     Unowned(rc::Weak<T>),
 }
 
-#[derive(Clone)]
 pub struct Recursive<'a, Input, Output, P>
 where
     Input: ParseStream<'a> + 'a,
-    P: Parser<'a, Input, Output>,
+    P: Parser<'a, Input, Output> + ?Sized,
 {
     inner: RecursiveInner<P>,
     _a: PhantomData<Input>,
@@ -101,7 +100,7 @@ where
 impl<'a, Input, Output, P> Parser<'a, Input, Output> for Recursive<'a, Input, Output, P>
 where
     Input: ParseStream<'a> + 'a,
-    P: Parser<'a, Input, Output>,
+    P: Parser<'a, Input, Output> + ?Sized,
 {
     fn parse(&self, input: Input) -> crate::ParseResult<Input, Output> {
         match &self.inner {
@@ -114,14 +113,33 @@ where
     }
 }
 
-pub fn recursive<'a, Input, Output, F, P1>(f: F) -> Recursive<'a, Input, Output, P1>
+impl<'a, Input, Output, P> Clone for Recursive<'a, Input, Output, P>
+where
+    Input: ParseStream<'a> + 'a,
+    P: Parser<'a, Input, Output> + ?Sized + 'a,
+{
+    fn clone(&self) -> Self {
+        Self {
+            inner: match &self.inner {
+                RecursiveInner::Owned(p) => RecursiveInner::Owned(p.clone()),
+                RecursiveInner::Unowned(p) => RecursiveInner::Unowned(p.clone()),
+            },
+            _a: PhantomData,
+            _b: PhantomData,
+            _c: PhantomData,
+        }
+    }
+}
+
+pub fn recursive<'a, 'b, Input, Output, F, P1>(f: F) -> Recursive<'a, Input, Output, P1>
 where
     Input: ParseStream<'a> + 'a,
     Output: 'a,
     P1: Parser<'a, Input, Output> + 'a,
-    F: FnOnce(Recursive<'a, Input, Output, P1>) -> P1,
+    F: FnOnce(Recursive<'a, Input, Output, dyn Parser<'a, Input, Output> + 'a>) -> P1,
 {
     let rc = Rc::new_cyclic(|rc| {
+        let rc: rc::Weak<dyn Parser<'a, Input, Output>> = rc.clone() as _;
         let parser = Recursive {
             inner: RecursiveInner::Unowned(rc.clone()),
             _a: PhantomData,
