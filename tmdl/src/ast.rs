@@ -1107,6 +1107,22 @@ impl From<BinOpExpr> for Expr {
     }
 }
 
+impl Expr {
+    pub fn as_list(&self) -> ListExpr {
+        match &self {
+            Expr::List(list) => list.clone(),
+            _ => unreachable!("Not a List!"),
+        }
+    }
+
+    pub fn as_literal(&self) -> LiteralExpr {
+        match &self {
+            Expr::Literal(literal) => literal.clone(),
+            _ => unreachable!("Not a Literal!"),
+        }
+    }
+}
+
 impl ExprNode for Expr {
     fn ty(&self) -> &Type {
         match self {
@@ -1156,6 +1172,18 @@ impl LiteralExpr {
         })?;
 
         Some(Self { syntax, ty })
+    }
+
+    pub fn text(&self) -> String {
+        self.syntax
+            .children()
+            .find_map(|c| match c {
+                NodeOrToken::Token(t) if t.kind() == SyntaxKind::StringLiteral => {
+                    Some(t.text().to_string())
+                }
+                _ => None,
+            })
+            .unwrap()
     }
 }
 
@@ -1229,6 +1257,10 @@ impl ListExpr {
             elements,
             ty,
         })
+    }
+
+    pub fn elements(&self) -> &[Expr] {
+        &self.elements
     }
 }
 
@@ -1320,7 +1352,7 @@ fn map_expr(element: SyntaxElement) -> Option<Expr> {
 }
 
 impl AttrList {
-    fn attributes(&self) -> impl Iterator<Item = Attr> + use<'_> {
+    pub fn attributes(&self) -> impl Iterator<Item = Attr> + use<'_> {
         self.syntax().children().filter_map(|c| match c {
             NodeOrToken::Node(n) => Attr::new(n.clone()),
             _ => None,

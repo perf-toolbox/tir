@@ -1,7 +1,7 @@
 use quote::{format_ident, quote};
 use std::{collections::HashMap, io::Write};
 
-use crate::ast;
+use crate::ast::{self, AttrListOwner};
 
 pub fn emit_rust<'a>(
     buf: &mut dyn Write,
@@ -113,19 +113,119 @@ fn generate_enum<'a>(
         |impl_| -> Option<proc_macro2::TokenStream> {
             if let ast::Item::ImplDecl(impl_) = impl_ {
                 if impl_.trait_name() == "Register" {
-                    let arms = decl.variants().iter().map(|v| {
+                    let names_arms = decl.variants().iter().map(|v| {
+                        let attr_list = v.attr_list().unwrap().clone();
+                        let list_expr = attr_list
+                            .attributes()
+                            .find(|v| v.name() == "reg_names")
+                            .unwrap()
+                            .exprs()
+                            .next()
+                            .unwrap()
+                            .as_list();
+                        let names = list_expr.elements().iter().map(|el| {
+                            let text = el.as_literal().text();
+                            text[1..text.len() - 1].to_string()
+                        });
                         let ident = format_ident!("{}", v.name());
-                        let lowercase = v.name().to_lowercase();
                         quote! {
-                            #name::#ident => fmt.write_direct(#lowercase)
+                            #name::#ident => &[#(#names),*]
                         }
                     });
 
+                    let parser_arms = decl.variants().iter().map(|v| {
+                        let attr_list = v.attr_list().unwrap().clone();
+                        let list_expr = attr_list
+                            .attributes()
+                            .find(|v| v.name() == "reg_names")
+                            .unwrap()
+                            .exprs()
+                            .next()
+                            .unwrap()
+                            .as_list();
+                        let names = list_expr.elements().iter().map(|el| {
+                            let text = el.as_literal().text();
+                            text[1..text.len() - 1].to_string()
+                        });
+
+                        let ident = format_ident!("{}", v.name());
+                        quote! {
+                            #(#names)|* => Some(#name::#ident)
+                        }
+                    });
+
+                    let to_num_arms = decl.variants().iter().enumerate().map(|(id, v)| {
+                        let ident = format_ident!("{}", v.name());
+
+                        quote! {
+                            #name::#ident => #id
+                        }
+                    });
+
+                    let from_num_arms = decl.variants().iter().enumerate().map(|(id, v)| {
+                        let ident = format_ident!("{}", v.name());
+
+                        quote! {
+                            #id => #name::#ident
+                        }
+                    });
+
+                    let parser_name = format_ident!("parse_{}", name.to_string().to_lowercase());
+
                     return Some(quote! {
-                        impl tir_core::Printable for #name {
-                            fn print(&self, fmt: &mut dyn IRFormatter) {
+                        impl #name {
+                            pub fn get_names(&self) -> &'static [&'static str] {
                                 match self {
-                                    #(#arms),*
+                                    #(#names_arms),*
+                                }
+                            }
+                            pub fn get_reg_num(&self) -> usize {
+                                match &self {
+                                    #(#to_num_arms),*
+                                }
+                            }
+
+                            pub fn encode(&self) -> usize {
+
+                            }
+                        }
+                        impl tir_core::Printable for #name {
+                            fn print(&self, fmt: &mut dyn tir_core::IRFormatter) {
+                                fmt.write_direct(self.get_names()[0])
+                            }
+                        }
+
+                        #[allow(clippy::from_over_into)]
+                        impl Into<tir_core::Attr> for #name {
+                            fn into(self) -> tir_core::Attr {
+                                tir_core::Attr::String(self.get_reg_names()[0].to_string())
+                            }
+                        }
+
+                        pub fn #parser_name(input: &str) -> Option<#name> {
+                            match self {
+                                #(#parser_arms),*,
+                                _ => None,
+                            }
+                        }
+                        impl tir_core::Parsable<#name> for #name {
+                            fn parse(input: tir_core::IRStrStream) -> lpl::ParseResult<tir_core::IRStrStream, #name> {
+                                let parser = ident(|_| false).try_map(|r, s| {
+                                    #parser_name(r).ok_or(Into::<lpl::Diagnostic>::into(DiagKind::UnknownRegister(
+                                        r.to_string(),
+                                        s,
+                                    )))
+                                });
+                                parser.parse(input)
+                            }
+                        }
+
+                        impl TryFrom<usize> for #name {
+                            type Error = ();
+                            fn try_from(value: usize) -> Result<Self, Self::Error> {
+                                match value {
+                                    #(#from_num_arms),*,
+                                    _ => Err(())
                                 }
                             }
                         }
