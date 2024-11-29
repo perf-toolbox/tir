@@ -4,6 +4,31 @@ use lpl::{syntax::NodeOrToken, Span};
 
 use crate::{SyntaxElement, SyntaxKind, SyntaxNode};
 
+macro_rules! ast_with_doc {
+    ($name: ident) => {
+        impl $name {
+            pub fn doc(&self) -> Option<String> {
+                let all: Vec<_> = self
+                    .syntax()
+                    .children()
+                    .filter_map(|c| match c {
+                        NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
+                            Some(t.text().to_string())
+                        }
+                        _ => None,
+                    })
+                    .collect();
+
+                if all.is_empty() {
+                    None
+                } else {
+                    Some(all.join("\n"))
+                }
+            }
+        }
+    };
+}
+
 macro_rules! trivial_ast_node {
     ($name: ident, $kind:expr) => {
         #[repr(transparent)]
@@ -26,6 +51,25 @@ macro_rules! trivial_ast_node {
             }
         }
     };
+
+    ($name: ident, $kind:expr, with_doc) => {
+        trivial_ast_node!($name, $kind);
+        ast_with_doc!($name);
+    };
+}
+
+macro_rules! ast_printer {
+    ($name: ident, $($field:ident),+) => {
+        impl fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.debug_struct(stringify!($name))
+                    $(
+                    .field(stringify!($field), &self.$field())
+                    )*
+                    .finish()
+            }
+        }
+    }
 }
 
 pub trait ASTNode {
@@ -101,11 +145,7 @@ pub struct InstrDecl {
     template_args: Vec<InstrTemplateArg>,
 }
 
-#[derive(Clone)]
-pub struct InstrTemplateArg {
-    #[allow(dead_code)]
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(InstrTemplateArg, SyntaxKind::InstrParentTemplateArg);
 
 #[derive(Clone)]
 pub struct EncodingDecl {
@@ -121,29 +161,22 @@ pub struct AsmDecl {
     body: BlockExpr,
 }
 
-#[derive(Clone)]
-pub struct ImplDecl {
-    #[allow(dead_code)]
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(ImplDecl, SyntaxKind::ImplDecl);
+ast_printer!(ImplDecl, trait_name, target_name);
 
-#[derive(Clone)]
-pub struct StructFieldDecl {
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(StructFieldDecl, SyntaxKind::StructField);
+ast_printer!(StructFieldDecl, name, ty);
 
 #[derive(Clone)]
 pub struct EnumDecl {
     syntax: SyntaxNode,
     variants: Vec<EnumVariantDecl>,
 }
+ast_with_doc!(EnumDecl);
 
-trivial_ast_node!(EnumVariantDecl, SyntaxKind::EnumVariantDecl);
-
-#[derive(Clone)]
-pub struct FlagDecl {
-    syntax: SyntaxNode,
-}
+trivial_ast_node!(EnumVariantDecl, SyntaxKind::EnumVariantDecl, with_doc);
+trivial_ast_node!(FlagDecl, SyntaxKind::FlagDecl, with_doc);
+ast_printer!(FlagDecl, name, doc);
 
 #[derive(Clone)]
 pub enum Expr {
@@ -191,6 +224,7 @@ pub struct BinOpExpr {
 }
 
 trivial_ast_node!(FnDecl, SyntaxKind::FnDecl);
+ast_printer!(FnDecl, signature, body);
 trivial_ast_node!(FnSignature, SyntaxKind::FnSignature);
 trivial_ast_node!(FnParam, SyntaxKind::FnParam);
 
@@ -369,8 +403,8 @@ impl SourceFile {
         })
     }
 
-    pub fn items(&self) -> &[Item] {
-        &self.items
+    pub fn items(&self) -> std::slice::Iter<'_, Item> {
+        self.items.iter()
     }
 }
 
@@ -384,13 +418,7 @@ impl ASTNode for SourceFile {
     }
 }
 
-impl fmt::Debug for SourceFile {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("SourceFile")
-            .field("items", &self.items)
-            .finish()
-    }
-}
+ast_printer!(SourceFile, items);
 
 impl InstrTemplateDecl {
     pub fn new(syntax: SyntaxNode) -> Option<InstrTemplateDecl> {
@@ -530,19 +558,20 @@ impl InstrTemplateDecl {
                 _ => None,
             })
     }
-}
 
-impl fmt::Debug for InstrTemplateDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("InstrTemplateDecl")
-            .field("name", &self.name())
-            .field("params", &self.parameters())
-            .field("fields", &self.fields())
-            .field("parent_template_name", &self.parent_template_name())
-            .field("parent_template_args", &self.parent_template_args)
-            .finish()
+    pub fn parent_template_args(&self) -> std::slice::Iter<'_, InstrTemplateArg> {
+        self.parent_template_args.iter()
     }
 }
+
+ast_printer!(
+    InstrTemplateDecl,
+    name,
+    parameters,
+    fields,
+    parent_template_name,
+    parent_template_args
+);
 
 impl InstrTemplateParameterDecl {
     pub fn name(&self) -> String {
@@ -581,14 +610,7 @@ impl InstrTemplateParameterDecl {
     }
 }
 
-impl fmt::Debug for InstrTemplateParameterDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("InstrTemplateParameterDecl")
-            .field("name", &self.name())
-            .field("type", &self.ty())
-            .finish()
-    }
-}
+ast_printer!(InstrTemplateParameterDecl, name, ty);
 
 impl InstrDecl {
     pub fn new(syntax: SyntaxNode) -> Option<Self> {
@@ -671,26 +693,9 @@ impl InstrDecl {
     }
 }
 
-impl fmt::Debug for InstrDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("InstrDecl")
-            .field("name", &self.name())
-            .field("parent_template_name", &self.template_name())
-            .field("parent_template_args", &self.template_args())
-            .finish()
-    }
-}
+ast_printer!(InstrDecl, name, template_name, template_args);
 
-impl InstrTemplateArg {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::InstrParentTemplateArg {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-}
-
+// FIXME remove this
 impl fmt::Debug for InstrTemplateArg {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("InstrTemplateArg").finish()
@@ -738,16 +743,13 @@ impl EncodingDecl {
             })
             .unwrap_or("unknown".to_string())
     }
-}
 
-impl fmt::Debug for EncodingDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EncodingDecl")
-            .field("target_name", &self.target_name())
-            .field("body", &self.body)
-            .finish()
+    pub fn body(&self) -> &BlockExpr {
+        &self.body
     }
 }
+
+ast_printer!(EncodingDecl, target_name, body);
 
 impl AsmDecl {
     pub fn new(syntax: SyntaxNode) -> Option<Self> {
@@ -790,28 +792,17 @@ impl AsmDecl {
             })
             .unwrap_or("unknown".to_string())
     }
-}
 
-impl fmt::Debug for AsmDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AsmDecl")
-            .field("target_name", &self.target_name())
-            .field("body", &self.body)
-            .finish()
+    pub fn body(&self) -> &BlockExpr {
+        &self.body
     }
 }
+
+ast_printer!(AsmDecl, target_name, body);
 
 impl ImplDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::ImplDecl {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-
     pub fn target_name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) => {
@@ -839,7 +830,7 @@ impl ImplDecl {
     }
 
     pub fn trait_name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|child| match child {
                 NodeOrToken::Node(node) => {
@@ -867,26 +858,9 @@ impl ImplDecl {
     }
 }
 
-impl fmt::Debug for ImplDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ImplDecl")
-            .field("trait_name", &self.trait_name())
-            .field("target_name", &self.target_name())
-            .finish()
-    }
-}
-
 impl StructFieldDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::StructField {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-
     pub fn name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
@@ -898,7 +872,7 @@ impl StructFieldDecl {
     }
 
     pub fn ty(&self) -> Type {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|c| match c {
                 NodeOrToken::Node(n) if n.kind() == SyntaxKind::Type => Type::new(n),
@@ -908,12 +882,11 @@ impl StructFieldDecl {
     }
 }
 
-impl fmt::Debug for StructFieldDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("StructFieldDecl")
-            .field("name", &self.name())
-            .field("type", &self.ty())
-            .finish()
+ast_printer!(EnumDecl, name, doc, variants);
+
+impl ASTNode for EnumDecl {
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
     }
 }
 
@@ -943,7 +916,7 @@ impl EnumDecl {
     }
 
     pub fn name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
@@ -956,35 +929,6 @@ impl EnumDecl {
 
     pub fn variants(&self) -> &[EnumVariantDecl] {
         &self.variants
-    }
-
-    pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self
-            .syntax
-            .children()
-            .filter_map(|c| match c {
-                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
-                    Some(t.text().to_string())
-                }
-                _ => None,
-            })
-            .collect();
-
-        if all.is_empty() {
-            None
-        } else {
-            Some(all.join("\n"))
-        }
-    }
-}
-
-impl fmt::Debug for EnumDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EnumDecl")
-            .field("name", &self.name())
-            .field("doc", &self.doc())
-            .field("variants", &self.variants())
-            .finish()
     }
 }
 
@@ -1000,50 +944,15 @@ impl EnumVariantDecl {
             })
             .unwrap_or("unknown".to_string())
     }
-
-    pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self
-            .syntax()
-            .children()
-            .filter_map(|c| match c {
-                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
-                    Some(t.text().to_string())
-                }
-                _ => None,
-            })
-            .collect();
-
-        if all.is_empty() {
-            None
-        } else {
-            Some(all.join("\n"))
-        }
-    }
 }
 
 impl AttrListOwner for EnumVariantDecl {}
 
-impl fmt::Debug for EnumVariantDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("EnumVariantDecl")
-            .field("name", &self.name())
-            .field("doc", &self.doc())
-            .field("attr_list", &self.attr_list())
-            .finish()
-    }
-}
+ast_printer!(EnumVariantDecl, name, doc, attr_list);
 
 impl FlagDecl {
-    pub fn new(syntax: SyntaxNode) -> Option<Self> {
-        if syntax.kind() != SyntaxKind::FlagDecl {
-            return None;
-        }
-
-        Some(Self { syntax })
-    }
-
     pub fn name(&self) -> String {
-        self.syntax
+        self.syntax()
             .children()
             .find_map(|c| match c {
                 NodeOrToken::Token(t) if t.kind() == SyntaxKind::Identifier => {
@@ -1052,34 +961,6 @@ impl FlagDecl {
                 _ => None,
             })
             .unwrap_or("unknown".to_string())
-    }
-
-    pub fn doc(&self) -> Option<String> {
-        let all: Vec<_> = self
-            .syntax
-            .children()
-            .filter_map(|c| match c {
-                NodeOrToken::Token(t) if t.kind() == SyntaxKind::LocalDocComment => {
-                    Some(t.text().to_string())
-                }
-                _ => None,
-            })
-            .collect();
-
-        if all.is_empty() {
-            None
-        } else {
-            Some(all.join("\n"))
-        }
-    }
-}
-
-impl fmt::Debug for FlagDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("FlagDecl")
-            .field("name", &self.name())
-            .field("doc", &self.doc())
-            .finish()
     }
 }
 
@@ -1193,13 +1074,7 @@ impl ExprNode for LiteralExpr {
     }
 }
 
-impl fmt::Debug for LiteralExpr {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("LiteralExpr")
-            .field("type", &self.ty)
-            .finish()
-    }
-}
+ast_printer!(LiteralExpr, ty);
 
 impl ExprNode for BlockExpr {
     fn ty(&self) -> &Type {
@@ -1421,15 +1296,6 @@ impl FnDecl {
                 _ => None,
             })
             .unwrap()
-    }
-}
-
-impl fmt::Debug for FnDecl {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("FnDecl")
-            .field("signature", &self.signature())
-            .field("body", &self.body())
-            .finish()
     }
 }
 

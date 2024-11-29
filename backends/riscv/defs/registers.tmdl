@@ -84,8 +84,5 @@ enum GPR {
   X31
 }
 
-impl Register for GPR {
-  fn name(self) -> [str] {}
-}
+impl Register for GPR {}
 
-fn name(self) -> [str] {}

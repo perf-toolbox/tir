@@ -54,7 +54,6 @@ pub fn emit_rust<'a>(
 
     let rust_items: Vec<_> = ast
         .items()
-        .iter()
         .filter_map(|item| match item {
             ast::Item::FlagDecl(ref flag) => Some(generate_flag(flag)),
             ast::Item::EnumDecl(ref enum_) => Some(generate_enum(&impls, enum_)),
