@@ -25,7 +25,7 @@ impl Register for GPR {
     }
 }
 
-fn test() -> [i32] {
+fn test(foo: i8) -> [i32] {
     [0, 1, 2, 3]
 }
 
