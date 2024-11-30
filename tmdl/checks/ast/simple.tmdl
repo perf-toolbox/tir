@@ -4,88 +4,455 @@
 
 // CHECK: Some(
 // CHECK-NEXT:     SourceFile {
-// CHECK-NEXT:         items: [
-// CHECK-NEXT:             EnumDecl {
-// CHECK-NEXT:                 name: "GPR",
-// CHECK-NEXT:                 variants: [
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X0",
+// CHECK-NEXT:         items: Iter(
+// CHECK-NEXT:             [
+// CHECK-NEXT:                 EnumDecl {
+// CHECK-NEXT:                     name: "GPR",
+// CHECK-NEXT:                     doc: None,
+// CHECK-NEXT:                     variants: [
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X0",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X1",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X2",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X3",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X4",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X5",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X6",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         EnumVariantDecl {
+// CHECK-NEXT:                             name: "X7",
+// CHECK-NEXT:                             doc: None,
+// CHECK-NEXT:                             attr_list: Some(
+// CHECK-NEXT:                                 [
+// CHECK-NEXT:                                     Attr {
+// CHECK-NEXT:                                         name: "reg_names",
+// CHECK-NEXT:                                         values: [
+// CHECK-NEXT:                                             [
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 LiteralExpr {
+// CHECK-NEXT:                                                     ty: str,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             ],
+// CHECK-NEXT:                                         ],
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 ],
+// CHECK-NEXT:                             ),
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 ImplDecl {
+// CHECK-NEXT:                     trait_name: "Register",
+// CHECK-NEXT:                     target_name: "GPR",
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 FlagDecl {
+// CHECK-NEXT:                     name: "PlatformFlag",
+// CHECK-NEXT:                     doc: Some(
+// CHECK-NEXT:                         "/// An example platform flag",
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrTemplateDecl {
+// CHECK-NEXT:                     name: "RInstr",
+// CHECK-NEXT:                     parameters: [
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct7",
+// CHECK-NEXT:                             ty: bits<7>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct3",
+// CHECK-NEXT:                             ty: bits<3>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$mnemonic",
+// CHECK-NEXT:                             ty: str,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$opcode",
+// CHECK-NEXT:                             ty: bits<7>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                     fields: [
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "rd",
+// CHECK-NEXT:                             ty: <unresolved>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "rs1",
+// CHECK-NEXT:                             ty: <unresolved>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "rs2",
+// CHECK-NEXT:                             ty: <unresolved>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                     parent_template_name: None,
+// CHECK-NEXT:                     parent_template_args: Iter(
+// CHECK-NEXT:                         [],
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 EncodingDecl {
+// CHECK-NEXT:                     target_name: "RInstr",
+// CHECK-NEXT:                     body: BlockExpr {
+// CHECK-NEXT:                         type: <unresolved>,
+// CHECK-NEXT:                         stmts: [
+// CHECK-NEXT:                             BinOpExpr {
+// CHECK-NEXT:                                 kind: BitConcat,
+// CHECK-NEXT:                                 left: BinOpExpr {
+// CHECK-NEXT:                                     kind: BitConcat,
+// CHECK-NEXT:                                     left: BinOpExpr {
+// CHECK-NEXT:                                         kind: BitConcat,
+// CHECK-NEXT:                                         left: BinOpExpr {
+// CHECK-NEXT:                                             kind: BitConcat,
+// CHECK-NEXT:                                             left: BinOpExpr {
+// CHECK-NEXT:                                                 kind: BitConcat,
+// CHECK-NEXT:                                                 left: LiteralExpr {
+// CHECK-NEXT:                                                     ty: <unresolved>,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                                 right: LiteralExpr {
+// CHECK-NEXT:                                                     ty: <unresolved>,
+// CHECK-NEXT:                                                 },
+// CHECK-NEXT:                                             },
+// CHECK-NEXT:                                             right: LiteralExpr {
+// CHECK-NEXT:                                                 ty: <unresolved>,
+// CHECK-NEXT:                                             },
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                         right: LiteralExpr {
+// CHECK-NEXT:                                             ty: <unresolved>,
+// CHECK-NEXT:                                         },
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                     right: LiteralExpr {
+// CHECK-NEXT:                                         ty: <unresolved>,
+// CHECK-NEXT:                                     },
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 right: LiteralExpr {
+// CHECK-NEXT:                                     ty: <unresolved>,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                         ],
 // CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X1",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X2",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X3",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X4",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X5",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X6",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     EnumVariantDecl {
-// CHECK-NEXT:                         name: "X7",
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             ImplDecl {
-// CHECK-NEXT:                 trait_name: "Register",
-// CHECK-NEXT:                 target_name: "GPR",
-// CHECK-NEXT:             },
-// CHECK-NEXT:             FlagDecl {
-// CHECK-NEXT:                 name: "PlatformFlag",
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrTemplateDecl {
-// CHECK-NEXT:                 name: "RInstr",
-// CHECK-NEXT:                 params: [
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct7",
-// CHECK-NEXT:                         type: bits<7>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct3",
-// CHECK-NEXT:                         type: bits<3>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 AsmDecl {
+// CHECK-NEXT:                     target_name: "RInstr",
+// CHECK-NEXT:                     body: BlockExpr {
 // CHECK-NEXT:                         type: str,
+// CHECK-NEXT:                         stmts: [
+// CHECK-NEXT:                             LiteralExpr {
+// CHECK-NEXT:                                 ty: str,
+// CHECK-NEXT:                             },
+// CHECK-NEXT:                         ],
 // CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$opcode",
-// CHECK-NEXT:                         type: bits<7>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 fields: [
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "rd",
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrTemplateDecl {
+// CHECK-NEXT:                     name: "ALUInstr",
+// CHECK-NEXT:                     parameters: [
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct7",
+// CHECK-NEXT:                             ty: bits<7>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct3",
+// CHECK-NEXT:                             ty: bits<3>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$mnemonic",
+// CHECK-NEXT:                             ty: str,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                     fields: [],
+// CHECK-NEXT:                     parent_template_name: Some(
+// CHECK-NEXT:                         "RInstr",
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                     parent_template_args: Iter(
+// CHECK-NEXT:                         [
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                         ],
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "ADD",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SUB",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SLL",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SLT",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SLTU",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "XOR",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SRL",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "SRA",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "OR",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrDecl {
+// CHECK-NEXT:                     name: "AND",
+// CHECK-NEXT:                     template_name: "ALUInstr",
+// CHECK-NEXT:                     template_args: [
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                         InstrTemplateArg,
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrTemplateDecl {
+// CHECK-NEXT:                     name: "IInstr",
+// CHECK-NEXT:                     parameters: [
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$imm",
+// CHECK-NEXT:                             ty: bits<12>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$rs1",
+// CHECK-NEXT:                             ty: bits<5>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct3",
+// CHECK-NEXT:                             ty: bits<3>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$rd",
+// CHECK-NEXT:                             ty: bits<5>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$mnemonic",
+// CHECK-NEXT:                             ty: str,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$opcode",
+// CHECK-NEXT:                             ty: bits<7>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                     fields: [
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "rd",
+// CHECK-NEXT:                             ty: <unresolved>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "rs1",
+// CHECK-NEXT:                             ty: <unresolved>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         StructFieldDecl {
+// CHECK-NEXT:                             name: "imm",
+// CHECK-NEXT:                             ty: bits<12>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                     ],
+// CHECK-NEXT:                     parent_template_name: None,
+// CHECK-NEXT:                     parent_template_args: Iter(
+// CHECK-NEXT:                         [],
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 EncodingDecl {
+// CHECK-NEXT:                     target_name: "IInstr",
+// CHECK-NEXT:                     body: BlockExpr {
 // CHECK-NEXT:                         type: <unresolved>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "rs1",
-// CHECK-NEXT:                         type: <unresolved>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "rs2",
-// CHECK-NEXT:                         type: <unresolved>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 parent_template_name: None,
-// CHECK-NEXT:                 parent_template_args: [],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             EncodingDecl {
-// CHECK-NEXT:                 target_name: "RInstr",
-// CHECK-NEXT:                 body: BlockExpr {
-// CHECK-NEXT:                     type: <unresolved>,
-// CHECK-NEXT:                     stmts: [
-// CHECK-NEXT:                         BinOpExpr {
-// CHECK-NEXT:                             kind: BitConcat,
-// CHECK-NEXT:                             left: BinOpExpr {
+// CHECK-NEXT:                         stmts: [
+// CHECK-NEXT:                             BinOpExpr {
 // CHECK-NEXT:                                 kind: BitConcat,
 // CHECK-NEXT:                                 left: BinOpExpr {
 // CHECK-NEXT:                                     kind: BitConcat,
@@ -94,277 +461,68 @@
 // CHECK-NEXT:                                         left: BinOpExpr {
 // CHECK-NEXT:                                             kind: BitConcat,
 // CHECK-NEXT:                                             left: LiteralExpr {
-// CHECK-NEXT:                                                 type: <unresolved>,
+// CHECK-NEXT:                                                 ty: <unresolved>,
 // CHECK-NEXT:                                             },
 // CHECK-NEXT:                                             right: LiteralExpr {
-// CHECK-NEXT:                                                 type: <unresolved>,
+// CHECK-NEXT:                                                 ty: <unresolved>,
 // CHECK-NEXT:                                             },
 // CHECK-NEXT:                                         },
 // CHECK-NEXT:                                         right: LiteralExpr {
-// CHECK-NEXT:                                             type: <unresolved>,
+// CHECK-NEXT:                                             ty: <unresolved>,
 // CHECK-NEXT:                                         },
 // CHECK-NEXT:                                     },
 // CHECK-NEXT:                                     right: LiteralExpr {
-// CHECK-NEXT:                                         type: <unresolved>,
+// CHECK-NEXT:                                         ty: <unresolved>,
 // CHECK-NEXT:                                     },
 // CHECK-NEXT:                                 },
 // CHECK-NEXT:                                 right: LiteralExpr {
-// CHECK-NEXT:                                     type: <unresolved>,
+// CHECK-NEXT:                                     ty: <unresolved>,
 // CHECK-NEXT:                                 },
 // CHECK-NEXT:                             },
-// CHECK-NEXT:                             right: LiteralExpr {
-// CHECK-NEXT:                                 type: <unresolved>,
-// CHECK-NEXT:                             },
-// CHECK-NEXT:                         },
-// CHECK-NEXT:                     ],
-// CHECK-NEXT:                 },
-// CHECK-NEXT:             },
-// CHECK-NEXT:             AsmDecl {
-// CHECK-NEXT:                 target_name: "RInstr",
-// CHECK-NEXT:                 body: BlockExpr {
-// CHECK-NEXT:                     type: str,
-// CHECK-NEXT:                     stmts: [
-// CHECK-NEXT:                         LiteralExpr {
-// CHECK-NEXT:                             type: str,
-// CHECK-NEXT:                         },
-// CHECK-NEXT:                     ],
-// CHECK-NEXT:                 },
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrTemplateDecl {
-// CHECK-NEXT:                 name: "ALUInstr",
-// CHECK-NEXT:                 params: [
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct7",
-// CHECK-NEXT:                         type: bits<7>,
+// CHECK-NEXT:                         ],
 // CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct3",
-// CHECK-NEXT:                         type: bits<3>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$mnemonic",
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 AsmDecl {
+// CHECK-NEXT:                     target_name: "IInstr",
+// CHECK-NEXT:                     body: BlockExpr {
 // CHECK-NEXT:                         type: str,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 fields: [],
-// CHECK-NEXT:                 parent_template_name: Some(
-// CHECK-NEXT:                     "RInstr",
-// CHECK-NEXT:                 ),
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "ADD",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SUB",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SLL",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SLT",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SLTU",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "XOR",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SRL",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "SRA",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "OR",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrDecl {
-// CHECK-NEXT:                 name: "AND",
-// CHECK-NEXT:                 parent_template_name: "ALUInstr",
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrTemplateDecl {
-// CHECK-NEXT:                 name: "IInstr",
-// CHECK-NEXT:                 params: [
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$imm",
-// CHECK-NEXT:                         type: bits<12>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$rs1",
-// CHECK-NEXT:                         type: bits<5>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct3",
-// CHECK-NEXT:                         type: bits<3>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$rd",
-// CHECK-NEXT:                         type: bits<5>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$mnemonic",
-// CHECK-NEXT:                         type: str,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$opcode",
-// CHECK-NEXT:                         type: bits<7>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 fields: [
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "rd",
-// CHECK-NEXT:                         type: <unresolved>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "rs1",
-// CHECK-NEXT:                         type: <unresolved>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     StructFieldDecl {
-// CHECK-NEXT:                         name: "imm",
-// CHECK-NEXT:                         type: bits<12>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 parent_template_name: None,
-// CHECK-NEXT:                 parent_template_args: [],
-// CHECK-NEXT:             },
-// CHECK-NEXT:             EncodingDecl {
-// CHECK-NEXT:                 target_name: "IInstr",
-// CHECK-NEXT:                 body: BlockExpr {
-// CHECK-NEXT:                     type: <unresolved>,
-// CHECK-NEXT:                     stmts: [
-// CHECK-NEXT:                         BinOpExpr {
-// CHECK-NEXT:                             kind: BitConcat,
-// CHECK-NEXT:                             left: BinOpExpr {
-// CHECK-NEXT:                                 kind: BitConcat,
-// CHECK-NEXT:                                 left: BinOpExpr {
-// CHECK-NEXT:                                     kind: BitConcat,
-// CHECK-NEXT:                                     left: BinOpExpr {
-// CHECK-NEXT:                                         kind: BitConcat,
-// CHECK-NEXT:                                         left: LiteralExpr {
-// CHECK-NEXT:                                             type: <unresolved>,
-// CHECK-NEXT:                                         },
-// CHECK-NEXT:                                         right: LiteralExpr {
-// CHECK-NEXT:                                             type: <unresolved>,
-// CHECK-NEXT:                                         },
-// CHECK-NEXT:                                     },
-// CHECK-NEXT:                                     right: LiteralExpr {
-// CHECK-NEXT:                                         type: <unresolved>,
-// CHECK-NEXT:                                     },
-// CHECK-NEXT:                                 },
-// CHECK-NEXT:                                 right: LiteralExpr {
-// CHECK-NEXT:                                     type: <unresolved>,
-// CHECK-NEXT:                                 },
+// CHECK-NEXT:                         stmts: [
+// CHECK-NEXT:                             LiteralExpr {
+// CHECK-NEXT:                                 ty: str,
 // CHECK-NEXT:                             },
-// CHECK-NEXT:                             right: LiteralExpr {
-// CHECK-NEXT:                                 type: <unresolved>,
-// CHECK-NEXT:                             },
+// CHECK-NEXT:                         ],
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 },
+// CHECK-NEXT:                 InstrTemplateDecl {
+// CHECK-NEXT:                     name: "IALUInstr",
+// CHECK-NEXT:                     parameters: [
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct7",
+// CHECK-NEXT:                             ty: bits<7>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$funct3",
+// CHECK-NEXT:                             ty: bits<3>,
+// CHECK-NEXT:                         },
+// CHECK-NEXT:                         InstrTemplateParameterDecl {
+// CHECK-NEXT:                             name: "$mnemonic",
+// CHECK-NEXT:                             ty: str,
 // CHECK-NEXT:                         },
 // CHECK-NEXT:                     ],
+// CHECK-NEXT:                     fields: [],
+// CHECK-NEXT:                     parent_template_name: Some(
+// CHECK-NEXT:                         "IInstr",
+// CHECK-NEXT:                     ),
+// CHECK-NEXT:                     parent_template_args: Iter(
+// CHECK-NEXT:                         [
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                             InstrTemplateArg,
+// CHECK-NEXT:                         ],
+// CHECK-NEXT:                     ),
 // CHECK-NEXT:                 },
-// CHECK-NEXT:             },
-// CHECK-NEXT:             AsmDecl {
-// CHECK-NEXT:                 target_name: "IInstr",
-// CHECK-NEXT:                 body: BlockExpr {
-// CHECK-NEXT:                     type: str,
-// CHECK-NEXT:                     stmts: [
-// CHECK-NEXT:                         LiteralExpr {
-// CHECK-NEXT:                             type: str,
-// CHECK-NEXT:                         },
-// CHECK-NEXT:                     ],
-// CHECK-NEXT:                 },
-// CHECK-NEXT:             },
-// CHECK-NEXT:             InstrTemplateDecl {
-// CHECK-NEXT:                 name: "IALUInstr",
-// CHECK-NEXT:                 params: [
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct7",
-// CHECK-NEXT:                         type: bits<7>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$funct3",
-// CHECK-NEXT:                         type: bits<3>,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                     InstrTemplateParameterDecl {
-// CHECK-NEXT:                         name: "$mnemonic",
-// CHECK-NEXT:                         type: str,
-// CHECK-NEXT:                     },
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:                 fields: [],
-// CHECK-NEXT:                 parent_template_name: Some(
-// CHECK-NEXT:                     "IInstr",
-// CHECK-NEXT:                 ),
-// CHECK-NEXT:                 parent_template_args: [
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                     InstrTemplateArg,
-// CHECK-NEXT:                 ],
-// CHECK-NEXT:             },
-// CHECK-NEXT:         ],
+// CHECK-NEXT:             ],
+// CHECK-NEXT:         ),
 // CHECK-NEXT:     },
 // CHECK-NEXT: )

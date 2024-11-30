@@ -19,7 +19,11 @@ enum GPR {
     X7
 }
 
-impl Register for GPR {}
+impl Register for GPR {
+    fn get_num(self) -> i32 {
+        0
+    }
+}
 
 /// An example platform flag
 flag PlatformFlag;

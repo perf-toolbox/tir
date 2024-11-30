@@ -165,7 +165,7 @@ fn generate_enum<'a>(
                         let ident = format_ident!("{}", v.name());
 
                         quote! {
-                            #id => #name::#ident
+                            #id => Ok(#name::#ident)
                         }
                     });
 
@@ -174,7 +174,7 @@ fn generate_enum<'a>(
                     return Some(quote! {
                         impl #name {
                             pub fn get_names(&self) -> &'static [&'static str] {
-                                match self {
+                                match &self {
                                     #(#names_arms),*
                                 }
                             }
@@ -182,10 +182,6 @@ fn generate_enum<'a>(
                                 match &self {
                                     #(#to_num_arms),*
                                 }
-                            }
-
-                            pub fn encode(&self) -> usize {
-
                             }
                         }
                         impl tir_core::Printable for #name {
@@ -197,17 +193,17 @@ fn generate_enum<'a>(
                         #[allow(clippy::from_over_into)]
                         impl Into<tir_core::Attr> for #name {
                             fn into(self) -> tir_core::Attr {
-                                tir_core::Attr::String(self.get_reg_names()[0].to_string())
+                                tir_core::Attr::String(self.get_names()[0].to_string())
                             }
                         }
 
                         pub fn #parser_name(input: &str) -> Option<#name> {
-                            match self {
+                            match input {
                                 #(#parser_arms),*,
                                 _ => None,
                             }
                         }
-                        impl tir_core::Parsable<#name> for #name {
+                        impl tir_core::parser::Parsable<#name> for #name {
                             fn parse(input: tir_core::IRStrStream) -> lpl::ParseResult<tir_core::IRStrStream, #name> {
                                 let parser = ident(|_| false).try_map(|r, s| {
                                     #parser_name(r).ok_or(Into::<lpl::Diagnostic>::into(DiagKind::UnknownRegister(

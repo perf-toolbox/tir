@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 lpl = { path = "../lpl" }
-clap = "4.5.9"
+clap = { version = "4.5.9", features = ["derive"] }
 thiserror = "2.0"
 quote = "1.0"
 prettyplease = "0.2.25"
