@@ -184,6 +184,34 @@
 // CHECK-NEXT:                     trait_name: "Register",
 // CHECK-NEXT:                     target_name: "GPR",
 // CHECK-NEXT:                 },
+// CHECK-NEXT:                 FnDecl {
+// CHECK-NEXT:                     signature: FnSignature {
+// CHECK-NEXT:                         name: "test",
+// CHECK-NEXT:                         parameters: [],
+// CHECK-NEXT:                         return_type: Some(
+// CHECK-NEXT:                             <unresolved>,
+// CHECK-NEXT:                         ),
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                     body: BlockExpr {
+// CHECK-NEXT:                         type: int,
+// CHECK-NEXT:                         stmts: [
+// CHECK-NEXT:                             [
+// CHECK-NEXT:                                 LiteralExpr {
+// CHECK-NEXT:                                     ty: int,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 LiteralExpr {
+// CHECK-NEXT:                                     ty: int,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 LiteralExpr {
+// CHECK-NEXT:                                     ty: int,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                                 LiteralExpr {
+// CHECK-NEXT:                                     ty: int,
+// CHECK-NEXT:                                 },
+// CHECK-NEXT:                             ],
+// CHECK-NEXT:                         ],
+// CHECK-NEXT:                     },
+// CHECK-NEXT:                 },
 // CHECK-NEXT:                 FlagDecl {
 // CHECK-NEXT:                     name: "PlatformFlag",
 // CHECK-NEXT:                     doc: Some(

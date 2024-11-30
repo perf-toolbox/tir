@@ -25,6 +25,10 @@ impl Register for GPR {
     }
 }
 
+fn test() -> [i32] {
+    [0, 1, 2, 3]
+}
+
 /// An example platform flag
 flag PlatformFlag;
 

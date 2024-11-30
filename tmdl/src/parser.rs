@@ -305,24 +305,6 @@ fn struct_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
         .label("struct body")
 }
 
-// fn func_body<'a>() -> impl Parser<'a, TokenStream<'a>, ImmElement> {
-//     just_token(SyntaxKind::LeftBrace)
-//         .and_then(zero_or_more(expr()))
-//         .and_then(token(SyntaxKind::RightBrace))
-//         .flat()
-//         .map(|(left_brace, exprs, right_brace)| {
-//             let mut elements = vec![];
-//             let span = left_brace.as_token().span();
-//             elements.push(left_brace);
-//             elements.extend(exprs);
-//             elements.extend(right_brace.trivia().iter().cloned());
-//             elements.push(right_brace.token().clone());
-//
-//             NodeOrToken::Node(GreenNodeData::new(SyntaxKind::BlockExpr, elements, span))
-//         })
-//         .label("func body")
-// }
-
 fn encoding<'a>() -> impl Parser<'a, TokenStream<'a>, ImmNode> {
     just_token(SyntaxKind::EncodingKw)
         .and_then(token(SyntaxKind::ForKw))
