@@ -150,7 +150,7 @@ impl<'a> From<&'a str> for StrStream<'a> {
     }
 }
 
-impl<'a> fmt::Debug for StrStream<'a> {
+impl fmt::Debug for StrStream<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:30}", self.string)
     }
@@ -220,7 +220,7 @@ impl<'a, SK: SyntaxLike> ParseStream<'a> for TokenStream<'a, SK> {
     }
 }
 
-impl<'a, SK: SyntaxLike> fmt::Debug for TokenStream<'a, SK> {
+impl<SK: SyntaxLike> fmt::Debug for TokenStream<'_, SK> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let end = self.tokens.len().min(5);
         write!(f, "offset: {} - {:?}", self.offset, &self.tokens[..end])
