@@ -3,3 +3,4 @@ ignore:
   - "fuzz"
   - "**/tests/**"
   - "xtask"
+  - "target/**"

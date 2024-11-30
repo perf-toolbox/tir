@@ -1,0 +1,88 @@
+/// This flag indicates that built-in assembly should use ABI register names
+/// as defined by the RISC-V specification.
+flag ABIRegName;
+
+/// RV32I and RV64I define a set of 32 general-purpose registers.
+/// X0 is a hardwired zero register. Other registers can hold integer
+/// values of XLEN bits length.
+enum GPR {
+  // Hard-wired zero
+  #[reg_names(["x0", "zero"])]
+  X0,
+  // Return address, saved by caller
+  #[reg_names(["x1", "ra"])]
+  X1,
+  // Stack pointer, saved by callee
+  #[reg_names(["x2", "sp"])]
+  X2,
+  // Global pointer
+  #[reg_names(["x3", "gp"])]
+  X3,
+  // Thread pointer
+  #[reg_names(["x4", "tp"])]
+  X4,
+  // Temp registers, saved by caller
+  #[reg_names(["x5", "t0"])]
+  X5,
+  #[reg_names(["x6", "t1"])]
+  X6,
+  #[reg_names(["x7", "t2"])]
+  X7,
+  // Saved reg 0 / frame pointer
+  #[reg_names(["x8", "s0", "fp"])]
+  X8,
+  #[reg_names(["x9", "s1"])]
+  X9,
+  // Function argument 0 / return value 0
+  #[reg_names(["x10", "a0"])]
+  X10,
+  // Function argument 1 / return value 1
+  #[reg_names(["x11", "a1"])]
+  X11,
+  // Function arguments 2-7
+  #[reg_names(["x12", "a2"])]
+  X12,
+  #[reg_names(["x13", "a3"])]
+  X13,
+  #[reg_names(["x14", "a4"])]
+  X14,
+  #[reg_names(["x15", "a5"])]
+  X15,
+  #[reg_names(["x16", "a6"])]
+  X16,
+  #[reg_names(["x17", "a7"])]
+  X17,
+  // Saved registers 2-11
+  #[reg_names(["x18", "s2"])]
+  X18,
+  #[reg_names(["x19", "s3"])]
+  X19,
+  #[reg_names(["x20", "s4"])]
+  X20,
+  #[reg_names(["x21", "s5"])]
+  X21,
+  #[reg_names(["x22", "s6"])]
+  X22,
+  #[reg_names(["x23", "s7"])]
+  X23,
+  #[reg_names(["x24", "s8"])]
+  X24,
+  #[reg_names(["x25", "s9"])]
+  X25,
+  #[reg_names(["x26", "s10"])]
+  X26,
+  #[reg_names(["x27", "s11"])]
+  X27,
+  // Temporary registers 3-6
+  #[reg_names(["x28", "t3"])]
+  X28,
+  #[reg_names(["x29", "t4"])]
+  X29,
+  #[reg_names(["x30", "t5"])]
+  X30,
+  #[reg_names(["x31", "t6"])]
+  X31
+}
+
+impl Register for GPR {}
+

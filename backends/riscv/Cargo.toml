@@ -13,3 +13,6 @@ lpl = { path = "../../lpl/" }
 seq-macro = "0.3.5"
 linkme = "0.3.27"
 thiserror = "2.0"
+
+[build-dependencies]
+tmdl = { path = "../../tmdl" }

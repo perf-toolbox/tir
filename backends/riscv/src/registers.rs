@@ -7,6 +7,8 @@ use seq_macro::seq;
 use tir_core::{parser::Parsable, IRFormatter, IRStrStream, Printable};
 use tir_macros::{lowercase, uppercase};
 
+include!(concat!(env!("OUT_DIR"), "/defs/registers.rs"));
+
 macro_rules! register {
     ($($case_name:ident => { abi_name = $abi_name:literal, encoding = $encoding:literal, num = $num:literal },)*) => {
         #[derive(Debug, Clone, Copy)]

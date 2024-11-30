@@ -38,7 +38,7 @@ pub fn zero_or_more<'a, P, Input: ParseStream<'a> + 'a, Output>(
     parser: P,
 ) -> impl Parser<'a, Input, Vec<Output>>
 where
-    P: Parser<'a, Input, Output>,
+    P: Parser<'a, Input, Output> + 'a,
 {
     move |input: Input| {
         let mut result = Vec::new();

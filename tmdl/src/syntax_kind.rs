@@ -39,6 +39,10 @@ pub enum SyntaxKind {
     ImplKw,
     /// `self`
     SelfKw,
+    /// `fn`
+    FnKw,
+    /// `flag`
+    FlagKw,
 
     // Identifiers and literals
     Identifier,
@@ -55,6 +59,14 @@ pub enum SyntaxKind {
     LeftAngle,
     /// `>`
     RightAngle,
+    /// `[`
+    LeftBracket,
+    /// `]`
+    RightBracket,
+    /// `(`
+    LeftParen,
+    /// `)`
+    RightParen,
     /// `:`
     Colon,
     /// `;`
@@ -69,11 +81,20 @@ pub enum SyntaxKind {
     At,
     /// `"`
     DoubleQuote,
+    /// `#`
+    Pound,
+    /// '-'
+    Minus,
+
+    // Compound symbols
+    /// '->'
+    Arrow,
 
     // Operators
     /// `=`
     Equals,
 
+    LocalDocComment,
     Comment,
 
     Whitespace,
@@ -100,8 +121,6 @@ pub enum SyntaxKind {
     StructField,
     StructFieldName,
 
-    StructFieldAccess,
-
     ImplDecl,
     ImplBody,
     ImplTraitName,
@@ -110,16 +129,31 @@ pub enum SyntaxKind {
     EncodingDecl,
     AsmDecl,
 
+    FlagDecl,
+
+    ListExpr,
     BlockExpr,
     LiteralExpr,
+    FieldExpr,
     BinOpExpr,
     BinOpExprLeft,
     BinOpExprRight,
     BinOpExprOp,
 
+    ExprStmt,
+
+    FnDecl,
+    FnSignature,
+    FnParamList,
+    FnParam,
+    FnRetType,
+
     EnumDecl,
     EnumBody,
     EnumVariantDecl,
+
+    AttrList,
+    Attr,
 }
 
 impl fmt::Display for SyntaxKind {

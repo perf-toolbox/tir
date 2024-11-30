@@ -12,73 +12,158 @@
 // CHECK-NEXT:     X6,
 // CHECK-NEXT:     X7,
 // CHECK-NEXT: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: impl lpl::combinators::NotTuple for GPR {}
+// CHECK-NEXT: impl GPR {
+// CHECK-NEXT:     pub fn get_names(&self) -> &'static [&'static str] {
+// CHECK-NEXT:         match &self {
+// CHECK-NEXT:             GPR::X0 => &["x0", "zero"],
+// CHECK-NEXT:             GPR::X1 => &["x1", "a1"],
+// CHECK-NEXT:             GPR::X2 => &["x2", "a2"],
+// CHECK-NEXT:             GPR::X3 => &["x3", "ra"],
+// CHECK-NEXT:             GPR::X4 => &["x4", "sp"],
+// CHECK-NEXT:             GPR::X5 => &["x5", "t0"],
+// CHECK-NEXT:             GPR::X6 => &["x6", "t1"],
+// CHECK-NEXT:             GPR::X7 => &["x7", "t2"],
+// CHECK-NEXT:         }
+// CHECK-NEXT:     }
+// CHECK-NEXT:     pub fn get_reg_num(&self) -> usize {
+// CHECK-NEXT:         match &self {
+// CHECK-NEXT:             GPR::X0 => 0usize,
+// CHECK-NEXT:             GPR::X1 => 1usize,
+// CHECK-NEXT:             GPR::X2 => 2usize,
+// CHECK-NEXT:             GPR::X3 => 3usize,
+// CHECK-NEXT:             GPR::X4 => 4usize,
+// CHECK-NEXT:             GPR::X5 => 5usize,
+// CHECK-NEXT:             GPR::X6 => 6usize,
+// CHECK-NEXT:             GPR::X7 => 7usize,
+// CHECK-NEXT:         }
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: impl tir_core::Printable for GPR {
+// CHECK-NEXT:     fn print(&self, fmt: &mut dyn tir_core::IRFormatter) {
+// CHECK-NEXT:         fmt.write_direct(self.get_names()[0])
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: [allow(clippy::from_over_into)]
+// CHECK-NEXT: impl Into<tir_core::Attr> for GPR {
+// CHECK-NEXT:     fn into(self) -> tir_core::Attr {
+// CHECK-NEXT:         tir_core::Attr::String(self.get_names()[0].to_string())
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: pub fn parse_gpr(input: &str) -> Option<GPR> {
+// CHECK-NEXT:     match input {
+// CHECK-NEXT:         "x0" | "zero" => Some(GPR::X0),
+// CHECK-NEXT:         "x1" | "a1" => Some(GPR::X1),
+// CHECK-NEXT:         "x2" | "a2" => Some(GPR::X2),
+// CHECK-NEXT:         "x3" | "ra" => Some(GPR::X3),
+// CHECK-NEXT:         "x4" | "sp" => Some(GPR::X4),
+// CHECK-NEXT:         "x5" | "t0" => Some(GPR::X5),
+// CHECK-NEXT:         "x6" | "t1" => Some(GPR::X6),
+// CHECK-NEXT:         "x7" | "t2" => Some(GPR::X7),
+// CHECK-NEXT:         _ => None,
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: impl tir_core::parser::Parsable<GPR> for GPR {
+// CHECK-NEXT:     fn parse(
+// CHECK-NEXT:         input: tir_core::IRStrStream,
+// CHECK-NEXT:     ) -> lpl::ParseResult<tir_core::IRStrStream, GPR> {
+// CHECK-NEXT:         let parser = ident(|_| false)
+// CHECK-NEXT:             .try_map(|r, s| {
+// CHECK-NEXT:                 parse_gpr(r)
+// CHECK-NEXT:                     .ok_or(
+// CHECK-NEXT:                         Into::<
+// CHECK-NEXT:                             lpl::Diagnostic,
+// CHECK-NEXT:                         >::into(DiagKind::UnknownRegister(r.to_string(), s)),
+// CHECK-NEXT:                     )
+// CHECK-NEXT:             });
+// CHECK-NEXT:         parser.parse(input)
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: impl TryFrom<usize> for GPR {
+// CHECK-NEXT:     type Error = ();
+// CHECK-NEXT:     fn try_from(value: usize) -> Result<Self, Self::Error> {
+// CHECK-NEXT:         match value {
+// CHECK-NEXT:             0usize => Ok(GPR::X0),
+// CHECK-NEXT:             1usize => Ok(GPR::X1),
+// CHECK-NEXT:             2usize => Ok(GPR::X2),
+// CHECK-NEXT:             3usize => Ok(GPR::X3),
+// CHECK-NEXT:             4usize => Ok(GPR::X4),
+// CHECK-NEXT:             5usize => Ok(GPR::X5),
+// CHECK-NEXT:             6usize => Ok(GPR::X6),
+// CHECK-NEXT:             7usize => Ok(GPR::X7),
+// CHECK-NEXT:             _ => Err(()),
+// CHECK-NEXT:         }
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: [doc = "/// An example platform flag"]
+// CHECK-NEXT: pub struct PlatformFlag;
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "add", dialect = test)]
-// CHECK-NEXT: pub struct ADDOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct ADD {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "sub", dialect = test)]
-// CHECK-NEXT: pub struct SUBOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SUB {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "sll", dialect = test)]
-// CHECK-NEXT: pub struct SLLOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SLL {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "slt", dialect = test)]
-// CHECK-NEXT: pub struct SLTOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SLT {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "sltu", dialect = test)]
-// CHECK-NEXT: pub struct SLTUOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SLTU {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "xor", dialect = test)]
-// CHECK-NEXT: pub struct XOROp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct XOR {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "srl", dialect = test)]
-// CHECK-NEXT: pub struct SRLOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SRL {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "sra", dialect = test)]
-// CHECK-NEXT: pub struct SRAOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct SRA {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "or", dialect = test)]
-// CHECK-NEXT: pub struct OROp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct OR {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
-// CHECK: [derive(Op, OpAssembly, OpValidator)]
+// CHECK-NEXT: [derive(Op, OpAssembly, OpValidator)]
 // CHECK-NEXT: [operation(name = "and", dialect = test)]
-// CHECK-NEXT: pub struct ANDOp {
-// CHECK-NEXT:     rd: bool,
-// CHECK-NEXT:     rs1: bool,
-// CHECK-NEXT:     rs2: bool,
+// CHECK-NEXT: pub struct AND {
+// CHECK:     rd: Register,
+// CHECK:     rs1: Register,
+// CHECK:     rs2: Register,
 // CHECK: }
