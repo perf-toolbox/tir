@@ -16,15 +16,15 @@ sw x3, -1(x6)
 # CHECK: module {
 # CHECK-NEXT: target.section ".text" {
 # CHECK-NEXT: ^entry:
-# CHECK-NEXT: riscv.lb rd = zero, rs1 = ra, attrs = {offset = <i16: 10>}
-# CHECK-NEXT: riscv.lh rd = zero, rs1 = sp, attrs = {offset = <i16: 0>}
-# CHECK-NEXT: riscv.lw rd = zero, rs1 = gp, attrs = {offset = <i16: -1>}
-# CHECK-NEXT: riscv.ld rd = zero, rs1 = tp, attrs = {offset = <i16: -4>}
-# CHECK-NEXT: riscv.lbu rd = t0, rs1 = zero, attrs = {offset = <i16: 0>}
-# CHECK-NEXT: riscv.lhu rd = t1, rs1 = zero, attrs = {offset = <i16: 0>}
-# CHECK-NEXT: riscv.lwu rd = t2, rs1 = ra, attrs = {offset = <i16: 0>}
-# CHECK-NEXT: riscv.sb rs1 = tp, rs2 = ra, attrs = {offset = <i16: 10>}
-# CHECK-NEXT: riscv.sh rs1 = t0, rs2 = sp, attrs = {offset = <i16: 0>}
-# CHECK-NEXT: riscv.sw rs1 = t1, rs2 = gp, attrs = {offset = <i16: -1>}
+# CHECK-NEXT: riscv.lb rd = x0, rs1 = x1, attrs = {offset = <i16: 10>}
+# CHECK-NEXT: riscv.lh rd = x0, rs1 = x2, attrs = {offset = <i16: 0>}
+# CHECK-NEXT: riscv.lw rd = x0, rs1 = x3, attrs = {offset = <i16: -1>}
+# CHECK-NEXT: riscv.ld rd = x0, rs1 = x4, attrs = {offset = <i16: -4>}
+# CHECK-NEXT: riscv.lbu rd = x5, rs1 = x0, attrs = {offset = <i16: 0>}
+# CHECK-NEXT: riscv.lhu rd = x6, rs1 = x0, attrs = {offset = <i16: 0>}
+# CHECK-NEXT: riscv.lwu rd = x7, rs1 = x1, attrs = {offset = <i16: 0>}
+# CHECK-NEXT: riscv.sb rs1 = x4, rs2 = x1, attrs = {offset = <i16: 10>}
+# CHECK-NEXT: riscv.sh rs1 = x5, rs2 = x2, attrs = {offset = <i16: 0>}
+# CHECK-NEXT: riscv.sw rs1 = x6, rs2 = x3, attrs = {offset = <i16: -1>}
 # CHECK-NEXT: }
 # CHECK-NEXT: }

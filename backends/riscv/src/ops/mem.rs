@@ -1,6 +1,5 @@
 use crate::utils::{ITypeInstr, STypeInstr};
-use crate::{assemble_reg, disassemble_gpr};
-use crate::{register_parser, DiagKind, Register};
+use crate::{parse_gpr, DiagKind, GPR};
 use tir_backend::isema::WithISema;
 use tir_backend::parser::{asm_ident, close_paren, comma, number, open_paren};
 use tir_backend::BinaryEmittable;
@@ -24,9 +23,9 @@ macro_rules! load_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            rd: Register,
+            rd: tir_backend::Register<GPR>,
             #[operand]
-            rs1: Register,
+            rs1: tir_backend::Register<GPR>,
             r#impl: OpImpl,
         }
 
@@ -38,9 +37,9 @@ macro_rules! load_op_base {
             ) -> tir_core::Result<()> {
                 let instr = ITypeInstr::builder()
                     .opcode(LOAD_OPCODE)
-                    .rd(assemble_reg(self.get_rd())?)
+                    .rd(self.get_rd().as_arch().encode())
                     .funct3($funct3)
-                    .rs1(assemble_reg(self.get_rs1())?)
+                    .rs1(self.get_rs1().as_arch().encode())
                     .imm(
                         self.get_offset_attr()
                             .try_into()
@@ -79,9 +78,10 @@ macro_rules! load_op_base {
                 let reg = move || {
                     asm_ident()
                         .try_map(|r, s| {
-                            register_parser(r).ok_or(Into::<Diagnostic>::into(
-                                DiagKind::UnknownRegister(r.to_string(), s),
-                            ))
+                            parse_gpr(r).ok_or(Into::<Diagnostic>::into(DiagKind::UnknownRegister(
+                                r.to_string(),
+                                s,
+                            )))
                         })
                         .label("register")
                 };
@@ -107,8 +107,8 @@ macro_rules! load_op_base {
                 let builder = asm_ctx.get_builder();
                 let context = builder.get_context();
                 let op = $struct_name::builder(&context)
-                    .rs1(base_reg)
-                    .rd(rd)
+                    .rs1(base_reg.into())
+                    .rd(rd.into())
                     .offset(offset_value.into())
                     .build();
                 builder.insert(&op);
@@ -136,14 +136,14 @@ macro_rules! load_ops {
                 return None;
             }
 
-            let rd = disassemble_gpr(instr.rd())?;
-            let rs1 = disassemble_gpr(instr.rs1())?;
+            let rd = GPR::try_from(instr.rd() as usize).ok()?;
+            let rs1 = GPR::try_from(instr.rs1() as usize).ok()?;
             let imm = instr.imm();
 
             match instr.funct3() {
                 $(
                 $funct3 => {
-                    let op = $struct_name::builder(&context).rd(rd).rs1(rs1).offset(imm.into()).build();
+                    let op = $struct_name::builder(&context).rd(rd.into()).rs1(rs1.into()).offset(imm.into()).build();
                     Some(op)
                 },
                 )*
@@ -159,9 +159,9 @@ macro_rules! store_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            rs1: Register,
+            rs1: tir_backend::Register<GPR>,
             #[operand]
-            rs2: Register,
+            rs2: tir_backend::Register<GPR>,
             r#impl: OpImpl,
         }
 
@@ -174,8 +174,8 @@ macro_rules! store_op_base {
                 let instr = STypeInstr::builder()
                     .opcode(STORE_OPCODE)
                     .funct3($funct3)
-                    .rs1(assemble_reg(self.get_rs1())?)
-                    .rs2(assemble_reg(self.get_rs2())?)
+                    .rs1(self.get_rs1().as_arch().encode())
+                    .rs2(self.get_rs2().as_arch().encode())
                     .imm(
                         self.get_offset_attr()
                             .try_into()
@@ -213,9 +213,10 @@ macro_rules! store_op_base {
                 let reg = move || {
                     asm_ident()
                         .try_map(|r, s| {
-                            register_parser(r).ok_or(Into::<Diagnostic>::into(
-                                DiagKind::UnknownRegister(r.to_string(), s),
-                            ))
+                            parse_gpr(r).ok_or(Into::<Diagnostic>::into(DiagKind::UnknownRegister(
+                                r.to_string(),
+                                s,
+                            )))
                         })
                         .label("register")
                 };
@@ -241,8 +242,8 @@ macro_rules! store_op_base {
                 let builder = asm_ctx.get_builder();
                 let context = builder.get_context();
                 let op = $struct_name::builder(&context)
-                    .rs1(base_reg)
-                    .rs2(rs2)
+                    .rs1(base_reg.into())
+                    .rs2(rs2.into())
                     .offset(offset_value.into())
                     .build();
                 builder.insert(&op);
@@ -270,14 +271,14 @@ macro_rules! store_ops {
                 return None;
             }
 
-            let rs1 = disassemble_gpr(instr.rs1())?;
-            let rs2 = disassemble_gpr(instr.rs2())?;
+            let rs1 = GPR::try_from(instr.rs1() as usize).ok()?;
+            let rs2 = GPR::try_from(instr.rs2() as usize).ok()?;
             let imm = instr.imm();
 
             match instr.funct3() {
                 $(
                 $funct3 => {
-                    let op = $struct_name::builder(&context).rs1(rs1).rs2(rs2).offset(imm.into()).build();
+                    let op = $struct_name::builder(&context).rs1(rs1.into()).rs2(rs2.into()).offset(imm.into()).build();
                     Some(op)
                 },
                 )*

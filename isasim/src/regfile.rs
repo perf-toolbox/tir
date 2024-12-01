@@ -121,19 +121,19 @@ impl RegFile for RISCVRegFile {
     }
 
     fn read_register(&self, reg_name: &str) -> Value {
-        let reg = tir_riscv::register_parser(reg_name).unwrap();
-        self.registers[tir_riscv::get_reg_num(&reg)].clone()
+        let reg = tir_riscv::parse_gpr(reg_name).unwrap();
+        self.registers[reg.get_reg_num()].clone()
     }
 
     fn write_register(&mut self, reg_name: &str, value: &Value) {
-        let reg = tir_riscv::register_parser(reg_name).unwrap();
+        let reg = tir_riscv::parse_gpr(reg_name).unwrap();
 
         // hardwired zero
-        if let tir_riscv::Register::X0 = reg {
+        if let tir_riscv::GPR::X0 = reg {
             return;
         }
 
-        self.registers[tir_riscv::get_reg_num(&reg)] = value.clone();
+        self.registers[reg.get_reg_num()] = value.clone();
     }
 
     fn dump(&self) -> String {
@@ -141,10 +141,10 @@ impl RegFile for RISCVRegFile {
         strings.push("{".to_string());
 
         for id in 0..self.registers.len() {
-            let reg: tir_riscv::Register = TryFrom::try_from(id).expect("A valid register");
+            let reg: tir_riscv::GPR = TryFrom::try_from(id).expect("A valid register");
             strings.push(format!(
                 "    \"{}\": {},",
-                tir_riscv::get_reg_name(&reg),
+                reg.get_names()[0],
                 self.registers[id].get_lower64()
             ));
         }
