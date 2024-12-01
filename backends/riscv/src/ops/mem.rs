@@ -21,6 +21,7 @@ macro_rules! load_op_base {
     ($struct_name:ident, $op_name:literal, $funct3:literal, $width:literal, $sign_extend:literal) => {
         #[derive(Op, OpAssembly, OpValidator)]
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
+        #[rustfmt::skip]
         pub struct $struct_name {
             #[operand]
             rd: tir_backend::Register::<GPR>,
@@ -157,6 +158,7 @@ macro_rules! store_op_base {
     ($struct_name:ident, $op_name:literal, $funct3:literal, $width:literal) => {
         #[derive(Op, OpAssembly, OpValidator)]
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
+        #[rustfmt::skip]
         pub struct $struct_name {
             #[operand]
             rs1: tir_backend::Register::<GPR>,
