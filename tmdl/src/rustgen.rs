@@ -183,6 +183,10 @@ fn generate_enum<'a>(
                                     #(#to_num_arms),*
                                 }
                             }
+
+                            pub fn encode(&self) -> u8 {
+                                self.get_reg_num() as u8
+                            }
                         }
                         impl tir_core::Printable for #name {
                             fn print(&self, fmt: &mut dyn tir_core::IRFormatter) {
@@ -205,7 +209,7 @@ fn generate_enum<'a>(
                         }
                         impl tir_core::parser::Parsable<#name> for #name {
                             fn parse(input: tir_core::IRStrStream) -> lpl::ParseResult<tir_core::IRStrStream, #name> {
-                                let parser = ident(|_| false).try_map(|r, s| {
+                                let parser = lpl::combinators::lang::ident(|_| false).try_map(|r, s| {
                                     #parser_name(r).ok_or(Into::<lpl::Diagnostic>::into(DiagKind::UnknownRegister(
                                         r.to_string(),
                                         s,
@@ -224,6 +228,12 @@ fn generate_enum<'a>(
                                 }
                             }
                         }
+
+                        impl From<#name> for tir_backend::Register<#name> {
+                            fn from(value: #name) -> tir_backend::Register<#name> {
+                                tir_backend::Register::Architecture(value)
+                            }
+                        }
                     });
                 }
             }
@@ -233,6 +243,7 @@ fn generate_enum<'a>(
     );
 
     quote! {
+        #[derive(Clone, Copy, Debug)]
         #doc
         pub enum #name {
             #(#variants),*

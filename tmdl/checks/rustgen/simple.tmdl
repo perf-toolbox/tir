@@ -2,7 +2,8 @@
 
 // RUN: tmdlc --action=emit-rust -d test %S/../Inputs/simple.tmdl -o - | filecheck %s
 
-// CHECK: pub enum GPR {
+// CHECK: [derive(Clone, Copy, Debug)]
+// CHECK-NEXT: pub enum GPR {
 // CHECK-NEXT:     X0,
 // CHECK-NEXT:     X1,
 // CHECK-NEXT:     X2,
@@ -38,6 +39,9 @@
 // CHECK-NEXT:             GPR::X7 => 7usize,
 // CHECK-NEXT:         }
 // CHECK-NEXT:     }
+// CHECK-NEXT:     pub fn encode(&self) -> u8 {
+// CHECK-NEXT:         self.get_reg_num() as u8
+// CHECK-NEXT:     }
 // CHECK-NEXT: }
 // CHECK-NEXT: impl tir_core::Printable for GPR {
 // CHECK-NEXT:     fn print(&self, fmt: &mut dyn tir_core::IRFormatter) {
@@ -67,7 +71,7 @@
 // CHECK-NEXT:     fn parse(
 // CHECK-NEXT:         input: tir_core::IRStrStream,
 // CHECK-NEXT:     ) -> lpl::ParseResult<tir_core::IRStrStream, GPR> {
-// CHECK-NEXT:         let parser = ident(|_| false)
+// CHECK-NEXT:         let parser = lpl::combinators::lang::ident(|_| false)
 // CHECK-NEXT:             .try_map(|r, s| {
 // CHECK-NEXT:                 parse_gpr(r)
 // CHECK-NEXT:                     .ok_or(
@@ -93,6 +97,11 @@
 // CHECK-NEXT:             7usize => Ok(GPR::X7),
 // CHECK-NEXT:             _ => Err(()),
 // CHECK-NEXT:         }
+// CHECK-NEXT:     }
+// CHECK-NEXT: }
+// CHECK-NEXT: impl From<GPR> for tir_backend::Register<GPR> {
+// CHECK-NEXT:     fn from(value: GPR) -> tir_backend::Register<GPR> {
+// CHECK-NEXT:         tir_backend::Register::Architecture(value)
 // CHECK-NEXT:     }
 // CHECK-NEXT: }
 // CHECK-NEXT: [doc = "/// An example platform flag"]

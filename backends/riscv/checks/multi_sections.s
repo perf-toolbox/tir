@@ -17,15 +17,15 @@ main:
 # CHECK: module {
 # CHECK-NEXT: target.section ".text" {
 # CHECK-NEXT: ^example:
-# CHECK-NEXT: riscv.add rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.sub rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.sll rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.slt rd = t3, rs1 = t1, rs2 = t2, attrs = {}
+# CHECK-NEXT: riscv.add rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.sub rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.sll rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.slt rd = x28, rs1 = x6, rs2 = x7, attrs = {}
 # CHECK-NEXT: ^main:
-# CHECK-NEXT: riscv.sltu rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.srl rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.sra rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.or rd = t3, rs1 = t1, rs2 = t2, attrs = {}
-# CHECK-NEXT: riscv.and rd = t3, rs1 = t1, rs2 = t2, attrs = {}
+# CHECK-NEXT: riscv.sltu rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.srl rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.sra rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.or rd = x28, rs1 = x6, rs2 = x7, attrs = {}
+# CHECK-NEXT: riscv.and rd = x28, rs1 = x6, rs2 = x7, attrs = {}
 # CHECK-NEXT: }
 # CHECK-NEXT: }
