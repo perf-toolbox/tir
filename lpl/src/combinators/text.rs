@@ -85,11 +85,22 @@ where
         let last = || {
             let chars = input.chars().skip(config.string_separator.len());
 
+            let mut skip_next = false;
+
             for (id, c) in chars.enumerate() {
+                if skip_next {
+                    skip_next = false;
+                    continue;
+                }
+
                 let lb = config.string_separator.len() + id;
                 let ub = config.string_separator.len() * 2 + id;
                 if input.substr(lb..ub).unwrap_or_default() == config.string_separator {
                     return Ok(ub);
+                }
+
+                if c == '\\' {
+                    skip_next = true;
                 }
 
                 if c == '\n' && !config.allow_multiline {
