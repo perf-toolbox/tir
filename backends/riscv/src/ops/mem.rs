@@ -19,15 +19,14 @@ const STORE_OPCODE: u8 = 0b0100011;
 
 macro_rules! load_op_base {
     ($struct_name:ident, $op_name:literal, $funct3:literal, $width:literal, $sign_extend:literal) => {
+#[rustfmt::skip]
         #[derive(Op, OpAssembly, OpValidator)]
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-                    #[rustfmt::skip]
-                    rd: tir_backend::Register::<GPR>,
+            rd: tir_backend::Register::<GPR>,
             #[operand]
-                    #[rustfmt::skip]
-                    rs1: tir_backend::Register::<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
@@ -157,15 +156,14 @@ macro_rules! load_ops {
 
 macro_rules! store_op_base {
     ($struct_name:ident, $op_name:literal, $funct3:literal, $width:literal) => {
+#[rustfmt::skip]
         #[derive(Op, OpAssembly, OpValidator)]
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-                    #[rustfmt::skip]
-                    rs1: tir_backend::Register::<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             #[operand]
-                    #[rustfmt::skip]
-                    rs2: tir_backend::Register::<GPR>,
+            rs2: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
