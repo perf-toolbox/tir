@@ -25,14 +25,14 @@ macro_rules! alu_op_base {
         #[operation(name = $op_name, dialect = riscv)]
         pub struct $struct_name {
             #[operand]
-            #[rustfmt::skip]
-            rd: tir_backend::Register::<GPR>,
+                    #[rustfmt::skip]
+                    rd: tir_backend::Register::<GPR>,
             #[operand]
-            #[rustfmt::skip]
-            rs1: tir_backend::Register::<GPR>,
+                    #[rustfmt::skip]
+                    rs1: tir_backend::Register::<GPR>,
             #[operand]
-            #[rustfmt::skip]
-            rs2: tir_backend::Register::<GPR>,
+                    #[rustfmt::skip]
+                    rs2: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
@@ -105,11 +105,11 @@ macro_rules! alu_imm_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(imm: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            #[rustfmt::skip]
-            rd: tir_backend::Register::<GPR>,
+                    #[rustfmt::skip]
+                    rd: tir_backend::Register::<GPR>,
             #[operand]
-            #[rustfmt::skip]
-            rs1: tir_backend::Register::<GPR>,
+                    #[rustfmt::skip]
+                    rs1: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
