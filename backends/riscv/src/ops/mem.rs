@@ -23,9 +23,9 @@ macro_rules! load_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            rd: tir_backend::Register<GPR>,
+            rd: tir_backend::Register::<GPR>,
             #[operand]
-            rs1: tir_backend::Register<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
@@ -159,9 +159,9 @@ macro_rules! store_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(offset: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            rs1: tir_backend::Register<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             #[operand]
-            rs2: tir_backend::Register<GPR>,
+            rs2: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 

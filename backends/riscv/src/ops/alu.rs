@@ -25,11 +25,11 @@ macro_rules! alu_op_base {
         #[operation(name = $op_name, dialect = riscv)]
         pub struct $struct_name {
             #[operand]
-            rd: tir_backend::Register<GPR>,
+            rd: tir_backend::Register::<GPR>,
             #[operand]
-            rs1: tir_backend::Register<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             #[operand]
-            rs2: tir_backend::Register<GPR>,
+            rs2: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
@@ -102,9 +102,9 @@ macro_rules! alu_imm_op_base {
         #[operation(name = $op_name, dialect = riscv, known_attrs(imm: IntegerAttr))]
         pub struct $struct_name {
             #[operand]
-            rd: tir_backend::Register<GPR>,
+            rd: tir_backend::Register::<GPR>,
             #[operand]
-            rs1: tir_backend::Register<GPR>,
+            rs1: tir_backend::Register::<GPR>,
             r#impl: OpImpl,
         }
 
@@ -266,6 +266,8 @@ mod tests {
     use crate::disassemble_alu_instr;
     use std::any::TypeId;
 
+    use builtin::ModuleOp;
+    use isema::convert_to_isema;
     use tir_core::Context;
 
     #[test]
@@ -336,24 +338,24 @@ mod tests {
         assert_eq!(ops.len(), 0);
     }
 
-    // #[test]
-    // fn test_sema() {
-    //     let context = Context::new();
-    //     context.add_dialect(crate::create_dialect());
-    //     context.add_dialect(tir_backend::target::create_dialect());
-    //     context.add_dialect(tir_backend::isema::create_dialect());
-    //
-    //     let module = ModuleOp::builder(&context).build();
-    //
-    //     let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
-    //
-    //     let add = AddOp::builder(&context)
-    //         .rd(Register::X0)
-    //         .rs1(Register::X0)
-    //         .rs2(Register::X0)
-    //         .build();
-    //     builder.insert(&add);
-    //
-    //     assert!(convert_to_isema(&module).is_ok());
-    // }
+    #[test]
+    fn test_sema() {
+        let context = Context::new();
+        context.add_dialect(crate::create_dialect());
+        context.add_dialect(tir_backend::target::create_dialect());
+        context.add_dialect(tir_backend::isema::create_dialect());
+
+        let module = ModuleOp::builder(&context).build();
+
+        let builder = OpBuilder::new(context.clone(), module.borrow().get_body());
+
+        let add = AddOp::builder(&context)
+            .rd(GPR::X0.into())
+            .rs1(GPR::X0.into())
+            .rs2(GPR::X0.into())
+            .build();
+        builder.insert(&add);
+
+        assert!(convert_to_isema(&module).is_ok());
+    }
 }
